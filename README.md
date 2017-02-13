@@ -28,10 +28,6 @@ In a separate shell, again navigate to the `litw-template-package/template` dire
 ```
 npm run build-api
 ```
-Finally, start the API's server:
-```
-npm run develop-server
-```
 
 ## Development environment
 If you wish to make changes to the template, you can configure the template's bundler to automatically watch for changes and re-bundle your changes. Press `Ctrl + c` to stop the process that you started by running `npm build`. Next, run:
