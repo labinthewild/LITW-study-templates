@@ -6,7 +6,7 @@ You will need Node and NPM to build and run this bundle. See [this link](https:/
 
 This bundle has been tested on OSX 10.11.1.
 
-To install everything, follow these instructions:
+## Installation 
 
 Clone this repository to a location where you'd like the code to live:
 ```
