@@ -24,7 +24,7 @@ Build the project and start the template's development server:
 ```
 npm run build
 ```
-In a separate shell, again navigate to the `litw-template-package/template` directory, and install dependencies for the API:
+In a separate shell, again navigate to the `litw-template-package/template` directory, and install dependencies for the API and start its server:
 ```
 npm run build-api
 ```
