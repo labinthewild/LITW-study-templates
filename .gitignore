@@ -1,4 +1,4 @@
 *.log
-*/vendor/*
+api/src/vendor/*
 dist/
 node_modules/
