@@ -1,0 +1,63 @@
+/*************************************************************
+ * styles.css
+ *
+ * Stylesheet for the LITW demo study.
+ *
+ * Author: Trevor Croxson
+ *       : Nigini A. Oliveira
+ * 
+ * Last Modified: February 5, 2017
+ * 
+ * © Copyright 2017 LabintheWild.
+ * For questions about this file and permission to use
+ * the code, contact us at info@labinthewild.org
+ *************************************************************/
+
+.instructions-stim-container {
+	text-align: center;
+}
+
+.instructions-stim-container img {
+	height: 150px;
+	margin-top: 35px;
+	margin-bottom: 35px;
+}
+
+#trials {
+	text-align: center;
+}
+
+#trials img {
+	height: 200px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+	font-weight: bold;
+}
+
+#break {
+	text-align: center;
+}
+
+#break img {
+	width: 300px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.prediction-img-container {
+	text-align: center;
+}
+
+.prediction-img {
+	margin-bottom: 50px;
+	display: inline;
+	height: 200px;
+}
+
+#progress-header {
+	text-align: center;
+	margin-top: 25px;
+	margin-bottom: 50px;
+}

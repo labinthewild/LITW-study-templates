@@ -1,0 +1,15 @@
+
+<!-- Template for the results page -->
+<h2 class="bolded-blue">{{content.header}}</h2>
+
+{{#if bothCats}}
+	<p>{{content.predictionMsgBoth}}</p>
+{{else}}
+	<p>{{content.predictionMsg}}</p>
+{{/if}}
+
+<div class="prediction-img-container">
+	{{#each whichCat}}
+		<img class="prediction-img" src="img/{{this}}" />
+	{{/each}}
+</div>

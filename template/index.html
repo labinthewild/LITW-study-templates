@@ -1,0 +1,89 @@
+<?php
+/*************************************************************
+ * index.php
+ * 
+ * Home page for the LITW demo study.
+ * 
+ * Author: Trevor Croxson
+ * Last Modified: February 5, 2017
+ *
+ * © Copyright 2017 LabintheWild
+ * For questions about this file and permission to use
+ * the code, contact us at info@labinthewild.org
+ *************************************************************/
+?>
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+		<title>Which Cat?</title>
+
+		<!-- open graph tags -->
+		<meta property="og:site_name" content="LabintheWild" />
+		<meta property="og:title" content="Which Cat?" />
+		<meta property="og:url" content="" />
+		<meta property="og:image" content="" />
+		<meta property="og:description" content="Which cat? A or B?" />
+		
+		<!-- ***** stylesheets ***** -->
+		<!-- bootstrap -->
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+		<!-- if using form autocompletion, include a jQueryUI css template -->
+		<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" type="text/css">
+		
+		<!-- jsPsych styles -->
+		<link href="js/jsPsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css">
+		
+		<!-- LITW base styles -->
+		<link href="https://static.labinthewild.org/styles/litw-styles.css" rel="stylesheet" type="text/css">
+		
+		<!-- study-specific styles -->
+		<link href="css/styles.css" rel="stylesheet" type="text/css">
+	</head>
+	
+	<body>
+		<div id="content">
+			<div id="header">
+				<a href='http://www.labinthewild.org'>
+					<img src='img/logo.png' alt='logo' id='logo'/>
+				</a>
+				<div id='header-share' class='sharing-buttons'></div>
+				<div class='separator'>&nbsp;</div>
+			</div>
+			<div id="progress-header"></div>
+ 			<div id="img-loading" class="slide"></div>
+			<div id="irb" class="slide"></div>
+			<div id="demographics" class="slide"></div>
+			<div id="instructions" class="slide"></div>
+			<div id="trials" class="slide"></div>
+			<div id="break" class="slide"></div>
+	  		<div id="comments" class="slide"></div>
+	  		<div id="results" class="slide"></div>
+			<div id="btn-next-page"></div>
+			<div id="ajax-working"></div>
+	   		<div id="empty" class="slide"></div>
+		</div>
+
+
+		<!-- LITW modules --> 
+		<script src="https://static.labinthewild.org/litw.utils.0.1.js"></script>
+		<script src="https://static.labinthewild.org/litw.results.0.1.js"></script>
+	 	<script src="https://static.labinthewild.org/litw.share.0.1.js"></script>
+	 	<script src="https://static.labinthewild.org/litw.forms.0.1.js"></script>
+		<script src="https://static.labinthewild.org/litw.data.0.1.js"></script>
+	 	<script src="https://static.labinthewild.org/litw.tracking.0.1.js"></script>
+	 	<script src="https://static.labinthewild.org/litw.comments.0.1.js"></script>
+
+ 		<!-- jspsych -->
+		<script src="js/jsPsych-5.0.3/jspsych.js"></script>
+		<script src="js/jsPsych-5.0.3/plugins/jspsych-call-function.js"></script>
+ 		<script src="js/jsPsych-5.0.3/plugins/jspsych-single-stim.js"></script>
+		
+		<!-- study code and content -->
+		<script src="dist/bundle.min.js"></script>
+	</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "litw-studytemplate",
+  "version": "0.1.0",
+  "dependencies": {
+    "handlebars": "^4.0.6",
+    "handlebars-loader": "^1.4.0",
+    "jquery": "2.2.0",
+    "jquery-i18n": "~1.0.1",
+    "jquery-ui-bundle": "^1.11.4",
+    "webpack": "^2.2.1",
+    "expose-loader": "^0.7.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack -p && php -S localhost:8080 ../routing.php",
+    "build-api": "cd ../api/src && php composer.phar install && cd public && php -S localhost:8081",
+    "develop": "webpack --watch && php -S localhost:8000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/LITW-core/litw-studytemplate.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/LITW-core/litw-studytemplate#readme",
+  "description": ""
+}

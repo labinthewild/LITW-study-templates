@@ -1,0 +1,4 @@
+*.log
+*/vendor/*
+dist/
+node_modules/

@@ -1,0 +1,21 @@
+
+<!-- Template for the IRB page -->
+<h2 class="bolded-blue">{{header}}</h2>
+<p>{{subheader.[0]}}</p>
+<p><em>{{subheader.[1]}}</em></p>
+
+{{#each body}}
+	<div class="irb-paragraph">
+		<strong class="irb-paragraph-header">{{this.[0]}}</strong>
+		<p class="irb-paragraph-body">{{this.[1]}}</p>
+	</div>
+{{/each}}
+
+<p>{{footer}}</p>
+<form id="consent-form">
+	<input type="checkbox" id="agree-to-study" />
+	<label for="agree-to-study">
+		{{consent}}
+	</label>
+</form>
+<span class="bolded-blue" id="approve-irb">{{warning}}</span>

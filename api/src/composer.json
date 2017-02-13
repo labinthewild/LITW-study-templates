@@ -1,0 +1,8 @@
+{
+    "require": {
+        "slim/slim": "^3.3",
+        "monolog/monolog": "^1.19",
+        "google/apiclient": "1.0.*@beta",
+        "geoip2/geoip2": "~2.0"
+    }
+}

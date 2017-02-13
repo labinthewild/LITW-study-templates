@@ -1,0 +1,16 @@
+<!-- Template for instructions page -->
+
+<h2 class="bolded-blue">{{header}}</h2>
+
+{{#each body.A}}
+	<p>{{this}}</p>
+{{/each}}
+
+<div class="instructions-stim-container">
+	<img src="stim-img/cat1.jpg" />
+	<img src="stim-img/cat2.jpg" />
+</div>
+
+{{#each body.B}}
+	<p {{#if @last}} class="bolded-blue"{{/if}}>{{this}}</p>
+{{/each}}
