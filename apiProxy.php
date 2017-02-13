@@ -159,8 +159,6 @@ $study_include_path = $_SERVER["DOCUMENT_ROOT"] . "/" . $studies_directory . "/"
 
 require($study_include_path . "/include/config.php");
 
-error_log("********* " . DB_TARGET);
-
 $url = LITW_API_URL . $_SERVER["REQUEST_URI"];
 
 if ( !$url ) {
@@ -199,7 +197,7 @@ if ( !$url ) {
   
   list( $header, $contents ) = preg_split( '/([\r\n][\r\n])\\1/', curl_exec( $ch ), 2 );
   
-  $contents = preg_split( '/([\r\n][\r\n])\\1/', $contents, 2 )[1];
+  //$contents = preg_split( '/([\r\n][\r\n])\\1/', $contents, 2 )[1];
 
   $status = curl_getinfo( $ch );
 
