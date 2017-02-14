@@ -29,6 +29,23 @@ In a separate shell, again navigate to the `litw-template-package/template` dire
 npm run build-api
 ```
 
+## Loading the template in a browser
+
+The commands above will start a development server for the template on port `8080` and a development server for the API on port `8081`.
+
+With the servers started, you should be able to load the template in your browser by visiting the following url:
+```
+localhost:8080
+```
+The study should load, and you should be able to interact with it.
+
+Additionally, you may test that the API is working correctly by visiting this url:
+```
+localhost:8081/api/v1/
+```
+(Note the trailing forward slash). You should see the text `Hello API!` displayed in your browser.
+
+
 ## Development environment
 If you wish to make changes to the template, you can configure the template's bundler to automatically watch for changes and re-bundle your changes. Press `Ctrl + c` to stop the process that you started by running `npm build`. Next, run:
 ```
