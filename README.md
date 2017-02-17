@@ -58,4 +58,8 @@ npm run develop-server
 
 ## Explore the database
 
-The template is configured to write data to a SQLite3 database. The database's file can be found at `api/db/template.db`. To examine data written to this database, you may use the `sqlite3` command line tool, or you may install a GUI such as [DB Browser for SQLite](http://sqlitebrowser.org/).
+The template is configured to write data to a SQLite3 database, a file-based, server-free database. There is no server to configure, and as soon as the installation instructions above are run the database connection should start working. 
+
+The database's file can be found at `api/db/template.db`. To examine data written to this database, you may use the `sqlite3` command line tool, or you may install a GUI such as [DB Browser for SQLite](http://sqlitebrowser.org/).
+
+If using the GUI, you may open the SQLite3 database file directly and examine its contents or make changes.
