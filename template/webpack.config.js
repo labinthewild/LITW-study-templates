@@ -12,7 +12,7 @@ var config = {
       // NOTE: make jquery available globally, so LITW modules
       // and jsPsych loaded externally can use it
       { test: require.resolve('jquery'), loader: 'expose-loader?jQuery!expose-loader?$' },
-      { test: /.*\.html$/, loader: "handlebars-loader" },
+      { test: /.*\.html$/, loader: "handlebars-loader" }
     ]
   }
 };

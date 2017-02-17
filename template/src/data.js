@@ -12,8 +12,6 @@
  * the code, contact us at info@labinthewild.org
  *************************************************************/
 
-require("jquery-i18n");
-
 module.exports = {
 	"irb": {
 		"header": "Welcome to the LabintheWild 2.0 Demo Study!",

@@ -14,13 +14,15 @@
  *************************************************************/
 
 // load webpack modules
-var $ = require("jquery");
+window.$ = window.jQuery = require("jquery");
+require("bootstrap");
 require("jquery-ui-bundle");
 var LITW_STUDY_CONTENT = require("./data");
 var irbTemplate = require("../templates/irb.html");
 var loadingTemplate = require("../templates/loading.html");
 var resultsTemplate = require("../templates/results.html");
 var progressTemplate = require("../templates/progress.html");
+var i18n = require("./i18n");
 require("./jspsych-display-info");
 
 module.exports = (function() {
@@ -36,6 +38,7 @@ module.exports = (function() {
 	irb = function() {
 		LITW.tracking.recordCheckpoint("irb");
 		$("#irb").html(irbTemplate(C.irb));
+		$("#irb").i18n();
 		LITW.utils.showSlide("irb");
 		$("#agree-to-study").on("click", function() {
 			if ($(this).prop("checked")) {
@@ -248,8 +251,10 @@ module.exports = (function() {
 		LITW.comments.showCommentsPage(results);
 	},
 
-	results = function() {
-		
+	results = function(commentsData) {
+
+		LITW.data.submitComments(commentsData);
+
 		// get the trial data from jsPsych
 		var studyData = jsPsych.data.getTrialsOfType("single-stim"),
 		whichCat;
@@ -286,9 +291,19 @@ module.exports = (function() {
 		LITW.results.insertFooter();
 	};
 
+
 	// when the page is loaded, start the study!
 	$(document).ready(function() {
-		
+
+		// determine and set the study language
+		$.i18n().locale = i18n.getLocale();
+		$.i18n().load('src/i18n/en.json', 'en').done(
+			function(){
+				$('head').i18n();
+				$('body').i18n();
+			}
+		);
+
 		// generate unique participant id and geolocate participant
 		LITW.data.initialize();
 		LITW.share.makeButtons("#header-share");
@@ -299,7 +314,7 @@ module.exports = (function() {
 		// Load the trial configuration data for the practice
 		// trials and the real trials
 		params.practiceStims = C.practiceCats;
-		params.stims = C.trialCats
+		params.stims = C.trialCats;
 
 		// shuffle the order of the trials
 		params.practiceStims = LITW.utils.shuffleArrays(params.practiceStims);
