@@ -22,7 +22,10 @@ module.exports = jsPsych.plugins["display-info"] = (function() {
   plugin.trial = function(display_element, trial) {
     
     if (trial.name === "instructions") {
-      $("#instructions").html(instructionsTemplate(trial.content));
+      $("#instructions").html(instructionsTemplate({
+        content: trial.content,
+        withTouch: trial.withTouch
+      }));
 
       LITW.utils.showNextButton(function() {
         display_element.empty();
@@ -31,7 +34,11 @@ module.exports = jsPsych.plugins["display-info"] = (function() {
       
       LITW.utils.showSlide("instructions");
     } else if (trial.name === "preTrialBreak") {
-      $("#break").html(preTrialBreakTemplate(trial.content));
+      $("#break").html(preTrialBreakTemplate({
+        content: trial.content,
+        withTouch: trial.withTouch
+      }));
+
       LITW.utils.showSlide("break");
       LITW.utils.showNextButton(function() {
         display_element.empty();

@@ -12,10 +12,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack -p && php -S localhost:8080 ../routing.php",
-    "build-api": "cd ../api/src && php composer.phar install && cd public && php -S localhost:8081",
-    "develop": "webpack --watch",
-    "develop-server": "php -S localhost:8080 ../routing.php"
+    "build": "webpack -p",
+    "develop": "webpack --watch"
   },
   "repository": {
     "type": "git",

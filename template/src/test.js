@@ -27,7 +27,10 @@ require("./jspsych-display-info");
 
 module.exports = (function() {
 
+	window.litwWithTouch = false;
+
 	var timeline = [],
+	self = this,
 	C,
 	params = {
 		stims: [],
@@ -98,6 +101,7 @@ module.exports = (function() {
 			type: "display-info",
 			name: "instructions",
 			content: C.instructions,
+			withTouch: window.litwWithTouch,
 			display_element: $("#instructions")
 		});
 
@@ -122,6 +126,7 @@ module.exports = (function() {
 				}
 			});
 
+			stim.withTouch = window.litwWithTouch;
 			timeline.push(stim);
 
 			// register a function to submit data as soon
@@ -146,6 +151,7 @@ module.exports = (function() {
 			type: "display-info",
 			name: "preTrialBreak",
 			content: C.preTrial,
+			withTouch: window.litwWithTouch,
 			display_element: $("#break")
 		});
 		
@@ -168,6 +174,7 @@ module.exports = (function() {
 				}
 			});
 
+			stim.withTouch = window.litwWithTouch;
 			timeline.push(stim);
 
 			// register a function to submit data as soon
@@ -284,6 +291,8 @@ module.exports = (function() {
 		LITW.utils.showSlide("results");
 		$("#results").html(resultsTemplate({
 			content: C.results,
+			resultsExplanation: C.resultsExplanation,
+			citations: C.citations,
 			whichCat: whichCat,
 			bothCats: (whichCat.length === 2)
 		}));
@@ -294,6 +303,9 @@ module.exports = (function() {
 
 	// when the page is loaded, start the study!
 	$(document).ready(function() {
+
+		// detect touch devices
+		window.litwWithTouch = ("ontouchstart" in window);
 
 		// determine and set the study language
 		$.i18n().locale = i18n.getLocale();

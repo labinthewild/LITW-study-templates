@@ -57,7 +57,11 @@ module.exports = {
 				"You'll be shown images like these:"
 			],
 			"B": [
-				"Your job is to decide which picture you identify with most. You'll do this by pressing 1 on your keyboard to select the left image and 2 to select the right image.",
+				"Your job is to decide which picture you identify with most. You'll do this by pressing 1 on your keyboard to select the left image and 2 to select the right image. You may also use your mouse to select an image.",
+				"After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!"
+			],
+			"BWithTouch": [
+				"Your job is to decide which picture you identify with most. You'll do this by tapping on the image you identify with to select it.",
 				"After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!"
 			]
 		}
@@ -67,7 +71,11 @@ module.exports = {
 		"body": [
 			"Now that you have the hang of it, we'll start the study.",
 			"Click the arrow or press the <strong>spacebar</strong> when you are ready to begin."
-		]
+		],
+		"bodyWithTouch": [
+			"Now that you have the hang of it, we'll start the study.",
+			"Tap the arrow when you are ready to begin."
+		],
 	},
 	"midTrial": {
 		"header": "You're doing great! Take a breather."
@@ -75,40 +83,45 @@ module.exports = {
 	"practiceCats": [
 		{
 			"type": "single-stim",
-			"stimulus": "<img src='stim-img/cat1.jpg' /><img src='stim-img/cat2.jpg' />",
+			"stimulus": "<img src='stim-img/cat1.jpg' class='left-stim' /><img src='stim-img/cat2.jpg' class='right-stim' />",
 			"is_html": true,
 			"choices": [49, 50], // the numbers 1 - 2
-			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image.)</span>"
+			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image. You may also use your mouse to click on an image.)</span>",
+			"promptWithTouch": "Which picture do you identify with most? <span class='bolded-blue'>(Tap on an image to select it.)</span>"
 		}
 	],
 	"trialCats": [
 		{
 			"type": "single-stim",
-			"stimulus": "<img src='stim-img/cat3.jpg' /><img src='stim-img/cat4.jpg' />",
+			"stimulus": "<img src='stim-img/cat3.jpg' class='left-stim' /><img src='stim-img/cat4.jpg' class='right-stim' />",
 			"is_html": true,
 			"choices": [49, 50], // the numbers 1 - 2
-			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image.)</span>"
+			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image. You may also use your mouse to click on an image.)</span>",
+			"promptWithTouch": "Which picture do you identify with most? <span class='bolded-blue'>(Tap on an image to select it.)</span>"
 		},
 		{
 			"type": "single-stim",
-			"stimulus": "<img src='stim-img/cat5.jpg' /><img src='stim-img/cat6.jpg' />",
+			"stimulus": "<img src='stim-img/cat5.jpg' class='left-stim' /><img src='stim-img/cat6.jpg' class='right-stim' />",
 			"is_html": true,
 			"choices": [49, 50], // the numbers 1 - 2
-			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image.)</span>"
+			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image. You may also use your mouse to click on an image.)</span>",
+			"promptWithTouch": "Which picture do you identify with most? <span class='bolded-blue'>(Tap on an image to select it.)</span>"
 		},
 		{
 			"type": "single-stim",
-			"stimulus": "<img src='stim-img/cat7.jpg' /><img src='stim-img/cat8.jpg' />",
+			"stimulus": "<img src='stim-img/cat7.jpg' class='left-stim' /><img src='stim-img/cat8.jpg' class='right-stim' />",
 			"is_html": true,
 			"choices": [49, 50], // the numbers 1 - 2
-			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image.)</span>"
+			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image. You may also use your mouse to click on an image.)</span>",
+			"promptWithTouch": "Which picture do you identify with most? <span class='bolded-blue'>(Tap on an image to select it.)</span>"
 		},
 		{
 			"type": "single-stim",
-			"stimulus": "<img src='stim-img/cat9.jpg' /><img src='stim-img/cat10.jpg' />",
+			"stimulus": "<img src='stim-img/cat9.jpg' class='left-stim' /><img src='stim-img/cat10.jpg' class='right-stim' />",
 			"is_html": true,
 			"choices": [49, 50], // the numbers 1 - 2
-			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image.)</span>"
+			"prompt": "Which picture do you identify with most? <span class='bolded-blue'>(Press 1 to select the left image and 2 to select the right image. You may also use your mouse to click on an image.)</span>",
+			"promptWithTouch": "Which picture do you identify with most? <span class='bolded-blue'>(Tap on an image to select it.)</span>"
 		}
 	],
 	"loadingMsg": "Loading resources:",
@@ -117,5 +130,7 @@ module.exports = {
 		"header": "Have a look at your results!",
 		"predictionMsg": "Based on your responses, we think you might like to take this cat home!",
 		"predictionMsgBoth": "Based on your responses, we think you might like to take both these cats home!"
-	}
+	},
+	"resultsExplanation": ["The task you completed in this study is one measure of cat preference [1]. We determined your cat preference based on the set of features exhibited by the cats you chose, such as posture.", "We are interested in learning whether cat preferences are consistent across cultures. We will report on this result on our blog."],
+	"citations": ["[1] Buttons, C.W., Patches, R.A. (2012). Evaluation of a method for determining cat preference: the cat selection task. Journal of Cats: Applied, 8:2, 75-84."]
 };
