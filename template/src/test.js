@@ -52,6 +52,9 @@ module.exports = (function() {
 				$("#approve-irb").show();
 			}
 		});
+
+		// show the introductory splash screen
+		$("#splash-screen").modal({backdrop: "static"});
 	},
 
 	demographics = function() {

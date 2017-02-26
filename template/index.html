@@ -5,7 +5,7 @@
  * Home page for the LITW demo study.
  * 
  * Author: Trevor Croxson
- * Last Modified: February 5, 2017
+ * Last Modified: February 26, 2017
  *
  * © Copyright 2017 LabintheWild
  * For questions about this file and permission to use
@@ -51,6 +51,27 @@
 	
 	<body>
 		<div id="content">
+			<div class='modal fade' id='splash-screen' role='dialog'>
+        <div class='modal-dialog'>
+      		<div class='modal-content'>
+      	  	<div class='modal-header'>
+              <button type='button' class='close' id='splash-close' data-dismiss='modal'>&times</button>
+      		  	<h3 class='modal-title'>LabintheWild Template Study</h3>
+    		 		</div>
+	      		<div class='modal-body' id='modal-body'>
+	      			<h4 align='left'><strong>Welcome!</strong></h4>
+	      			<p align='left'>This LabintheWild study is a demonstration. It is designed to be a template for building other studies using the jsPsych library and LabintheWild utilities.</p>
+	      			<p align='left'>Although this template only demonstrates a single kind of stimulus, other trial types are possible. See the <a href="http://docs.jspsych.org/" target="_blank">jsPsych documentation</a> to see which other trial types are supported.</p>
+	      			<p>Close this box to begin the study!</p>
+	      		</div>
+	      		<div class='modal-footer'>
+	            <img src='https://static.labinthewild.org/images/LabintheWild_withGlobe.png' style='float:left; height: 42px;'>
+	            <button type='button' class='btn btn-primary' id='splash-ok' data-dismiss='modal'>Ok</button>
+	      		</div>
+	       	</div>
+	      </div>
+      </div>
+
 			<div id="header">
 				<a href='http://www.labinthewild.org'>
 					<img src='img/logo.png' alt='logo' id='logo'/>
@@ -88,7 +109,7 @@
 		<script src="src/jspsych-single-stim-litw.js"></script>
 
 		<!-- study code and content -->
-		<script src="dist/bundle.min.js?ver=0.2"></script>
+		<script src="dist/bundle.min.js?ver=0.3"></script>
 		<script src="js/jquery.i18n.js" type="text/javascript"></script>
 		<script src="js/jquery.i18n.messagestore.js" type="text/javascript"></script>
 
