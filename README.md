@@ -2,7 +2,9 @@
 
 This repository bundles together the LabintheWild template study and the LabintheWild RESTful API.
 
-You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM. You will also need PHP to run it. 
+You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM. 
+
+You will also need to have PHP installed to run it. (Make sure you have the 'PHP-curl' extension installed and enabled.)
 
 This bundle has been tested on OSX 10.11.1 and Ubuntu 17.04.
 
