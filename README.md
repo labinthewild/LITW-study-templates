@@ -2,15 +2,15 @@
 
 This repository bundles together the LabintheWild template study and the LabintheWild RESTful API.
 
-You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM.
+You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM. You will also need PHP to run it. 
 
-This bundle has been tested on OSX 10.11.1.
+This bundle has been tested on OSX 10.11.1 and Ubuntu 17.04.
 
 ## Installation 
 
 Clone this repository to a location where you'd like the code to live:
 ```
-git clone git@bitbucket.org:LITW-core/litw-template-package.git
+git clone https://bitbucket.org/LITW-core/litw-template-package.git
 ```
 Navigate to the `template` directory:
 ```
