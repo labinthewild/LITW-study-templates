@@ -15,7 +15,8 @@
 
 $config['displayErrorDetails'] = true;
 
-$config['db']['host']   = "";
+$config['db']['db_target'] = "sqlite";
+$config['db']['host']   = "bd/template.db";
 $config['db']['user']   = "";
 $config['db']['pass']   = "";
 $config['db']['dbname'] = "";
