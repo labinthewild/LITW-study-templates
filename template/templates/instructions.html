@@ -1,10 +1,8 @@
 <!-- Template for instructions page -->
 
-<h2 class="bolded-blue">{{content.header}}</h2>
+<h2 class="bolded-blue" data-i18n="litw-instruct-header"></h2>
 
-{{#each content.body.A}}
-	<p>{{this}}</p>
-{{/each}}
+	<p data-i18n="litw-instruct-body-1-p1"></p>
 
 <div class="instructions-stim-container">
 	<img src="stim-img/cat1.jpg" />
@@ -12,12 +10,10 @@
 </div>
 
 {{#if withTouch}}
-	{{#each content.body.BWithTouch}}
-		<p {{#if @last}} class="bolded-blue"{{/if}}>{{this}}</p>
-	{{/each}}
+	<p data-i18n="litw-instruct-body-2-p1-touch"></p>
+	<p class="bolded-blue" data-i18n="litw-instruct-body-2-p2-touch"></p>
 {{else}}
-	{{#each content.body.B}}
-		<p {{#if @last}} class="bolded-blue"{{/if}}>{{this}}</p>
-	{{/each}}
+    <p data-i18n="litw-instruct-body-2-p1"></p>
+    <p class="bolded-blue" data-i18n="litw-instruct-body-2-p2"></p>
 {{/if}}
 

@@ -19,11 +19,13 @@ require("bootstrap");
 require("jquery-ui-bundle");
 var LITW_STUDY_CONTENT = require("./data");
 var irbTemplate = require("../templates/irb.html");
+var instructionsTemplate = require("../templates/instructions.html");
 var loadingTemplate = require("../templates/loading.html");
 var resultsTemplate = require("../templates/results.html");
 var progressTemplate = require("../templates/progress.html");
 var i18n = require("./i18n");
 require("./jspsych-display-info");
+require("./jspsych-display-slide");
 
 module.exports = (function() {
 
@@ -40,7 +42,7 @@ module.exports = (function() {
 
 	irb = function() {
 		LITW.tracking.recordCheckpoint("irb");
-		$("#irb").html(irbTemplate(C.irb));
+		$("#irb").html(irbTemplate());
 		$("#irb").i18n();
 		LITW.utils.showSlide("irb");
 		$("#agree-to-study").on("click", function() {
@@ -91,21 +93,11 @@ module.exports = (function() {
 		// ******* BEGIN STUDY PROGRESSION ******** //
 		
 		// 1. GENERAL INSTRUCTIONS PAGE
-		// right before we show the instructions page, record
-		// a tracking checkpoint
 		timeline.push({
-			type: "call-function",
-			func: function() {
-				LITW.utils.showSlide("instructions");
-				LITW.tracking.recordCheckpoint("instructions");
-			}
-		})
-		timeline.push({
-			type: "display-info",
+			type: "display-slide",
+            display_element: $("#instructions"),
 			name: "instructions",
-			content: C.instructions,
-			withTouch: window.litwWithTouch,
-			display_element: $("#instructions")
+            template: instructionsTemplate({withTouch: window.litwWithTouch})
 		});
 
 		// 2. PRACTICE STIMS

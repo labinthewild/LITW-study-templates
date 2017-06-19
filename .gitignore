@@ -1,6 +1,7 @@
 *.log
 .DS_Store
+.idea
+api/db/template.db
 api/src/vendor/*
 dist/
 node_modules/
-api/db/template.db
