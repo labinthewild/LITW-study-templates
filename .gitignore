@@ -1,6 +1,6 @@
 *.log
 .DS_Store
-api/src/vendor/*
-dist/
-node_modules/
+.idea
 api/db/template.db
+api/src/vendor/*
+node_modules/

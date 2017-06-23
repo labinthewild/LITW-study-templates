@@ -24,5 +24,11 @@
     "litw-irb-body-6-p2": "If you have questions about this research, you may contact Professor Buttons, Head of Feline Research, University of Washington.",
     "litw-irb-body-final": "If you have questions about your rights as a research participant, or wish to obtain information, ask questions or discuss any concerns about this study with someone other than the researcher(s), please contact the Unversity of Washington IRB.",
     "litw-irb-consent": "By ticking this box, you are agreeing to be in the study. Be sure that questions you have about the study have been answered and that you understand what you are being asked to do. You may contact the researcher if you think of a question later. You are free to leave the experiment at any time, and refusing to be in the experiment or stopping participation will involve no penalty or loss of benefits to which you are otherwise entitled.",
-    "litw-irb-warning": "You must check the box to continue."
+    "litw-irb-warning": "You must check the box to continue.",
+    "litw-instruct-header": "Please read these instructions carefully.",
+    "litw-instruct-body-1-p1": "You'll be shown images like these:",
+    "litw-instruct-body-2-p1": "Your job is to decide which picture you identify with most. You'll do this by pressing 1 on your keyboard to select the left image and 2 to select the right image. You may also use your mouse to select an image.",
+    "litw-instruct-body-2-p2": "After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!",
+    "litw-instruct-body-2-p1-touch": "Your job is to decide which picture you identify with most. You'll do this by tapping on the image you identify with to select it.",
+    "litw-instruct-body-2-p2-touch": "After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!"
 }
