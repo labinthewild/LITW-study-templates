@@ -10,12 +10,12 @@ Please consider submitting ideas and code to improve either the tutorial or this
 ## Project structure
 
   * *API*: code that handles some basic data storage functionality. You'll probably not change this.
-  * *TEMPLATE*: the real thing.
+  * *DOCS*: some documentation and howto guides.
+  * *TEMPLATE*: the template code.
   
-How are the template folders organized?
+How are the *template* folders organized?
 
   * **css**: Style sheet files;
-  * **docs**: Documentation and HowTo instructions;
   * **img**: All sorts of images used in your study;
   * **include**: Configuration files;
   * **js**: External JavaScripts -- preferably only 'non-bundleable' ones (as we use Webpack to bundle external dependencies);
@@ -28,6 +28,7 @@ How are the template folders organized?
 Good to know that you got to this point. =)
 
 Please visit the docs folder and learn:
-  - [How to install and run this template](docs/1-Installation.md)
-  - What's the current architecture
-  - how to change the code, for instance, to include a survey page.
+  * [How to install and run this template?](docs/1-Installation.md)
+  * [What's the current 'code architecture'?](docs/2-CodeExecutionOverview.md)
+  * How to change a page's text?
+  * [How to include a page containing a survey?](docs/4-AddASurveyPage.md)
