@@ -4,7 +4,7 @@ This repository bundles together the LabintheWild template study and instruction
 
 This project is meant to help people with basic web development skills -- meaning HTML, CSS and JavaScript -- to bootstrap a LabintheWild study. Using it is not at all mandatory to be part of our researchers' community as a LabintheWild study is fundamentally implemented as a web application. If you have your own choices of technology you're free to use them as long as the study comply with some [design guidelines presented in our tutorial](http://tutorial.labinthewild.org). 
 
-Please consider submitting ideas and code to improve either the tutorial or this tutorial. This can be done by [submitting an issue](https://bitbucket.org/LITW-core/litw-template-package/issues), creating a pull request for an open issue, or [emailing us at](tutorial@labinthewild.org).
+Please consider submitting ideas and code to improve either the tutorial or this tutorial. This can be done by [submitting an issue](https://bitbucket.org/LITW-core/litw-template-package/issues), creating a pull request for an open issue, or emailing us at: *tutorial [at] labinthewild.org*.
 
 
 ## Project structure
@@ -28,7 +28,9 @@ How are the *template* folders organized?
 Good to know that you got to this point. =)
 
 Please visit the docs folder and learn:
+
   * [How to install and run this template?](docs/1-Installation.md)
   * [What's the current 'code architecture'?](docs/2-CodeExecutionOverview.md)
-  * How to change a page's text?
-  * [How to include a page containing a survey?](docs/4-AddASurveyPage.md)
+  * [How to change a page's text?](docs/3-ChangePageText.md)
+  * [How ot create a new study page?](docs/4-AddNewPage.md)
+  * [How to include a page containing a survey?](docs/5-CreateSurvey.md)
