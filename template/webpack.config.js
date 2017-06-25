@@ -2,7 +2,7 @@ var path = require("path");
 var webpack = require("webpack");
 
 var config = {
-  entry: path.join(__dirname, "src", "test.js"),
+  entry: path.join(__dirname, "src", "study.js"),
   output: {
     path: path.join(__dirname, "dist"),
     filename: "bundle.min.js"
