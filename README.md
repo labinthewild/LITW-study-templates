@@ -32,5 +32,5 @@ Please visit the docs folder and learn:
   * [How to install and run this template?](docs/1-Installation.md)
   * [What's the current 'code architecture'?](docs/2-CodeExecutionOverview.md)
   * [How to change a page's text?](docs/3-ChangePageText.md)
-  * [How ot create a new study page?](docs/4-AddNewPage.md)
+  * [How to create a new study page?](docs/4-AddNewPage.md)
   * [How to include a page containing a survey?](docs/5-CreateSurvey.md)

@@ -88,4 +88,6 @@ var loadingTemplate = require("../templates/loading.html");
 
 ```
 
-That's it! Save all the files, and restart your server if you're not running it in development mode. You should now be able to access **localhost:8080** and see the new page after clicking next in the demographics form.
+## That's it!
+
+Save all the files, and restart your server in the case you're not running it in the development mode. You should now be able to access **localhost:8080** and see the new page after clicking the *Next button* in the demographics form.

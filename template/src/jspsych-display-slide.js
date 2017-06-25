@@ -1,8 +1,8 @@
 /*************************************************************
  * jspsych-display-slide.js
- * 
+ *
  * A jsPsych plugin that displays slides based on their name.
- * 
+ *
  *
  * © Copyright 2017 LabintheWild
  * For questions about this file and permission to use
@@ -11,21 +11,22 @@
 
 module.exports = jsPsych.plugins["display-slide"] = (function() {
 
-  var plugin = {};
+    var plugin = {};
 
-  plugin.trial = function(display_element, trial) {
-      display_element.html(trial.template);
-      display_element.i18n();
+    plugin.trial = function(display_element, trial) {
+        display_element.html(trial.template);
+        display_element.i18n();
 
-      LITW.utils.showNextButton(function() {
-        display_element.empty();
-        jsPsych.finishTrial();
-      });
-      
-      LITW.utils.showSlide(display_element[0].id);
-      LITW.tracking.recordCheckpoint(display_element[0].id);
-  };
+        LITW.utils.showNextButton(function() {
+            if(trial.finish) trial.finish();
+            display_element.empty();
+            jsPsych.finishTrial();
+        });
 
-  return plugin;
+        LITW.utils.showSlide(display_element[0].id);
+        LITW.tracking.recordCheckpoint(display_element[0].id);
+    };
+
+    return plugin;
 
 })();
