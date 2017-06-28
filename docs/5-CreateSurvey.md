@@ -1,6 +1,6 @@
 # How to... Create a survey?
 
-To show you how we can create a survey in the study we take from where we left in the [how to create a new page tutorial.](docs/4-AddNewPage.md) There we just inserted an almost empty page after the demographics page. Here we'll include the questions, collect participants responses and save them using the LabintheWild API.
+To show you how we can create a survey in the study we take from where we left in the [how to create a new page tutorial.](4-AddNewPage.md) There we just inserted an almost empty page after the demographics page. Here we'll include the questions, collect participants responses and save them using the LabintheWild API.
 
 To do so, we'll have to:
 
@@ -60,9 +60,11 @@ And remember to also include the English text used in the form inside the **en.j
 
 ```
 
+Remember when adding these lines to separate them from the previous one with a comma.
+
 ## 2. Saving form's data
 
-What we have to do now is make sure that when participants click  the *Next button* we collect the data from the survey and save that to the database. Do do so, we'll have to write a function data to data all, and include a new attribute to the configuration of the timeline related to our survey page. Here is the code:
+What we have to do now is making sure when participants click the *Next button* we collect the data from the survey and save that to the database. To do so, we'll have to write a function to do it all, and include a new attribute to the timeline configuration related to our survey page -- meaning the `timeline.push` named *motivationsurvey* inside the **study.js** file. Here is the code:
 
 ```
 ...

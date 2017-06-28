@@ -16,6 +16,6 @@ Is it clearer now?
 
 How about implementing something new in the template to get a sense of how this should be done? We've created the following HowTo tasks to warm you up:
 
-  * [How to change a page's text?](docs/3-ChangePageText.md)
-  * [How to create a new study page?](docs/4-AddNewPage.md)
-  * [How to create a survey?](docs/5-CreateSurvey.md)
+  * [How to change a page's text?](3-ChangePageText.md)
+  * [How to create a new study page?](4-AddNewPage.md)
+  * [How to create a survey?](5-CreateSurvey.md)

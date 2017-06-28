@@ -14,7 +14,7 @@ To include a new page we'll need to:
 
 Our template page will be amazingly simple now, because we just want to make sure we'll have it in the right place on the study timeline. So:
 
-  * Create a file called `templates/motivationSurvey.html`;
+  * Create a file called **templates/motivationSurvey.html**;
   * Include a header for the page with this line: 
 
 `<h2 class="bolded-blue" data-i18n="litw-motivationsurvey-header"></h2>`
@@ -33,15 +33,15 @@ As a matter of organization, let's include a new `<DIV>` at the **index.html** f
 
 ```
 ...
-<div id="demographics" class="slide"></div>
+//<div id="demographics" class="slide"></div>
 <div id="motivationsurvey" class="slide"></div>
-<div id="instructions" class="slide"></div>
+//<div id="instructions" class="slide"></div>
 ...
 ```
 
 ## 4. The study timeline
 
-Is now time to include the created new page in study's timeline. As previously mentioned, the file that manages the study workflow is called **study.js**. Open it and find the beginning of the function called *initJsPsych*. This function defines the timeline for everything that happens after the *demographics* page. (*This should change soon and this page will also make part of the main workflow*).
+Is now time to include the created new page in study's timeline. As previously mentioned, the file that manages the study workflow is called **study.js** (inside the **src** folder). Open it and find the beginning of the function called *initJsPsych*. This function defines the timeline for everything that happens after the *demographics* page. *(This should change soon and this page will also be part of the main workflow)*.
 
 The current version of the *initJsPsych* function defines the following:
 
@@ -82,9 +82,9 @@ timeline.push({
 The one last piece is that we've never defined what does *motivationSurveyTemplate* means. To do so, go to the beginning of the file and you'll find a bunch of `require` statements defining the template variables. After adding the new one for the survey the code should look like this:
 
 ```
-var instructionsTemplate = require("../templates/instructions.html");
+//var instructionsTemplate = require("../templates/instructions.html");
 var motivationSurveyTemplate = require("../templates/motivationSurvey.html");
-var loadingTemplate = require("../templates/loading.html");
+//var loadingTemplate = require("../templates/loading.html");
 
 ```
 
