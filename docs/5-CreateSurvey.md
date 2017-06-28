@@ -48,7 +48,7 @@ Here it is a very simple HTML code that you can append to your template:
 </div>
 ```
 
-And remember to also include the English text used in the form inside the **en.json** file:
+And remember to also include the English text used in the form inside the **src/i18n/en.json** file:
  
 ```
     "litw-motivationsurvey-question1": "To what extent are you participating in this study for the following reasons?",
