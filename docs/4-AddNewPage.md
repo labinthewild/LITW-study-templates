@@ -33,9 +33,9 @@ As a matter of organization, let's include a new `<DIV>` at the **index.html** f
 
 ```
 ...
-//<div id="demographics" class="slide"></div>
+<!--div id="demographics" class="slide"></div-->
 <div id="motivationsurvey" class="slide"></div>
-//<div id="instructions" class="slide"></div>
+<!--div id="instructions" class="slide"></div-->
 ...
 ```
 
