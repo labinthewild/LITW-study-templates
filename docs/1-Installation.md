@@ -8,6 +8,8 @@ You will need Node and NPM to build and run this bundle. See [this link](https:/
 
 You will also need to have PHP installed to run it. (Make sure you have the 'PHP-curl' extension installed and enabled.)
 
+Finally, you'll need a MySQL 5.7 or older (mainly because this is the first version that supports JSON fields).
+
 This bundle has been tested on OSX 10.11.1 and Ubuntu 17.04.
 
 
@@ -29,26 +31,16 @@ Build the project and start the template's development server:
 ```
 npm run build
 ```
-In a separate shell, again navigate to the `litw-template-package/template` directory, and install dependencies for the API and start its server:
-```
-npm run build-api
-```
 
 ## Loading the template in a browser
 
-The commands above will start a development server for the template on port `8080` and a development server for the API on port `8081`.
+The commands above will start a development server for the template on port `8080`.
 
 With the servers started, you should be able to load the template in your browser by visiting the following url:
 ```
 localhost:8080
 ```
 The study should load, and you should be able to interact with it.
-
-Additionally, you may test that the API is working correctly by visiting this url:
-```
-localhost:8081/api/v1/
-```
-(Note the trailing forward slash). You should see the text `Hello API!` displayed in your browser.
 
 
 ## Development environment
@@ -61,10 +53,26 @@ In a separate shell, again navigate to the `litw-template-package/template` dire
 npm run develop-server
 ```
 
-## Explore the database
+## Create MySQL database
+Connect to your MySQL database, which should look line this, if you are using a terminal:
+```
+mysql -uroot -hlocalhost -p
+```
+Hopefully, you know the password for the root user. It could be changed for any user with admin powers.
 
-The template is configured to write data to a SQLite3 database, a file-based, server-free database. There is no server to configure, and as soon as the installation instructions above are run the database connection should start working. 
+Now, create a new database, new user, and grand the user the needed privileges:
+```
+mysql> CREATE DATABASE <DBNAME>;
+mysql> CREATE USER '<LITWU>'@'localhost' IDENTIFIED BY '<SAFEPASS>';
+mysql> GRANT ALL ON <DBNAME>.* TO '<LITWU>'@'localhost';
+mysql> FLUSH PRIVILEGES;
+```
+Then, exit MYSQL terminal so we can create the database structure using the following command:
+```
+mysql -uroot -hlocalhost -p <DBNAME> < include/litw-template.sql
+```
 
-The database's file can be found at `api/db/template.db`. To examine data written to this database, you may use the `sqlite3` command line tool, or you may install a GUI such as [DB Browser for SQLite](http://sqlitebrowser.org/).
-
-If using the GUI, you may open the SQLite3 database file directly and examine its contents or make changes.
+### Configure the template
+Now, we have to include these database information in the "include/config.php" file.
+To do so, first copy the "include/config.php.model" and open it with your favorite text editor.
+You should be able to fill in the gaps. =)

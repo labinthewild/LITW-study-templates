@@ -1,9 +1,9 @@
 <?php
 /*************************************************************
  * index.php
- * 
+ *
  * Home page for the LITW demo study.
- * 
+ *
  * Author: Trevor Croxson
  * Last Modified: February 26, 2017
  *
@@ -30,21 +30,21 @@
 		
 		<!-- ***** stylesheets ***** -->
 		<!-- bootstrap -->
-		<!-- NOTE(Trevor): for now, include the bootstrap stylesheet here. Including 
-		it via webpackcaused other stylesheets linked to here (like litw-styles.css) 
+		<!-- NOTE(Trevor): for now, include the bootstrap stylesheet here. Including
+		it via webpackcaused other stylesheets linked to here (like litw-styles.css)
 		to be overridden. There's probably a way to do this within webpack, but need
 		to investigate further. -->
 		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 		<!-- if using form autocompletion, include a jQueryUI css template -->
 		<link href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" rel="stylesheet" type="text/css">
-		
+
 		<!-- jsPsych styles -->
 		<link href="js/jsPsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css">
-		
+
 		<!-- LITW base styles -->
-		<link href="https://static.labinthewild.org/styles/litw-styles.css" rel="stylesheet" type="text/css">
-		
+		<link href="css/litw-styles.css" rel="stylesheet" type="text/css">
+
 		<!-- study-specific styles -->
 		<link href="css/styles.css" rel="stylesheet" type="text/css">
 	</head>
@@ -66,7 +66,7 @@
 	      			<p>Close this box to begin the study!</p>
 	      		</div>
 	      		<div class='modal-footer'>
-	            <img src='https://static.labinthewild.org/images/LabintheWild_withGlobe.png' style='float:left; height: 42px;'>
+	            <img src='img/LabintheWild_withGlobe.png' style='float:left; height: 42px;'>
 	            <button type='button' class='btn btn-primary' id='splash-ok' data-dismiss='modal'>Ok</button>
 	      		</div>
 	       	</div>
@@ -100,9 +100,10 @@
 		<script src="js/litw/litw.results.0.1.js"></script>
 	 	<script src="js/litw/litw.share.0.1.js"></script>
 	 	<script src="js/litw/litw.forms.0.1.js"></script>
-		<script src="js/litw/litw.data.0.1.js"></script>
-	 	<script src="js/litw/litw.tracking.0.1.js"></script>
+		<script src="js/litw/litw.data.noapi.0.1.js"></script>
+	 	<script src="js/litw/litw.tracking.noapi.0.1.js"></script>
 	 	<script src="js/litw/litw.comments.0.1.js"></script>
+	 	<script src="js/litw/litw.locale.0.1.js"></script>
 
  		<!-- jspsych -->
 		<script src="js/jsPsych-5.0.3/jspsych.js"></script>

@@ -188,7 +188,7 @@ module.exports = (function() {
 				LITW.utils.showSlide("break");
 				LITW.tracking.recordCheckpoint("mid-trial break");
 			}
-		})
+		});
 		timeline.push({
 			type: "display-info",
 			content: C.midTrial,
