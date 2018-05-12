@@ -1,17 +1,16 @@
 # LabintheWild Study Templates
 
-This repository bundles together the LabintheWild template study and instructions to guide new developers to create their own online studies. For your convenience we also provide a pre-configured instance of the LabintheWild RESTful API which will be able to handle local data storage.
+This repository bundles together the LabintheWild template study and instructions to guide new developers to create their own online studies.
 
 This project is meant to help people with basic web development skills -- meaning HTML, CSS and JavaScript -- to bootstrap a LabintheWild study. Using it is not at all mandatory to be part of our researchers' community as a LabintheWild study is fundamentally implemented as a web application. If you have your own choices of technology you're free to use them as long as the study comply with some [design guidelines presented in our tutorial](http://tutorial.labinthewild.org). 
 
-Please consider submitting ideas and code to improve either the tutorial or this tutorial. This can be done by [submitting an issue](https://bitbucket.org/LITW-core/litw-template-package/issues), creating a pull request for an open issue, or emailing us at: *tutorial [at] labinthewild.org*.
+Please consider submitting ideas and code to improve either the tutorial or this templates. This can be done by [submitting an issue](https://bitbucket.org/LITW-core/litw-template-package/issues), creating a pull request for an open issue, or emailing us at: *tutorial [at] labinthewild.org*.
 
 
 ## Project structure
 
-  * *API*: code that handles some basic data storage functionality. You'll probably not change this.
   * *DOCS*: some documentation and howto guides.
-  * *TEMPLATE*: the template code.
+  * *TEMPLATE*: our first beloved template presents choices of cats to present your future kitty.
   
 How are the *template* folders organized?
 
