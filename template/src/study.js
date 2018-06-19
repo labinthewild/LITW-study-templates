@@ -295,9 +295,34 @@ module.exports = (function() {
 		LITW.results.insertFooter();
 	};
 
+	summaryInitialData = function(json_data){
+		var summary = {};
+		for (count in json_data) {
+			var country = json_data[count].country;
+			if( country in summary){
+				summary[country] = summary[country]+1;
+			} else {
+				summary[country] = 1;
+			}
+		};
+		var data = {summary : true};
+		data.data = summary;
+		LITW.data.submitStudyData(data);
+	}
+
+	readSummaryData = function() {
+		$.getJSON( "summary.json", function( data ) {
+			//TODO: 'data' contains the produced summary form DB data 
+			//      in case the study was loaded using 'index.php'
+			//SAMPLE: The example code gets the cities of study partcipants.
+			console.log(data);
+		});
+	}
 
 	// when the page is loaded, start the study!
 	$(document).ready(function() {
+		// get initial data from database (nmaybe needed for the results page!?)
+		readSummaryData();
 
 		// detect touch devices
 		window.litwWithTouch = ("ontouchstart" in window);

@@ -33,3 +33,4 @@ Please visit the docs folder and learn:
   * [How to change a page's text?](docs/3-ChangePageText.md)
   * [How to create a new study page?](docs/4-AddNewPage.md)
   * [How to include a page containing a survey?](docs/5-CreateSurvey.md)
+  * [How to retrieve data from the database?](docs/6-GetDataFromDatabase.md)

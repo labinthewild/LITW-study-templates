@@ -6,7 +6,7 @@ This page aims to help you getting the template running on your development mach
 
 You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM. 
 
-You will also need to have PHP installed to run it. (Make sure you have the 'PHP-curl' extension installed and enabled.)
+You will also need to have PHP 7 installed to run it. (Make sure you have the 'PHP-curl' extension installed and enabled.)
 
 Finally, you'll need a MySQL 5.7 or older (mainly because this is the first version that supports JSON fields).
 
