@@ -14,7 +14,7 @@ Because we already know that science contribution is a big thing for LabintheWil
 
 ## 1. Creating a form
 
-Here it is a very simple HTML code that you can append to your template:
+Here it is a very simple HTML code that you can append to your template (in a new html file):
 
 ```
 <div id="questions">
@@ -64,10 +64,19 @@ Remember when adding these lines to separate them from the previous one with a c
 
 ## 2. Saving form's data
 
-What we have to do now is making sure when participants click the *Next button* we collect the data from the survey and save that to the database. To do so, we'll have to write a function to do it all, and include a new attribute to the timeline configuration related to our survey page -- meaning the `timeline.push` named *motivationsurvey* inside the **study.js** file. Here is the code:
+Make sure to link the template you added to the study.js (at the top with all other requirements)
 
 ```
-...
+var surveyTemplate = require("../templates/survey.html");
+
+```
+
+What we have to do now is making sure when participants click the *Next button* we collect the data from the survey and save that to the database. To do so, we'll have to write a function to do it all, and include a new attribute to the timeline configuration related to our survey page -- meaning the `timeline.push` named *motivationsurvey* inside the **study.js** file. Here is the code:
+
+
+```
+timeline.push{
+type:...,
 template:...,
 finish: function () {
     var surveyData = {"dataType":"motivationSurvey"};
@@ -76,11 +85,11 @@ finish: function () {
     surveyData["motivationOther"] = $('#othermotivation').val();
     LITW.data.submitStudyData(surveyData);
 }
-
+}
 ```
 
-  * In line one we declare a function and associate it to the `finish` attribute. Our `display-slide` JsPsych plugin will make sure to call this function first thing when participant clicks the *Next button*.
-  * From second to firth lines we build a JSON/dictionary object with the data from the survey page. For example, we use the JQuery call `$("input[name=science]:checked")` to get the selected radio button for the science motivation question, then we associate this button's value to the JSON property `motivationScience`.
+  * With `finish:function(){}` we declare a function and associate it to the `finish` attribute. Our `display-slide` JsPsych plugin will make sure to call this function first thing when participant clicks the *Next button*.
+  * Afterwards, we build a JSON/dictionary object with the data from the survey page. For example, we use the JQuery call `$("input[name=science]:checked")` to get the selected radio button for the science motivation question, then we associate this button's value to the JSON property `motivationScience`.
   * Finally we call the `submitStudyData` provided by the LabintheWild data library to save the JSON object into the database.
   
 ## That's it!
