@@ -54,6 +54,7 @@ npm run develop-server
 ```
 
 ## Create MySQL database
+Note you need to be running MySQL version 5.7 or less.
 Connect to your MySQL database, which should look line this, if you are using a terminal:
 ```
 mysql -uroot -hlocalhost -p
