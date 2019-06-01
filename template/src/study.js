@@ -328,8 +328,14 @@ module.exports = (function() {
 		window.litwWithTouch = ("ontouchstart" in window);
 
 		// determine and set the study language
-		$.i18n().locale = i18n.getLocale();
-		$.i18n().load('src/i18n/en.json', 'en').done(
+		//$.i18n().locale = i18n.getLocale();
+
+		$.i18n().load(
+			{
+				'en': 'src/i18n/en.json',
+				'pt-BR': 'src/i18n/pt-br.json'
+			}
+		).done(
 			function(){
 				$('head').i18n();
 				$('body').i18n();
