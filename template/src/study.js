@@ -360,12 +360,12 @@ module.exports = (function() {
 		
 		LITW.utils.showSlide("img-loading");
 		
-		// preload images
-		jsPsych.pluginAPI.preloadImages(params.stims,
-			
-			// initialize the jsPsych timeline and
-			// proceed to IRB page when loading has finished
-			function() { 
+		// 1. preload images
+		// 2. initialize the jsPsych timeline and
+		// 3. proceed to IRB page when loading has finished
+		jsPsych.pluginAPI.preloadImages(
+			["img/btn-next.png","img/btn-next-active.png","img/ajax-loader.gif"].concat(params.stims),
+			function() {
 				initJsPsych();
 				irb(); 
 			},

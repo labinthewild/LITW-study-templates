@@ -3,67 +3,48 @@
  * 
  * Base stylesheet for LabintheWild.
  * 
- * Author: Yuechen Zhao, Trevor Croxson
+ * Author: LITW team
  * 
- * Last Modified: January 7, 2017
+ * Last Modified: Apr 21, 2020
  *
- * © Copyright 2017 LabintheWild
+ * © Copyright 2020 LabintheWild
  * For questions about this file and permission to use
  * the code, contact us at info@labinthewild.org
  *************************************************************/
 
-/********************************************
- * CSS RESET
- * http://meyerweb.com/eric/tools/css/reset/ 
- * v2.0 | 20110126
- * License: none (public domain)
- *******************************************/
-/*html, body, div, span, applet, object, iframe,
-blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-size: 100%;
-	vertical-align: baseline;
-}*/
-/* HTML5 display-role reset for older browsers */
-/*article, aside, details, figcaption, figure, 
-footer, header, hgroup, menu, nav, section {
-	display: block;
-}
-body {
-	line-height: 1;
-}
-ol, ul {
-	list-style: none;
-}
-blockquote, q {
-	quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-	content: '';
-	content: none;
-}
-table {
-	border-collapse: collapse;
-	border-spacing: 0;
-}*/
 
 /********************************************
  * PAGE STRUCTURE
  *******************************************/
+
+html, body {
+	margin: 0;
+	height: 100%;
+	/*overflow: hidden*/
+}
+
+@media only screen and (min-width: 960px) {
+	.instructions-stim-container {
+		text-align: center;
+		width: 800px;
+		margin: 0 auto;
+	}
+
+	#comments {
+		width: 800px;
+		margin: 0 auto;
+	}
+}
+
+@media only screen and (max-width: 960px) {
+	.instructions-stim-container {
+		text-align: center;
+	}
+
+	#comments {
+		margin: 0 auto;
+	}
+}
 
 /* styles for the entire page */
 body {
@@ -75,11 +56,11 @@ body {
 	color: #222;
 }
 #wrapper, #content { 
-	width: 800px; 
-	margin: 0 auto; 
+	/*width: 800px; */
+		margin: 0 auto;
 }
 #header { 
-	margin-top: 30px; 
+	margin-top: 0px;
 }
 #share-text { 
 	float:right; 
@@ -87,6 +68,11 @@ body {
 	font-size: 13px; 
 	color:#888; 
 }
+
+.slide {
+	display: none;
+}
+
 .irb-paragraph {
 	margin-top: 20px;
 	margin-bottom: 20px;
@@ -104,9 +90,7 @@ body {
 #irb h2 {
 	margin-bottom: 30px;
 }
-.slide { 
-	display: none; 
-}
+
 #likert-scale {
 	display: block;
 	margin: 0 auto;
@@ -117,6 +101,93 @@ body {
 	margin-left: 15px; 
 	margin-right: 15px; 
 }
+
+.scale-legend {
+	width: 70px;
+	display: inline-block;
+	padding: 10px;
+}
+
+.scale-buttons {
+	vertical-align: middle;
+}
+
+.instructions-stim-container img {
+	height: 150px;
+	margin-top: 35px;
+	margin-bottom: 35px;
+}
+
+#trials {
+	text-align: center;
+}
+
+#trials img {
+	height: 200px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+#trials .modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 0px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: white;
+}
+
+/* Modal Content */
+#trials .modal-content {
+  background-color: white;
+  margin: auto;
+  padding: 0px;
+  border: 1px solid #888;
+}
+
+#stimulus-form{
+	margin-top: 40px;
+}
+
+#break {
+	text-align: center;
+}
+
+#break img {
+	width: 300px;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.prediction-img-container {
+	text-align: center;
+}
+
+.prediction-img {
+	margin-bottom: 50px;
+	display: inline;
+	height: 200px;
+}
+
+#progress-header {
+	text-align: center;
+	margin-top: 25px;
+	margin-bottom: 50px;
+}
+
+.citations {
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
+
 #comments { 
 	text-align: center; 
 }
@@ -145,9 +216,15 @@ textarea.comments-box, textarea.comments_box {
 	font-weight: bold;
 	margin-bottom: 20px;
 }
+.litw-results-content {
+	width: 90%;
+	margin: 40px auto;
+}
 .litw-results-footer-content {
 	background-color: #EEEEEE;
-	padding: 25px;
+	padding: 40px;
+	width: 90%;
+	margin: 0 auto;
 }
 .litw-results-footer .litw-separator {
 	margin: 0;
@@ -166,7 +243,13 @@ textarea.comments-box, textarea.comments_box {
 	padding: 15px;
 	min-height: 105px;
 }
+
+.litw-study-link .row {
+	margin-right: 0px;
+}
+
 .litw-study-link-img {
+	width: 200px;
 }
 .litw-study-link-description {
 }
@@ -224,6 +307,12 @@ textarea.comments-box, textarea.comments_box {
 	padding: 25px;
 }
 
+.litw-results-questions {
+	border: 1px solid gray;
+	width: 80%;
+}
+
+.litw-results-questions type
 
 /********************************************
  * BUTTONS
@@ -258,7 +347,8 @@ textarea.comments-box, textarea.comments_box {
 #logo { 
 	float: left; 
 	margin-top: 30px; 
-	margin-bottom: 15px; 
+	margin-bottom: 15px;
+	width: 300px;
 }
 .img-logo {
 	height: 75px;
@@ -517,6 +607,10 @@ a:active {
 	font-weight: bold; 
 	color: #3f6379; 
 }
+.bolded-italic {
+	font-weight: bold;
+	font-style: italic;
+}
 .hidden {
 	display: none;
 }
@@ -533,3 +627,18 @@ a:active {
 	text-align: center;
 }
 
+
+/** OVERWRITING JSPYCH STUFF **/
+
+.jspsych-display-element {
+	width: 90%;
+	margin: 0px auto 50px auto;
+}
+
+#jspsych-progressbar-outer {
+	background-color: #dedede;
+	border-radius: 5px;
+	padding: 1px;
+	margin: auto;
+	width: 95%;
+}

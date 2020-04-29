@@ -1,6 +1,7 @@
 *.log
 .DS_Store
 .idea
+__pycache__
 api/db/template.db
 api/src/vendor/*
 node_modules/
