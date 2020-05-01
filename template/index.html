@@ -33,16 +33,21 @@
     it via webpackcaused other stylesheets linked to here (like litw-styles.css)
     to be overridden. There's probably a way to do this within webpack, but need
     to investigate further. -->
-    <link href="js/bootstrap.min-3_3_7.css" rel="stylesheet" type="text/css">
+    <link href="css/bootstrap.min-3_3_7.css" rel="stylesheet" type="text/css">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css" rel="stylesheet">
 
     <!-- if using form autocompletion, include a jQueryUI css template -->
-    <link href="js/jquery-ui-1_12_1.css" rel="stylesheet" type="text/css">
+    <link href="css/jquery-ui-1_12_1.css" rel="stylesheet" type="text/css">
 
     <!-- jsPsych styles -->
     <link href="js/jsPsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css">
 
     <!-- LITW base styles -->
     <link href="css/litw-styles.css" rel="stylesheet" type="text/css">
+
+    <!-- study_client-specific styles -->
+    <link type="text/css" href="//code.cloudcms.com/alpaca/1.5.23/bootstrap/alpaca.min.css" rel="stylesheet" />
+
 </head>
 
 <body class="jspsych-display-element">
@@ -100,10 +105,8 @@
 <script src="js/litw/litw.utils.0.1.js"></script>
 <script src="js/litw/litw.results.0.1.js"></script>
 <script src="js/litw/litw.share.0.1.js"></script>
-<script src="js/litw/litw.forms.0.1.js"></script>
 <script src="js/litw/litw.data.1.0.0.js"></script>
 <script src="js/litw/litw.tracking.noapi.0.1.js"></script>
-<script src="js/litw/litw.comments.0.1.js"></script>
 <script src="js/litw/litw.locale.0.1.js"></script>
 
 <!-- jspsych -->
@@ -115,6 +118,8 @@
 <script src="dist/bundle.min.js?ver=1.0.0"></script>
 <script src="js/jquery.i18n.js" type="text/javascript"></script>
 <script src="js/jquery.i18n.messagestore.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/handlebars.js"></script>
+<script type="text/javascript" src="js/alpaca.min.js"></script>
 
 </body>
 </html>
