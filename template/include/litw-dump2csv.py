@@ -23,6 +23,7 @@ def read_litw_data_dump(filename):
                 db_id, json_data, timestamp = row
                 clean_data = clean_json_data(json_data)
                 data = json.loads(clean_data)
+                data['timestamp'] = timestamp
                 all_data.append(data)
             except json.JSONDecodeError:
                 print('INFO: Could not process the JSON bellow:')
