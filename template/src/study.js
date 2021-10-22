@@ -68,7 +68,7 @@ module.exports = (function() {
             display_element: $("#demographics"),
             name: "demographics",
             finish: function(){
-            	let dem_data = $('#demographicsForm').alpaca().getValue();
+            	var dem_data = $('#demographicsForm').alpaca().getValue();
 				dem_data['time_elapsed'] = getSlideTime();
             	jsPsych.data.addProperties({demographics:dem_data});
             	LITW.data.submitDemographics(dem_data);
@@ -216,7 +216,7 @@ module.exports = (function() {
 				display_element: $("#comments"),
 				name: "comments",
 				finish: function(){
-					let comments = $('#commentsForm').alpaca().getValue();
+					var comments = $('#commentsForm').alpaca().getValue();
 					if (Object.keys(comments).length > 0) {
 						comments['time_elapsed'] = getSlideTime();
 						LITW.data.submitComments(comments);
@@ -227,7 +227,7 @@ module.exports = (function() {
 	}
 
     function getSlideTime() {
-		let data_size = jsPsych.data.getData().length;
+		var data_size = jsPsych.data.getData().length;
 		if( data_size > 0 ) {
 			return jsPsych.totalTime() - jsPsych.data.getLastTrialData().time_elapsed;
 		} else {
