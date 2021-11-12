@@ -1,5 +1,5 @@
 /*************************************************************
- * litw.data.1.0.0js
+ * litw.data.1.1.0js
  *
  * Contains functions for writing LITW Study data operations
  * using the LITW REST API
@@ -96,10 +96,9 @@
         _submit = function(obj_data, finalAttempt) {
             //console.log(JSON.stringify(obj_data));
             $.ajax({
-                url: 'data',
-                type: 'PUT',
+                url: 'include/save_data.php',
+                type: 'POST',
                 data: JSON.stringify(obj_data),
-                contentType: 'application/json'
             }).fail(function(e) {
                 if (!finalAttempt) {
                     _submit(obj_data, true);
