@@ -73,7 +73,7 @@
             if (!params._isInitialized) {
                 initialize();
             }
-            data.user_id = getParticipantId();
+            data.uuid = getParticipantId();
             data.data_type = dataType;
             _submit(data, false);
         },

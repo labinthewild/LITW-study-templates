@@ -1,4 +1,4 @@
-# LabintheWild Study Templates
+# LabintheWild Study Templates V2
 
 This repository bundles together the LabintheWild template study and instructions to guide new developers to create their own online studies.
 
@@ -12,7 +12,7 @@ Please consider submitting ideas and code to improve either the tutorial or this
   * *DOCS*: some documentation and howto guides.
   * *TEMPLATE*: our first beloved template presents choices of cats to present your future kitty.
   
-How are the *template* folders organized?
+How is the *template* folder organized?
 
   * **css**: Style sheet files;
   * **img**: All sorts of images used in your study;
