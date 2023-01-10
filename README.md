@@ -1,10 +1,13 @@
-# LabintheWild Study Templates V2
+!!! This project is **under heavy refactoring** to be soon a cool and modern Node.js project.
+!!! Soon enough (begining of 2023) we should start shipping stable versions and have a `main` branch for less adventurous creators.
 
-This repository bundles together the LabintheWild template study and instructions to guide new developers to create their own online studies.
+# LabintheWild Study Templates - V2
 
-This project is meant to help people with basic web development skills -- meaning HTML, CSS and JavaScript -- to bootstrap a LabintheWild study. Using it is not at all mandatory to be part of our researchers' community as a LabintheWild study is fundamentally implemented as a web application. If you have your own choices of technology you're free to use them as long as the study comply with some [design guidelines presented in our tutorial](http://tutorial.labinthewild.org). 
+This repository bundles together LabintheWild study templates and instructions to support developers with creating their own online studies.
 
-Please consider submitting ideas and code to improve either the tutorial or this templates. This can be done by [submitting an issue](https://bitbucket.org/LITW-core/litw-template-package/issues), creating a pull request for an open issue, or emailing us at: *tutorial [at] labinthewild.org*.
+This project is meant to help people with basic web development skills -- meaning HTML, CSS, JavaScript, and Node -- to bootstrap a LabintheWild study. Using it is not at all mandatory to be part of our researchers' community as a LabintheWild study is fundamentally implemented as a web application. If you have your own choices of technology you're free to use them as long as the study comply with some [design guidelines presented in our tutorial](http://tutorial.labinthewild.org). 
+
+Please consider submitting ideas and code to improve either the tutorial or this templates. This can be done by [submitting an issue](https://github.com/labinthewild/LITW-study-templates/issues), creating a pull request for an open issue, or emailing us at: *tech [at] labinthewild.org*
 
 
 ## Project structure
