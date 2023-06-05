@@ -6,8 +6,9 @@
     "locale": "en",
     "message-documentation": "qqq"
   },
-  "litw-template-title": "Which Cat?",
-  "litw-irb-header": "Welcome to the LabintheWild 2.0 Demo Study!",
+  "litw-template-title": "The Vax Project",
+  "litw-template-loading": "Loading...",
+  "litw-irb-header": "Welcome to the LabintheWild VAX Study!",
   "litw-irb-subheader-1": "You're about to take a test on LabintheWild. Your contribution to our research allows us to learn more about cognitive differences around the world. The results from your test will also tell you something about yourself!",
   "litw-irb-subheader-2": "Please read the following information carefully before proceeding.",
   "litw-irb-body-1-p1": "Why we are doing this research?",
@@ -78,5 +79,17 @@
   "litw-instruct-body-2-p1": "Your job is to decide which picture you identify with most. You'll do this by pressing 1 on your keyboard to select the left image and 2 to select the right image. You may also use your mouse to select an image.",
   "litw-instruct-body-2-p2": "After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!",
   "litw-instruct-body-2-p1-touch": "Your job is to decide which picture you identify with most. You'll do this by tapping on the image you identify with to select it.",
-  "litw-instruct-body-2-p2-touch": "After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!"
+  "litw-instruct-body-2-p2-touch": "After your choice, we will run some hyper-complicated algorithms to predict your future. Let's give it a try!",
+  "litw-results-header": "Here are your results!",
+  "litw-results-explanation": "Here is why you got those results...",
+  "litw-results-citation1": "You can read more about this different mindsets and global trends HERE...",
+  "litw-more-title": "If you enjoyed this study, there's more!",
+  "litw-more-step1": "Visit and follow us on Facebook to learn about new studies:",
+  "litw-more-step2": "Share this study with your friends!",
+  "litw-more-step3": "And consider participating in some of our other studies:",
+  "litw-more-participate": "Participate now!",
+  "litw-more-study1-slogan": "How well can AI understand your speech?",
+  "litw-more-study1-description": "Find out how well AI can understand your speech by reading out loud a few words and sentences! The test takes around 7 minutes.",
+  "litw-more-study2-slogan": "Learn to be a better writer!",
+  "litw-more-study2-description": "Can you identify the writing strategies of experts? Improve your reading and writing while comparing yourself to experts in this 10 minute study!"
 }

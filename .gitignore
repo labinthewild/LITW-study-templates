@@ -5,4 +5,4 @@ __pycache__
 api/db/template.db
 api/src/vendor/*
 node_modules/
-template/include/config.php
+src/include/config.php

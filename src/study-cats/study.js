@@ -6,7 +6,7 @@
  *
  * Author: LITW Team.
  *
- * © Copyright 2017-2020 LabintheWild.
+ * © Copyright 2017-2023 LabintheWild.
  * For questions about this file and permission to use
  * the code, contact us at info@labinthewild.org
  *************************************************************/
@@ -24,8 +24,8 @@ var resultsTemplate = require("../templates/results.html");
 var progressTemplate = require("../templates/progress.html");
 var commentsTemplate = require("../templates/comments.html");
 var i18n = require("../js/i18n");
-require("./jspsych-display-info");
-require("./jspsych-display-slide");
+require("../js/litw/jspsych-display-info");
+require("../js/litw/jspsych-display-slide");
 
 module.exports = (function() {
 
@@ -309,8 +309,8 @@ module.exports = (function() {
 
 		$.i18n().load(
 			{
-				'en': 'src/i18n/en.json',
-				'pt-br': 'src/i18n/pt-br.json'
+				'en': 'study-base/i18n/en.json',
+				'pt-br': 'study-base/i18n/pt-br.json'
 			}
 		).done(
 			function(){

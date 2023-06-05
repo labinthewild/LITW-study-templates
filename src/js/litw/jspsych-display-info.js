@@ -11,9 +11,9 @@
  * the code, contact us at info@labinthewild.org
  *************************************************************/
 
-var instructionsTemplate = require("../templates/instructions.html");
-var preTrialBreakTemplate = require("../templates/preTrialBreak.html");
-var midTrialBreakTemplate = require("../templates/midTrialBreak.html");
+var instructionsTemplate = require("../../templates/instructions.html");
+var preTrialBreakTemplate = require("../../templates/preTrialBreak.html");
+var midTrialBreakTemplate = require("../../templates/midTrialBreak.html");
 
 module.exports = jsPsych.plugins["display-info"] = (function() {
 

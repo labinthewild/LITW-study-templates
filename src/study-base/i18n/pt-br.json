@@ -7,6 +7,7 @@
         "message-documentation": "qqq"
     },
     "litw-template-title": "Qual o seu gato?",
+    "litw-template-loading": "Carregando...",
     "litw-irb-header": "Bem vinda(o) ao estudo de demonstração do LabintheWild!",
     "litw-irb-subheader-1": "You're about to take a test on LabintheWild. Your contribution to our research allows us to learn more about cognitive differences around the world. The results from your test will also tell you something about yourself!",
     "litw-irb-subheader-2": "Please read the following information carefully before proceeding.",
