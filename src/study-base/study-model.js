@@ -1,14 +1,12 @@
 /*************************************************************
- * study.js
- *
  * Main code, responsible for configuring the steps and their
  * actions.
  *
  * Author: LITW Team.
  *
- * © Copyright 2017-2022 LabintheWild.
+ * © Copyright 2017-2023 LabintheWild.
  * For questions about this file and permission to use
- * the code, contact us at info@labinthewild.org
+ * the code, contact us at tech@labinthewild.org
  *************************************************************/
 
 // load webpack modules
@@ -30,7 +28,7 @@ require("../js/litw/jspsych-display-slide");
 module.exports = (function(exports) {
 	var timeline = [],
 	params = {
-		preLoad: ["img/btn-next.png","img/btn-next-active.png","img/ajax-loader.gif"],
+		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
 	};
 
 	function configureStudy() {
@@ -179,7 +177,7 @@ module.exports = (function(exports) {
 		// determine and set the study language
 		$.i18n().locale = 'en'; //LITW.locale.getLocale();
 		$.i18n().load({
-			'en': 'study-base/i18n/en.json',
+			'en': 'i18n/en.json',
 		}).done( function(){
 			$('head').i18n();
 			$('body').i18n();

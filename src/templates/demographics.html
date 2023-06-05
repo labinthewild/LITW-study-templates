@@ -29,13 +29,13 @@
         let languages = {};
         let religions = {};
         //TODO: load based on language
-        $.getJSON('templates/i18n/countries-en.json', function (data) {
+        $.getJSON('../templates/i18n/countries-en.json', function (data) {
             countries = data;
         }).done(async function () {
-            $.getJSON('templates/i18n/lang-en.json', function (data) {
+            $.getJSON('../templates/i18n/lang-en.json', function (data) {
                 languages = data;
             }).done(async function () {
-                $.getJSON('templates/i18n/religions-en.json', function (data) {
+                $.getJSON('../templates/i18n/religions-en.json', function (data) {
                     religions = data;
                 }).done(function () {
                     $("#demographicsForm").alpaca({

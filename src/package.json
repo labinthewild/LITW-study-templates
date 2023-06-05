@@ -14,10 +14,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "webpack",
+    "build-base": "webpack --config study-base/webpack.config.js",
     "develop": "webpack --watch",
-    "devserver-php": "php -S localhost:8080",
-    "devserver-python": "python3 -m http.server"
+    "devserver": "python3 -m http.server"
   },
   "repository": {
     "type": "git",
