@@ -10,13 +10,14 @@
     "jquery": "3.6.0",
     "jquery-ui-bundle": "^1.11.4",
     "popper.js": "^1.16.1",
-    "webpack": "^5.77.0"
+    "webpack": "^5.77.0",
+    "webpack-dev-server": "^4.15.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-base": "webpack --config study-base/webpack.config.js",
     "develop": "webpack --watch",
-    "devserver": "python3 -m http.server"
+    "devserver": "webpack serve --config study-base/webpack.config.js --mode development --static-directory ."
   },
   "repository": {
     "type": "git",

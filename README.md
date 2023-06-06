@@ -13,16 +13,21 @@ Please consider submitting ideas and code to improve either the tutorial or this
 ## Project structure
 
   * *DOCS*: some documentation and howto guides.
-  * *TEMPLATE*: our first beloved template presents choices of cats to present your future kitty.
+  * *SRC*: reusable resources to build a LabintheWild study
   
-How is the *template* folder organized?
+How is the *SRC* folder organized?
 
   * **css**: Style sheet files;
+  * **dist**: Where built studies (JS bundles) will be saved;
   * **img**: All sorts of images used in your study;
-  * **include**: Configuration files;
-  * **js**: External JavaScripts -- preferably only 'non-bundleable' ones (as we use Webpack to bundle external dependencies);
-  * **src**: Your code (mainly JavaScripts now).
-  * **templates**: HTML templates for the study pages -- [we use the Handlebars.js library](http://handlebarsjs.com/) to handle this right now.
+  * **include**: Configuration and scripting files (mainly to deal with deployment and datasets);
+  * **js**: JS files that we chose not to install through NPM (for example, the LITW utility modules);
+  * **templates**: HTML templates for the study pages -- [we use the Handlebars.js library](http://handlebarsjs.com/) to handle these.
+
+Moreover, we have added some studies to get you inspired:
+
+  * **STUDY-CATS**: our beloved demo study presents choices of cats to help your find your future kitty.
+  * **STUDY-BASE**: the code you will likely want to use as the baseline of a new study.
 
 
 ## What now?
@@ -31,7 +36,7 @@ Good to know that you got to this point. =)
 
 Please visit the docs folder and learn:
 
-  * [How to install and run this template?](docs/1-Installation.md)
+  * [How to install and run these templates?](docs/1-Installation.md)
   * [What's the current 'code architecture'?](docs/2-CodeExecutionOverview.md)
   * [How to change a page's text?](docs/3-ChangePageText.md)
   * [How to create a new study page?](docs/4-AddNewPage.md)

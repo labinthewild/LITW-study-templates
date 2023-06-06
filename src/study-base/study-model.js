@@ -100,17 +100,6 @@ module.exports = (function(exports) {
 		}
 	}
 
-	function submitData() {
-		LITW.data.submitStudyData(jsPsych.data.getLastTrialData());
-	}
-
-	function startStudy() {
-		jsPsych.init({
-		  timeline: timeline,
-		  on_finish: showResults
-		});
-	}
-
 	function showResults(showFooter = false, test = false) {
 		//TODO: we recommend creating a separate function that do necessary calculations.
 		let results = {};
@@ -158,6 +147,13 @@ module.exports = (function(exports) {
 		});
 	}
 
+	function startStudy() {
+		jsPsych.init({
+		  timeline: timeline,
+		  on_finish: showResults
+		});
+	}
+
 	function initStudy() {
 		// generate unique participant id and geolocate participant
 		LITW.data.initialize();
@@ -172,52 +168,13 @@ module.exports = (function(exports) {
 		//TODO This methods should be something like act1().then.act2().then...
 		//... it is close enough to that... maybe the translation need to be encapsulated next.
 		// get initial data from database (maybe needed for the results page!?)
-		readSummaryData();
-
-		// determine and set the study language
-		$.i18n().locale = 'en'; //LITW.locale.getLocale();
-		$.i18n().load({
-			'en': 'i18n/en.json',
-		}).done( function(){
-			$('head').i18n();
-			$('body').i18n();
-
-			LITW.utils.showSlide("img-loading");
-			//start the study when resources are preloaded
-			jsPsych.pluginAPI.preloadImages( params.preLoad,
-				function() {
-					initStudy();
-					configureStudy();
-					startStudy();
-				},
-
-				// update loading indicator
-				function(numLoaded) {
-					$("#img-loading").html(loadingTemplate({
-						msg: $.i18n("litw-template-loading"),
-						numLoaded: numLoaded,
-						total: params.preLoad.length
-					}));
-				}
-			);
-		});
-	}
-
-
-
-	// when the page is loaded, start the study!
-	$(document).ready(function() {
-		// get initial data from database (nmaybe needed for the results page!?)
-		readSummaryData();
-
-		// detect touch devices
-		window.litwWithTouch = ("ontouchstart" in window);
+		//readSummaryData();
 
 		// determine and set the study language
 		$.i18n().locale = LITW.locale.getLocale();
 		var languages = {
-			'en': 'study-base/i18n/en.json?v=1.0',
-			'pt': 'study-base/i18n/pt-br.json?v=1.0',
+			'en': './i18n/en.json?v=1.0',
+			'pt': './i18n/pt-br.json?v=1.0',
 		};
 		var language = LITW.locale.getLocale().substring(0,2);
 		var toLoad = {};
@@ -227,12 +184,36 @@ module.exports = (function(exports) {
 			toLoad['en'] = languages['en'];
 		}
 		$.i18n().load(toLoad).done(
-			function(){
+			function() {
 				$('head').i18n();
 				$('body').i18n();
-				startExperiment();
-			}
-		);
+
+				LITW.utils.showSlide("img-loading");
+				//start the study when resources are preloaded
+				jsPsych.pluginAPI.preloadImages(params.preLoad,
+					function () {
+						initStudy();
+						configureStudy();
+						startStudy();
+					},
+
+					// update loading indicator
+					function (numLoaded) {
+						$("#img-loading").html(loadingTemplate({
+							msg: $.i18n("litw-template-loading"),
+							numLoaded: numLoaded,
+							total: params.preLoad.length
+						}));
+					}
+				);
+			});
+	}
+
+
+
+	// when the page is loaded, start the study!
+	$(document).ready(function() {
+		startExperiment();
 	});
 	exports.study = {};
 	exports.study.params = params

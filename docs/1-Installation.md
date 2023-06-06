@@ -1,36 +1,34 @@
 # Installation 
 
-This page aims to help you getting the template running on your development machine.
+This page aims to help you to get the template running on your machine.
 
 ## Requirements
 
 You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM. 
 
-You will also need to have PHP 7 installed to run it. (Make sure you have the 'PHP-curl' extension installed and enabled.)
-
-Finally, you'll need a MySQL 5.7 or older (mainly because this is the first version that supports JSON fields).
-
-This bundle has been tested on OSX 10.11.1 and Ubuntu 17.04.
+This bundle has been tested on Ubuntu 23.04.
 
 
 ## Steps
 
 Clone this repository to a location where you'd like the code to live:
 ```
-git clone https://bitbucket.org/LITW-core/litw-template-package.git
+git clone git@github.com:labinthewild/LITW-study-templates.git 
 ```
-Navigate to the `template` directory:
+Navigate to the `src` directory:
 ```
-cd litw-template-package/template
+cd litw-template-package/src
 ```
 Install dependencies:
 ```
 npm install
 ```
-Build the project and start the template's development server:
+Start the dev-server:
 ```
-npm run build
+npm run devserver
 ```
+
+You should now to be able to ope the local server where all (pre-built) studies in the package are available to use.
 
 ## Loading the template in a browser
 
