@@ -2,7 +2,7 @@
 
 With this small overview we want you to meet the main concepts and files related to a page in the template.
 
-![template_coding_overview](img/template-coding-overview.jpg "Template coding overview")
+![template_coding_overview](img/template-coding-overview.jpg "Template coding overview: in the center the study manager box, which manages the index HTML page to show pages based on a pre-configure timeline.")
 
 In this diagram you can see the following entities:
 

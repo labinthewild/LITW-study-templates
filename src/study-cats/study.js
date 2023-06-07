@@ -23,7 +23,6 @@ var loadingTemplate = require("../templates/loading.html");
 var resultsTemplate = require("../templates/results.html");
 var progressTemplate = require("../templates/progress.html");
 var commentsTemplate = require("../templates/comments.html");
-var i18n = require("../js/i18n");
 require("../js/litw/jspsych-display-info");
 require("../js/litw/jspsych-display-slide");
 

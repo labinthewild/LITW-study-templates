@@ -12,13 +12,27 @@
  * @licence MIT License
  */
 
-( function ( $, window, undefined ) {
+( function ( $ ) {
 	'use strict';
 
 	var MessageStore = function () {
 		this.messages = {};
 		this.sources = {};
 	};
+
+	function jsonMessageLoader( url ) {
+		var deferred = $.Deferred();
+
+		$.getJSON( url )
+			.done( deferred.resolve )
+			.fail( function ( jqxhr, settings, exception ) {
+				$.i18n.log( 'Error in loading messages from ' + url + ' Exception: ' + exception );
+				// Ignore 404 exception, because we are handling fallabacks explicitly
+				deferred.resolve();
+			} );
+
+		return deferred.promise();
+	}
 
 	/**
 	 * See https://github.com/wikimedia/jquery.i18n/wiki/Specification#wiki-Message_File_Loading
@@ -47,19 +61,16 @@
 		 */
 		load: function ( source, locale ) {
 			var key = null,
-				deferred = null,
 				deferreds = [],
 				messageStore = this;
 
 			if ( typeof source === 'string' ) {
 				// This is a URL to the messages file.
 				$.i18n.log( 'Loading messages from: ' + source );
-				deferred = jsonMessageLoader( source )
-					.done( function ( localization ) {
-						messageStore.set( locale, localization );
+				return jsonMessageLoader( source )
+					.then( function ( localization ) {
+						return messageStore.load( localization, locale );
 					} );
-
-				return deferred.promise();
 			}
 
 			if ( locale ) {
@@ -108,19 +119,5 @@
 		}
 	};
 
-	function jsonMessageLoader( url ) {
-		var deferred = $.Deferred();
-
-		$.getJSON( url )
-			.done( deferred.resolve )
-			.fail( function ( jqxhr, settings, exception ) {
-				$.i18n.log( 'Error in loading messages from ' + url + ' Exception: ' + exception );
-				// Ignore 404 exception, because we are handling fallabacks explicitly
-				deferred.resolve();
-			} );
-
-		return deferred.promise();
-	}
-
 	$.extend( $.i18n.messageStore, new MessageStore() );
-}( jQuery, window ) );
+}( jQuery ) );

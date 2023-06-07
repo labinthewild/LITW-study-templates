@@ -20,7 +20,6 @@ var loadingTemplate = require("../templates/loading.html");
 var resultsTemplate = require("../templates/results.html");
 var resultsFooter = require("../templates/results-footer.html");
 var commentsTemplate = require("../templates/comments.html");
-var i18n = require("../js/i18n");
 require("../js/litw/jspsych-display-info");
 require("../js/litw/jspsych-display-slide");
 

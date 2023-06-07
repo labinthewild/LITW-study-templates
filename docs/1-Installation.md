@@ -24,6 +24,11 @@ Install dependencies:
 ```
 npm install
 ```
+Build the study (throughout this tutorial we will only use the `study-base` one:
+```
+npm run build-base
+```
+
 Start the dev-server:
 ```
 npm run devserver
