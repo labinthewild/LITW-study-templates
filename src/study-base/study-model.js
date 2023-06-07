@@ -19,7 +19,6 @@ var instructionsTemplate = require("../templates/instructions.html");
 var loadingTemplate = require("../templates/loading.html");
 var resultsTemplate = require("../templates/results.html");
 var resultsFooter = require("../templates/results-footer.html");
-var progressTemplate = require("../templates/progress.html");
 var commentsTemplate = require("../templates/comments.html");
 var i18n = require("../js/i18n");
 require("../js/litw/jspsych-display-info");
@@ -176,6 +175,7 @@ module.exports = (function(exports) {
 			'en': './i18n/en.json?v=1.0',
 			'pt': './i18n/pt-br.json?v=1.0',
 		};
+		//TODO needs to be a little smarter than this when serving specific language versions, like pt-BR!
 		var language = LITW.locale.getLocale().substring(0,2);
 		var toLoad = {};
 		if(language in languages) {

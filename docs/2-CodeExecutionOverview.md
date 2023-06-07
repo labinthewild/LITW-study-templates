@@ -13,8 +13,10 @@ In this diagram you can see the following entities:
   * **API:** This is a module created to support simple data management. In general, all you need to do is call a function that will save JSON objects.
    
 Is it clearer now?
+(*If not, please [start a Q&A](https://github.com/labinthewild/LITW-study-templates/discussions/categories/q-a) thread!*)
 
-How about implementing something new in the template to get a sense of how this should be done? We've created the following HowTo tasks to warm you up:
+How about implementing something new in the template to get a sense of how this should be done? 
+We've created the following HowTo tasks to warm you up:
 
   * [How to change a page's text?](3-ChangePageText.md)
   * [How to create a new study page?](4-AddNewPage.md)
