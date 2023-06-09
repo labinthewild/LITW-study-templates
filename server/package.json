@@ -1,0 +1,14 @@
+{
+  "name": "litw-study-server",
+  "version": "1.0.0",
+  "description": "A lean HTTP environment that serves the LabintheWild studies.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "The LITW Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
