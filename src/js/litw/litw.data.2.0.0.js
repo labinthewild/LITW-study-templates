@@ -4,7 +4,7 @@
  *
  * Author: The LITW crew
  *
- * © Copyright 2022 LabintheWild_TM
+ * © Copyright 2023 LabintheWild_TM
  *
  * For questions about our code: tech@labinthewild.org
  *************************************************************/
@@ -55,7 +55,9 @@
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(
             /[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
         },
-
+        submitCheckpoint = function(checkpoint_name) {
+            submitData({description: checkpoint_name},"litw:checkpoint");
+        },
         submitComments = function(data) {
             submitData(data,"study_client:comments")
         },
@@ -94,6 +96,7 @@
             $.ajax({
                 url: DATA_URL,
                 type: 'POST',
+                contentType: "application/json",
                 data: JSON.stringify(obj_data),
             }).fail(function(e) {
                 if (!finalAttempt) {
@@ -105,6 +108,7 @@
     /**** PUBLIC METHODS ****/
     exports.data = {};
     exports.data.submitComments = submitComments;
+    exports.data.submitCheckpoint = submitCheckpoint;
     exports.data.submitDemographics = submitDemographics;
     exports.data.submitStudyData = submitStudyData;
     exports.data.submitData = submitData;

@@ -39,7 +39,7 @@ module.exports = (function() {
 	};
 
 	function showIRB(afterIRBFunction) {
-		LITW.tracking.recordCheckpoint("irb");
+		LITW.data.submitCheckpoint("irb");
 		$("#irb").html(irbTemplate());
 		$("#irb").i18n();
 		LITW.utils.showSlide("irb");
@@ -100,7 +100,7 @@ module.exports = (function() {
 		// 			.show();
 		//
 		// 			LITW.utils.showSlide("trials");
-		// 			LITW.tracking.recordCheckpoint("practice-" + (index + 1));
+		// 			LITW.data.submitCheckpoint("practice-" + (index + 1));
 		// 		}
 		// 	});
 		//
@@ -122,7 +122,7 @@ module.exports = (function() {
 		// 		params.currentProgress = 0;
 		// 		$("#progress-header").hide();
 		// 		LITW.utils.showSlide("break");
-		// 		LITW.tracking.recordCheckpoint("pre-trial break");
+		// 		LITW.data.submitCheckpoint("pre-trial break");
 		// 	}
 		// })
 		// timeline.push({
@@ -148,7 +148,7 @@ module.exports = (function() {
 		// 			.show();
 		//
 		// 			LITW.utils.showSlide("trials");
-		// 			LITW.tracking.recordCheckpoint("trials-1-" + (index + 1));
+		// 			LITW.data.submitCheckpoint("trials-1-" + (index + 1));
 		// 		}
 		// 	});
 		//
@@ -169,7 +169,7 @@ module.exports = (function() {
 		// 	func: function() {
 		// 		$("#progress-header").hide();
 		// 		LITW.utils.showSlide("break");
-		// 		LITW.tracking.recordCheckpoint("mid-trial break");
+		// 		LITW.data.submitCheckpoint("mid-trial break");
 		// 	}
 		// });
 		// timeline.push({
@@ -196,7 +196,7 @@ module.exports = (function() {
 		// 			.show();
 		//
 		// 			LITW.utils.showSlide("trials");
-		// 			LITW.tracking.recordCheckpoint("trials-2-" + (index + 1));
+		// 			LITW.data.submitCheckpoint("trials-2-" + (index + 1));
 		// 		}
 		// 	});
 		//

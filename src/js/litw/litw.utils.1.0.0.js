@@ -3,18 +3,17 @@
  *
  * Dependencies: jQuery
  *
- * Author: The LITW Team
+ * Author: The LITW crew
  *
- * © Copyright 2023 LabintheWild
- * For questions about this file and permission to use
- * the code, contact us at info@labinthewild.org
- *************************************************************/
+ * © Copyright 2023 LabintheWild_TM
+ *
+ * For questions about our code: tech@labinthewild.org
+ **************************************************************/
 
-//module.exports = exports = (function( exports ) {
 (function (exports) {
     "use strict";
 
-    var version = "0.2",
+    var version = "1.0.0",
         defaultProperties = {
             // the next button goes by a few different names
             nextBtnSelectors: "#next_button, #next-button, #btn-next-page, .next-button, .btn-next-page",
@@ -73,7 +72,7 @@
 
             if (!$(properties.ajaxWorkingSelectors).children("img").length) {
                 $(properties.ajaxWorkingSelectors)
-                    .html("<img src='http://static.labinthewild.org/images/ajax-loader.gif' />")
+                    .html("<img src='/img/ajax-loader.gif' />")
                     .hide();
             }
 
@@ -238,7 +237,7 @@
             for (let key of paramsURL.keys()) {
                 result[key] = paramsURL.get(key);
             }
-            console.log('URL params: ' + JSON.stringify(result));
+            //console.log('URL params: ' + JSON.stringify(result));
             return result;
         };
 

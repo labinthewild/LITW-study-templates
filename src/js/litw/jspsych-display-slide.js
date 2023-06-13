@@ -3,11 +3,12 @@
  *
  * A jsPsych plugin that displays slides based on their name.
  *
+ * Author: The LITW crew
  *
- * © Copyright 2021 LabintheWild
- * For questions about this file and permission to use
- * the code, contact us at info@labinthewild.org
- *************************************************************/
+ * © Copyright 2023 LabintheWild_TM
+ *
+ * For questions about our code: tech@labinthewild.org
+ **************************************************************/
 
 module.exports = jsPsych.plugins["display-slide"] = (function() {
 
@@ -39,7 +40,7 @@ module.exports = jsPsych.plugins["display-slide"] = (function() {
             $('#btn-next-page').hide();
         }
         LITW.utils.showSlide(display_element[0].id);
-        LITW.tracking.recordCheckpoint(display_element[0].id);
+        LITW.data.submitCheckpoint(display_element[0].id);
     };
 
     return plugin;
