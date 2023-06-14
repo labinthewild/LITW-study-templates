@@ -12,10 +12,10 @@ var config_temp = {
     production: {
         api_url: "api.labinthewild.org",
         auth_endpoint: "/auth/study",
-        studies_endpoint: "/studies/",
-        study_endpoint: "/studies/{ID}/",
-        data_endpoint: "/studies/{ID}/data/",
-        geoip_endpoint: "/services/geoip/",
+        studies_endpoint: "/studies",
+        study_endpoint: "/studies/{ID}",
+        data_endpoint: "/studies/{ID}/data",
+        geoip_endpoint: "/services/geoip",
         auth_user: "",
         auth_key: "",
     }
