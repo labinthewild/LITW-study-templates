@@ -1,4 +1,5 @@
 const config = require('./config');
+const api = require('./api');
 const express = require('express');
 const app = express();
 
@@ -25,6 +26,14 @@ app.post('/service/data/', (req, res) => {
   }
 });
 
-app.listen(config.port, () => {
+let server = app.listen(config.port, () => {
   console.log(`LabintheWild studies server listening on port ${config.port} - ENV: ${config.env}`);
+  if(config.env == 'production') {
+    let result = api.init();
+    if(!result) {
+      server.close(() => {
+        console.log('Failed to authenticate with API.');
+      });
+    }
+  }
 })
