@@ -36,7 +36,7 @@ module.exports = (function(exports) {
             type: "display-slide",
             template: irbTemplate,
             display_element: $("#irb"),
-            show_next: false
+            display_next_button: false
         });
 
 		// // DEMOGRAPHICS

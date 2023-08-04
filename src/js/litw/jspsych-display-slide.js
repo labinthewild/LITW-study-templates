@@ -35,7 +35,7 @@ module.exports = jsPsych.plugins["display-slide"] = (function() {
         }, {submitKeys: []});
 
         //TODO Is there a better way to do this?
-        if(trial.show_next === false){
+        if(trial.display_next_button === false){
             $('#btn-next-page').hide();
         }
         LITW.utils.showSlide(display_element[0].id);

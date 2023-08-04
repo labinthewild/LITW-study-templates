@@ -73,7 +73,7 @@
 
             if (!$(properties.ajaxWorkingSelectors).children("img").length) {
                 $(properties.ajaxWorkingSelectors)
-                    .html("<img src='http://static.labinthewild.org/images/ajax-loader.gif' />")
+                    .html("<img src='../img/ajax-loader.gif' />")
                     .hide();
             }
 
