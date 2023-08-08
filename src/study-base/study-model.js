@@ -36,7 +36,13 @@ module.exports = (function(exports) {
             type: "display-slide",
             template: irbTemplate,
             display_element: $("#irb"),
-            display_next_button: false
+            display_next_button: false,
+            finish: function(){
+            	let irb_data = {
+					time_elapsed: getSlideTime()
+				}
+            	LITW.data.submitConsent(irb_data);
+            }
         });
 
 		// // DEMOGRAPHICS

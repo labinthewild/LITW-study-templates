@@ -19,13 +19,13 @@
 	var version = '2.0.0';
 	const tracking_data = {
 		description: "",
-		type: ""
+		tracking_type: ""
 	},
 
 	submitData = function (type, description) {
 		let data = JSON.parse(JSON.stringify(tracking_data));
 		data.description = description;
-		data.type = type;
+		data.tracking_type = type;
 		LITW.data.submitData(data, "litw:tracking");
 	},
 

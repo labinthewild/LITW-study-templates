@@ -61,13 +61,16 @@
         },
 
         submitComments = function(data) {
-            submitData(data,"study_client:comments")
+            submitData(data,"study:comments")
         },
         submitDemographics = function(data) {
-            submitData(data,"study_client:demographics")
+            submitData(data,"study:demographics")
+        },
+        submitConsent = function(data) {
+            submitData(data,"study:informed_consent")
         },
         submitStudyData = function(data) {
-            submitData(data,"study_client:data")
+            submitData(data,"study:data")
         },
         submitData = function(data, dataType) {
             if (!params._isInitialized) {
@@ -111,6 +114,7 @@
     exports.data = {};
     exports.data.submitComments = submitComments;
     exports.data.submitDemographics = submitDemographics;
+    exports.data.submitConsent = submitConsent;
     exports.data.submitStudyData = submitStudyData;
     exports.data.submitData = submitData;
     exports.data.initialize = initialize;
