@@ -24,7 +24,21 @@
             ipCity: "not_fetched_or_initialized",
             userAgent: "not_fetched_or_initialized"
         },
-
+        getParticipantId = function() {
+            return params.participantId;
+        },
+        getCountry = function() {
+            return params.ipCountry;
+        },
+        getCity = function() {
+            return params.ipCity;
+        },
+        isInitialized = function() {
+            return params._isInitialized;
+        },
+        getURLparams = function () {
+            return params.url;
+        },
         initialize = function() {
             let litw_locale = LITW.locale.getLocale() || "";
             let geoip_url = '/service/geoip/';
@@ -59,45 +73,7 @@
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(
             /[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16))
         },
-
-        submitComments = function(data) {
-            submitData(data,"study:comments")
-        },
-        submitDemographics = function(data) {
-            submitData(data,"study:demographics")
-        },
-        submitConsent = function(data) {
-            submitData(data,"study:informed_consent")
-        },
-        submitStudyData = function(data) {
-            submitData(data,"study:data")
-        },
-        submitData = function(data, dataType) {
-            if (!params._isInitialized) {
-                initialize();
-            }
-            data.uuid = getParticipantId();
-            data.data_type = dataType;
-            _submit(data, false);
-        },
-        getParticipantId = function() {
-            return params.participantId;
-        },
-        getCountry = function() {
-            return params.ipCountry;
-        },
-        getCity = function() {
-            return params.ipCity;
-        },
-        isInitialized = function() {
-            return params._isInitialized;
-        },
-        getURLparams = function () {
-            return params.url;
-        },
-
         _submit = function(obj_data, finalAttempt) {
-            //console.log(JSON.stringify(obj_data));
             $.ajax({
                 url: '/service/data/',
                 type: 'POST',
@@ -108,13 +84,37 @@
                     _submit(obj_data, true);
                 }
             });
-        }
+        },
+        submitData = function(data, dataType) {
+            if (!params._isInitialized) {
+                initialize();
+            }
+            data.uuid = getParticipantId();
+            data.data_type = dataType;
+            _submit(data, false);
+        },
+        submitComments = function(data) {
+            submitData(data,"study:comments")
+        },
+        submitDemographics = function(data) {
+            submitData(data,"study:demographics")
+        },
+        submitConsent = function(data) {
+            submitData(data,"study:informed_consent")
+        },
+        submitConfig = function(data) {
+            submitData(data,"study:configuration")
+        },
+        submitStudyData = function(data) {
+            submitData(data,"study:data")
+        };
 
     /**** PUBLIC METHODS ****/
     exports.data = {};
     exports.data.submitComments = submitComments;
     exports.data.submitDemographics = submitDemographics;
     exports.data.submitConsent = submitConsent;
+    exports.data.submitStudyConfig = submitConfig;
     exports.data.submitStudyData = submitStudyData;
     exports.data.submitData = submitData;
     exports.data.initialize = initialize;
