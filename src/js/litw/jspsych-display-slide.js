@@ -13,6 +13,15 @@ module.exports = jsPsych.plugins["display-slide"] = (function() {
 
     var plugin = {};
 
+    let getSlideTime = function() {
+		var data_size = jsPsych.data.getData().length;
+		if( data_size > 0 ) {
+			return jsPsych.totalTime() - jsPsych.data.getLastTrialData().time_elapsed;
+		} else {
+			return jsPsych.totalTime();
+		}
+	};
+
     plugin.trial = function(display_element, trial) {
         if(trial.setup) trial.setup();
 
@@ -29,6 +38,7 @@ module.exports = jsPsych.plugins["display-slide"] = (function() {
         display_element.i18n();
 
         LITW.utils.showNextButton(function() {
+            LITW.tracking.recordSlideTime(display_element[0].id, getSlideTime());
             if(trial.finish) trial.finish();
             display_element.empty();
             jsPsych.finishTrial();
@@ -39,7 +49,7 @@ module.exports = jsPsych.plugins["display-slide"] = (function() {
             $('#btn-next-page').hide();
         }
         LITW.utils.showSlide(display_element[0].id);
-        LITW.tracking.recordCheckpoint(display_element[0].id);
+        LITW.tracking.recordSlideVisit(display_element[0].id);
     };
 
     return plugin;
