@@ -1,5 +1,5 @@
 {
-  "name": "litw-template",
+  "name": "litw-study-base",
   "version": "2.0.0-alpha",
   "dependencies": {
     "alpaca": "^1.5.27",
@@ -15,9 +15,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-base": "webpack --config study-base/webpack.config.js",
+    "build": "webpack",
     "develop": "webpack --watch",
-    "devserver": "webpack serve --config study-base/webpack.config.js --mode development --static-directory ."
+    "devserver": "webpack serve --config webpack.config.js --mode development --static-directory .."
   },
   "repository": {
     "type": "git",

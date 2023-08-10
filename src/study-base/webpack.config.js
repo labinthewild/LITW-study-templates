@@ -3,7 +3,7 @@ var path = require("path");
 var config = {
   entry: path.join(__dirname, "study-model.js"),
   output: {
-    path: path.join(__dirname, "..", "dist"),
+    path: path.join(__dirname, "js"),
     filename: "bundle-model.min.js"
   },
   module: {
