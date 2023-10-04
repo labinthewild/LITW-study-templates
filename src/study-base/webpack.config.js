@@ -12,11 +12,15 @@ var config = {
           test: require.resolve('jquery'),
             use: [{
               loader: 'expose-loader',
-              options: 'jQuery'
+              options: {
+                exposes: "jquery",
+              },
             },
             {
               loader: 'expose-loader',
-              options: '$'
+              options: {
+                exposes: '$',
+              },
             }
             ]
         },
