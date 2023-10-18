@@ -1,0 +1,13 @@
+<!-- Template for the pre-trial break page -->
+
+<h2 class="bolded-blue">{{content.header}}</h2>
+
+{{#if withTouch}}
+	{{#each content.bodyWithTouch}}
+		<p>{{{this}}}</p>
+	{{/each}}
+{{else}}
+	{{#each content.body}}
+		<p>{{{this}}}</p>
+	{{/each}}
+{{/if}}

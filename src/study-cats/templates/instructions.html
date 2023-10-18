@@ -1,0 +1,19 @@
+<!-- Template for instructions page -->
+
+<h2 class="bolded-blue" data-i18n="litw-instruct-header"></h2>
+
+	<p data-i18n="litw-instruct-body-1-p1"></p>
+
+<div class="instructions-stim-container">
+	<img src="img/stim-img/cat1.jpg" />
+	<img src="img/stim-img/cat2.jpg" />
+</div>
+
+{{#if withTouch}}
+	<p data-i18n="litw-instruct-body-2-p1-touch"></p>
+	<p class="bolded-blue" data-i18n="litw-instruct-body-2-p2-touch"></p>
+{{else}}
+    <p data-i18n="litw-instruct-body-2-p1"></p>
+    <p class="bolded-blue" data-i18n="litw-instruct-body-2-p2"></p>
+{{/if}}
+

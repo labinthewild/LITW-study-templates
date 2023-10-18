@@ -1,0 +1,33 @@
+{
+  "name": "litw-study-cats",
+  "version": "2.0.0-alpha",
+  "dependencies": {
+    "alpaca": "^1.5.27",
+    "bootstrap": "^4.3.1",
+    "expose-loader": "^4.1.0",
+    "handlebars": "^4.7.7",
+    "handlebars-loader": "^1.7.3",
+    "jquery": "3.6.0",
+    "jquery-ui-bundle": "^1.11.4",
+    "popper.js": "^1.16.1",
+    "webpack": "^5.77.0",
+    "webpack-dev-server": "^4.15.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "develop": "webpack --watch",
+    "devserver": "webpack serve --config webpack.config.js --mode development --static-directory .."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:labinthewild/LITW-study-templates.git"
+  },
+  "author": "The LabintheWild Team",
+  "license": "MIT",
+  "homepage": "https://github.com/labinthewild/LITW-study-templates",
+  "description": "",
+  "devDependencies": {
+    "webpack-cli": "^5.1.3"
+  }
+}
