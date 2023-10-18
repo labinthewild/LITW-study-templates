@@ -59,15 +59,17 @@ module.exports = (function(exports) {
             }
         });
 
-		// timeline.push({
-		// 	type: "display-slide",
-        //     template: instructionsTemplate,
-		// 	template_data: {
-		// 		withTouch: window.litwWithTouch
-		// 	},
-        //     display_element: $("#instructions"),
-		// 	name: "instructions",
-		// });
+		timeline.push({
+			type: "display-slide",
+      template: instructionsTemplate,
+            display_element: $("#irb"),
+            display_next_button: false,
+            finish: function(){
+            	let instructions_data = {
+								time_elapsed: getSlideTime()
+							}
+            }
+		 });
 
 		timeline.push({
 			type: "display-slide",
