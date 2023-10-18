@@ -63,7 +63,7 @@ module.exports = (function(exports) {
 			type: "display-slide",
       template: instructionsTemplate,
             display_element: $("#irb"),
-            display_next_button: false,
+            display_next_button: true,
             finish: function(){
             	let instructions_data = {
 								time_elapsed: getSlideTime()
