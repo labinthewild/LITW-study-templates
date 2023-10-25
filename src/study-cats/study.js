@@ -13,9 +13,11 @@
 window.$ = window.jQuery = require("jquery");
 require("bootstrap");
 require("jquery-ui-bundle");
+var LITW_STUDY_CONTENT = require("./data");
 var irbTemplate = require("../templates/irb.html");
 var demographicsTemplate = require("/templates/demographics.html");
 var instructionsTemplate = require("/templates/instructions.html");
+var preTrialBreakTemplate = require("/templates/preTrialBreak.html");
 var loadingTemplate = require("/templates/loading.html");
 var resultsTemplate = require("/templates/results.html");
 var resultsFooter = require("/templates/results-footer.html");
@@ -27,49 +29,59 @@ module.exports = (function(exports) {
 	var timeline = [],
 	params = {
 		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
+		stims: LITW_STUDY_CONTENT.trialCats,
+		practiceStims: LITW_STUDY_CONTENT.practiceCats,
+		currentProgress: 0
 	};
 
 	function configureStudy() {
 		// ******* BEGIN STUDY PROGRESSION ******** //
 		timeline.push({
-            name: "informed_consent",
-            type: "display-slide",
-            template: irbTemplate,
-            display_element: $("#irb"),
-            display_next_button: false,
-            finish: function(){
-            	let irb_data = {
+    	name: "informed_consent",
+    	type: "display-slide",
+    	template: irbTemplate,
+    	display_element: $("#irb"),
+    	display_next_button: false,
+    	finish: function(){
+    		let irb_data = {
 					time_elapsed: getSlideTime()
 				}
-            	LITW.data.submitConsent(irb_data);
-            }
-        });
-
-		// // DEMOGRAPHICS
+    		LITW.data.submitConsent(irb_data);
+    	}
+    });
+		// // // DEMOGRAPHICS
 		timeline.push({
-            type: "display-slide",
-            template: demographicsTemplate,
-            display_element: $("#demographics"),
-            name: "demographics",
-            finish: function(){
-            	var dem_data = $('#demographicsForm').alpaca().getValue();
+      type: "display-slide",
+    	template: demographicsTemplate,
+    	display_element: $("#demographics"),
+    	name: "demographics",
+    	finish: function(){
+    		var dem_data = $('#demographicsForm').alpaca().getValue();
 				dem_data['time_elapsed'] = getSlideTime();
-            	jsPsych.data.addProperties({demographics:dem_data});
-            	LITW.data.submitDemographics(dem_data);
-            }
-        });
+    		jsPsych.data.addProperties({demographics:dem_data});
+    		LITW.data.submitDemographics(dem_data);
+      }
+    });
+
+		timeline.push({
+		 	type: "display-slide",
+      template: instructionsTemplate,
+      display_element: $("#irb"),
+      display_next_button: true,
+      finish: function(){
+        let instructions_data = {
+		 			time_elapsed: getSlideTime()
+		 		}
+       }
+		});
 
 		timeline.push({
 			type: "display-slide",
-      template: instructionsTemplate,
-            display_element: $("#irb"),
-            display_next_button: true,
-            finish: function(){
-            	let instructions_data = {
-								time_elapsed: getSlideTime()
-							}
-            }
-		 });
+			display_element: $("#preTrialBreak"),
+			name: "preTrialBreak",
+			template: preTrialBreakTemplate,
+			template_data: {header: "YAAAAAY!"}
+		});
 
 		timeline.push({
 			type: "display-slide",
