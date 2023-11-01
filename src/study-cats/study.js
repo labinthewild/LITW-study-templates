@@ -17,6 +17,7 @@ var LITW_STUDY_CONTENT = require("./data");
 var irbTemplate = require("../templates/irb.html");
 var demographicsTemplate = require("/templates/demographics.html");
 var instructionsTemplate = require("/templates/instructions.html");
+var practiceTemplate = require("/templates/practice.html");
 var preTrialBreakTemplate = require("/templates/preTrialBreak.html");
 var loadingTemplate = require("/templates/loading.html");
 var resultsTemplate = require("/templates/results.html");
@@ -36,7 +37,7 @@ module.exports = (function(exports) {
 
 	function configureStudy() {
 		// ******* BEGIN STUDY PROGRESSION ******** //
-		timeline.push({
+		/*timeline.push({
     	name: "informed_consent",
     	type: "display-slide",
     	template: irbTemplate,
@@ -62,7 +63,7 @@ module.exports = (function(exports) {
     		LITW.data.submitDemographics(dem_data);
       }
     });
-
+*/
 		timeline.push({
 		 	type: "display-slide",
       template: instructionsTemplate,
@@ -77,10 +78,10 @@ module.exports = (function(exports) {
 
 		timeline.push({
 			type: "display-slide",
-			display_element: $("#preTrialBreak"),
-			name: "preTrialBreak",
-			template: preTrialBreakTemplate,
-			template_data: {header: "YAAAAAY!"}
+			display_element: $("#practice"),
+			name: "practice",
+			template: practiceTemplate,
+			template_data: {header: LITW_STUDY_CONTENT.preTrial}
 		});
 
 		timeline.push({
@@ -120,7 +121,7 @@ module.exports = (function(exports) {
 
 	function showResults(showFooter = false, test = false) {
 		//TODO: we recommend creating a separate function that do necessary calculations.
-		let results = {};
+		let results = calculateResults();
 		if('PID' in params.URL) {
 			//REASON: Default behavior for returning a unique PID when collecting data from other platforms
 			results.code = LITW.data.getParticipantId();
