@@ -86,6 +86,14 @@ module.exports = (function(exports) {
 
 		timeline.push({
 			type: "display-slide",
+			display_element: $("#preTrialBreak"),
+			name: "preTrialBreak",
+			template: preTrialBreakTemplate,
+			template_data: {header: LITW_STUDY_CONTENT.preTrial}
+		});
+
+		timeline.push({
+			type: "display-slide",
 			template: commentsTemplate,
 			display_element: $("#comments"),
 			name: "comments",
