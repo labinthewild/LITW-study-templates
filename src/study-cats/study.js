@@ -19,6 +19,7 @@ var demographicsTemplate = require("/templates/demographics.html");
 var instructionsTemplate = require("/templates/instructions.html");
 var practiceTemplate = require("/templates/practice.html");
 var preTrialBreakTemplate = require("/templates/preTrialBreak.html");
+var mainTemplate = require("/templates/main.html");
 var loadingTemplate = require("/templates/loading.html");
 var resultsTemplate = require("/templates/results.html");
 var resultsFooter = require("/templates/results-footer.html");
@@ -89,6 +90,15 @@ module.exports = (function(exports) {
 			display_element: $("#preTrialBreak"),
 			name: "preTrialBreak",
 			template: preTrialBreakTemplate,
+			template_data: {header: LITW_STUDY_CONTENT.preTrial}
+		});
+
+		timeline.push({
+			type: "display-slide",
+			display_element: $("#main"),
+			name: "main",
+			template: mainTemplate,
+			display_next_button: false,
 			template_data: {header: LITW_STUDY_CONTENT.preTrial}
 		});
 
