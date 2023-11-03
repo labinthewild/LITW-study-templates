@@ -82,6 +82,7 @@ module.exports = (function(exports) {
 			display_element: $("#practice"),
 			name: "practice",
 			template: practiceTemplate,
+			display_next_button: false,
 			template_data: {header: LITW_STUDY_CONTENT.preTrial}
 		});
 

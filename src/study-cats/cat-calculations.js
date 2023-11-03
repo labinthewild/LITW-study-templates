@@ -8,6 +8,7 @@ let niceCatsArray = ["img/stim-img/cat1.jpg", "img/stim-img/cat4.jpg", "img/stim
 let meanCatsArray = ["img/stim-img/cat2.jpg", "img/stim-img/cat3.jpg", "img/stim-img/cat5.jpg", "img/stim-img/cat7.jpg", "img/stim-img/cat9.jpg"];
 
 function initPractice() {
+  progress = 9;
   let niceCat = document.getElementById("cat1");
   let meanCat = document.getElementById("cat2");
   niceCat.addEventListener("click", incrementNiceCatCount);
@@ -72,6 +73,8 @@ function checkProgress() {
     let meanCat = document.getElementById("cat2");
     niceCat.removeEventListener("click", incrementNiceCatCount);
     meanCat.removeEventListener("click", incrementMeanCatCount);
+    $('#btn-next-page').attr('style', 'display:block;');
+    $('#btn-next-page')[0].scrollIntoView();
   }
 }
 
