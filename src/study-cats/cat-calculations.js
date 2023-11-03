@@ -72,6 +72,8 @@ function checkProgress() {
     let meanCat = document.getElementById("cat2");
     niceCat.removeEventListener("click", incrementNiceCatCount);
     meanCat.removeEventListener("click", incrementMeanCatCount);
+    $('#btn-next-page').attr('style', 'display:block;');
+    $('#btn-next-page')[0].scrollIntoView();
   }
 }
 
