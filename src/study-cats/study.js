@@ -38,7 +38,7 @@ module.exports = (function(exports) {
 
 	function configureStudy() {
 		// ******* BEGIN STUDY PROGRESSION ******** //
-		/*timeline.push({
+		/* timeline.push({
     	name: "informed_consent",
     	type: "display-slide",
     	template: irbTemplate,

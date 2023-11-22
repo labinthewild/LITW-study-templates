@@ -12,14 +12,15 @@
 <br>
 
 <div class="container">
-    <p data-i18n="litw-results-template"></p>
+    <p class="text-center" data-i18n="litw-results-explanation"></p>
+</div>
+
+<div id= "cat-container" class="text-center instructions-stim-container">
 </div>
 
 <br>
 <div id="results-footer"></div>
 
 <script type="text/javascript">
-    $(document).ready(function() {
-        //TODO: trigger post-loading functions?
-    });
+	window.onload = calcResults();
 </script>

@@ -11,15 +11,20 @@ function initPractice() {
   progress = 9;
   let niceCat = document.getElementById("cat1");
   let meanCat = document.getElementById("cat2");
-  niceCat.addEventListener("click", incrementNiceCatCount);
-  meanCat.addEventListener("click", incrementMeanCatCount);
+  niceCat.addEventListener("click", viewNextButton);
+  meanCat.addEventListener("click", viewNextButton);
   document.onkeydown = function(e) {
     if (e.keyCode === 49) {
-      incrementNiceCatCount();
+      viewNextButton();
     } else if(e.keyCode == 50) {
-      incrementMeanCatCount();
+      viewNextButton();
     }
   }
+}
+
+function viewNextButton() {
+  $('#btn-next-page').attr('style', 'display:block;');
+  $('#btn-next-page')[0].scrollIntoView();
 }
 
 function initTrial() {
@@ -41,6 +46,8 @@ function initTrial() {
 }
 
 function incrementNiceCatCount() {
+  let counter = document.getElementById("counter");
+  counter.textContent = progress + 1 + "/10";
   niceCatCount++;
   console.log("mean:" + meanCatCount);
   console.log("nice:" +niceCatCount);
@@ -54,6 +61,8 @@ function incrementNiceCatCount() {
 }
 
 function incrementMeanCatCount() {
+  let counter = document.getElementById("counter");
+  counter.textContent = progress + 1 + "/10";
   meanCatCount++;
   console.log("mean:" + meanCatCount);
   console.log("nice:" +niceCatCount);
@@ -71,10 +80,10 @@ function checkProgress() {
   if (progress >= 10) {
     let niceCat = document.getElementById("cat1");
     let meanCat = document.getElementById("cat2");
+    document.onkeydown = null;
     niceCat.removeEventListener("click", incrementNiceCatCount);
     meanCat.removeEventListener("click", incrementMeanCatCount);
-    $('#btn-next-page').attr('style', 'display:block;');
-    $('#btn-next-page')[0].scrollIntoView();
+    viewNextButton();
   }
 }
 
@@ -115,10 +124,17 @@ function setMeanCatImage() {
 }
 
 function calculateResults() {
-  if (niceCatCount > meanCatCount) {
-    return selectRandomNiceCat();
+  /*if (niceCatCount > meanCatCount) {
+    setNiceCatImage();
   } else {
-    return selectRandomMeanCat();
-  }
+    setMeanCatImage();
+  }*/
 }
 
+function calcResults() {
+  if (niceCatCount > meanCatCount) {
+    setNiceCatImage();
+  } else {
+    setMeanCatImage();
+  }
+}
