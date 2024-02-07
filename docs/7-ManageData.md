@@ -1,14 +1,14 @@
 # Study data workflow
 
-The simplest way to save your study data is to use our library call `LITW.data.submitStudyData(JsonData)`. This function accepts a JavaScript dictionary, and it will inject the session UUID before inserting a new JSON entry in permanent storage. Although this strategy gives a lot of flexibility to your study data structure, this can be a problem when retrieving and using this data.
+The simplest way to save your study data is to use our library call `LITW.data.submitStudyData(JsonData)`. This function accepts a JavaScript dictionary, and it will inject the session UUID before inserting a new JSON entry into permanent storage. Although this strategy gives a lot of flexibility to your study data structure, this can be a problem when retrieving and using this data.
 
-In this document, we will suggest a data storage and analysis workflow that will get you from saving well-structured data to having a nicely formatted CSV do load in your favorite analysis tool.
+In this document, we will suggest a data storage and analysis workflow that will get you from saving well-structured data to having a nicely formatted CSV to load into your favorite analysis tool.
 
 ##Step 1: Saving data
 
-As you can submit as many entries per session (i.e., per participant) to the database, we recommend you to make sure the set of dictionary keys DO NOT contains repetitive keys! 
+Since you can submit as many entries per session (i.e., per participant) to the database, we recommend that you make sure the set of dictionary keys DO NOT contain repetitive keys!
 
-Let's say you want to save data collected in two diffent slides of your study. For that, you will probably call the `submitStudyData` two times like this:
+Let's say that you want to save data collected in two different slides of your study. For that, you will probably call `submitStudyData` two times like this:
 
 ```
 var trial_data_1 = {"stimulus_1": trial.stimulus, "answer_1": trial.response};
@@ -18,11 +18,11 @@ var trial_data_2 = {"stimulus_2": trial.stimulus, "answer_2": trial.response};
 LITW.data.submitStudyData({trial_data_2});
 ```
 
-From this example, you can see we opted to insert the trial number in each dictionary key, instead of using something more generic like `{"trial_number": 1, "stimulus": trial.stimulus, "answer": trial.response}`. Why is that? For analysis purposes, all data from one session will be probably merged under one UUID and having repeated keys will make it harder to differentiate the data. 
+From this example, you can see we opted to insert the trial number in each dictionary key, instead of using something more generic like `{"trial_number": 1, "stimulus": trial.stimulus, "answer": trial.response}`. Why is that? For analysis purposes, all data from one session will probably be merged under one UUID and having repeated keys will make it harder to differentiate the data.
 
 ##Step 2: Retrieving data
 
-If you are either using your own infrastruct or ours, one approach to get your data out of the database is a simple DATA DUMP. If you are using our infrastructure, we will provide you files that looks like this:
+If you are either using your own infrastructure or ours, one approach to get your data out of the database is a simple DATA DUMP. If you are using our infrastructure, we will provide you files that looks like this:
 
 ```
 "59";"{""uuid"": ""ce69563a-8e88-4c06-9b41-2723fe1c89d7"", ""data_type"": ""study:data"", ""stimulus_1"": [""cat1"",""cat2""], ""answer"": ""cat1""}";"2018-08-23 22:31:41"
@@ -53,6 +53,6 @@ python3 litw-dump2csv.py study_data_dump.csv study_data.csv study:data
 
 The first two parameters are the input and output files, and the third one is a comma-separated list of data types you want to add to your CSV file. For instance, a typical call will also include the demographic information, which can be done by typing `study:demographics,study:data`.
 
-This script uses a Python Pandas trick to flatten down JSON to CSV, so you will need to install that library before using the script. The flattening process is well documented [HERE](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.io.json.json_normalize.html), so you might want to check it if you need to save more complex data structures and use this workflow to keep the data management more straightforward.
+This script uses a Python Pandas trick to flatten down JSON to CSV, so you will need to install that library before using the script. The flattening process is well documented [HERE](https://pandas.pydata.org/pandas-docs/stable/generated/pandas.io.json.json_normalize.html), so you might want to check it out if you need to save more complex data structures and use this workflow to keep the data management more straightforward.
 
 We hope this helps! If you find any bug, please let us know at our repository ToDo list.

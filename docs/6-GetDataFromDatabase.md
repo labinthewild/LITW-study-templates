@@ -31,7 +31,7 @@ As you might imagine, this algorithm is study specific as the data to be summari
 
 ### Example
 
-In the current template implementation, we have used the data containing participants location information to count the number and list of cities from all participants to this date. As expected, this produces a ``summary.json`` file that looks like this:
+In the current template implementation, we have used the data containing participants' location information to count the number and list of cities from all participants to this date. As expected, this produces a ``summary.json`` file that looks like this:
 
     {"city_number":2,"cities":["Seattle","Chicago"]}
 

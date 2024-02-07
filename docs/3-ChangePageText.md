@@ -16,7 +16,7 @@ If you know enough of HTML and about the `timeline` configured in the `study-mod
 var irbTemplate = require("../templates/irb.html");
 ```
 
-Knowing that, we can go to the `irb.html` file and change it! But instead of seen a simple `H1` and `p` nodes in the page, you will find something slightly different like this:
+Knowing that, we can go to the `irb.html` file and change it! But instead of seeing simple `H1` and `p` nodes in the page, you will find something slightly different like this:
 
 ```html
 <h2 class="bolded-blue" data-i18n='litw-irb-header'></h2>
@@ -43,13 +43,13 @@ All you need to do is to open the language file (in this case `en.json`) inside 
   ...
 }
 ```
-All it is, is a `key:value` JSON file with all the string you need to use in the HTML of your study.
+All it is, is a `key:value` JSON file with all the strings you need to use in the HTML of your study.
+All you have to do to change the text displayed on the page is to change the value of your desired key:value pair to be whatever you want it to be!
 Now, considering we want to change the text above that has the `litw-irb-header` key, go ahead and change it in the JSON file.
-
 
 ## Check the changes
 
-To see the changes -- any changes from now on -- we recommend to: 
+To see the changes -- any changes from now on -- we recommend to:
 1. stop the `dev-server` if it is running (Ctrl+C on terminal)
 2. build your study (as described [here](1-Installation.md#steps))
 3. run the `dev-server`
@@ -59,12 +59,12 @@ You should now see the new title of your study.
 
 ## What now?
 
-We're so excited you got here! Now that you know how the basic of a study slide, maybe you want to [add a whole new page](4-AddNewPage.md) to your study?
+We're so excited you got here! Now that you know the basics of a study slide, maybe you want to [add a whole new page](4-AddNewPage.md) to your study?
 
 ## What if this did not work?
 
 1. Did you really refresh all components? Cash can always be an annoying thing while making small changes like this!
-2. Try to open your browser console, deactivate cashing, and reflesh the page. (Maybe opening the URL in a private windows may help with cash as well.)
+2. Try to open your browser console, deactivate cashing, and refresh the page. (Maybe opening the URL in a private window may help with cash as well.)
 3. If you could not make this work:
    1. Search [our discussions](https://github.com/labinthewild/LITW-study-templates/discussions) for an answer.
    2. Open [an issue](https://github.com/labinthewild/LITW-study-templates/issues)!
