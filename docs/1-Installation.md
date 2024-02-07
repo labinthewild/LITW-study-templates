@@ -1,12 +1,12 @@
-# Installation 
+# Installation
 
 This page aims to help you to get the template running on your machine.
 
 ## Requirements
 
-You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM. 
+You will need Node and NPM to build and run this bundle. See [this link](https://nodejs.org/en/) for instructions on installing Node and NPM.
 
-This bundle has been tested on Ubuntu 23.04. 
+This bundle has been tested on Ubuntu 23.04.
 *If you used any other platform, please add it here and submit a pull request! ;)*
 
 
@@ -14,11 +14,15 @@ This bundle has been tested on Ubuntu 23.04.
 
 Clone this repository to a location where you'd like the code to live:
 ```
-git clone git@github.com:labinthewild/LITW-study-templates.git 
+git clone git@github.com:labinthewild/LITW-study-templates.git
 ```
 Navigate to the `src` directory:
 ```
-cd litw-template-package/src
+cd LITW-study-templates/src
+```
+Navigate to the `study-base` directory:
+```
+cd study-base
 ```
 Install dependencies:
 ```
@@ -26,7 +30,7 @@ npm install
 ```
 Build the study (throughout this tutorial we will only use the `study-base` one:
 ```
-npm run build-base
+npm run build
 ```
 
 Start the dev-server:

@@ -1,5 +1,5 @@
 {
-  "name": "litw-study-base",
+  "name": "litw-study-cats",
   "version": "2.0.0-alpha",
   "dependencies": {
     "alpaca": "^1.5.27",

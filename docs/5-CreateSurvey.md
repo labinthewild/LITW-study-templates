@@ -1,6 +1,6 @@
 # How to... Create a survey?
 
-To show you how we can create a survey in the study we take from where we left in the [how to create a new page tutorial.](4-AddNewPage.md) There we just inserted an almost empty page after the demographics page. Here we'll include the questions, collect participants responses and save them using the LabintheWild API.
+To show you how we can create a survey in the study we pick up from where we left off in the [how to create a new page tutorial.](4-AddNewPage.md) There we just inserted an almost empty page after the demographics page. Here we'll include the questions, collect participants' responses and save them using the LabintheWild API.
 
 To do so, we'll have to:
 
@@ -49,7 +49,7 @@ Here it is a very simple HTML code that you can append to your template (in a ne
 ```
 
 And remember to also include the English text used in the form inside the **src/i18n/en.json** file:
- 
+
 ```
     "litw-motivationsurvey-question1": "To what extent are you participating in this study for the following reasons?",
     "litw-motivationsurvey-question1-1": "I want to help science",
@@ -60,18 +60,18 @@ And remember to also include the English text used in the form inside the **src/
 
 ```
 
-Remember when adding these lines to separate them from the previous one with a comma.
+Remember when adding these lines to separate them from the previous ones with a comma.
 
-## 2. Saving form's data
+## 2. Saving a form's data
 
-Make sure to link the template you added to the study.js (at the top with all other requirements)
+Make sure to link the template you added to the study.js file (at the top with all other requirements).
 
 ```
 var surveyTemplate = require("../templates/survey.html");
 
 ```
 
-What we have to do now is making sure when participants click the *Next button* we collect the data from the survey and save that to the database. To do so, we'll have to write a function to do it all, and include a new attribute to the timeline configuration related to our survey page -- meaning the `timeline.push` named *motivationsurvey* inside the **study.js** file. Here is the code:
+What we have to do now is make sure that when participants click the *Next button*, we collect the data from the survey and save that to the database. To do so, we'll have to write a function, and include a new attribute to the existing timeline configuration related to our survey page -- meaning the `timeline.push` named *motivationsurvey* inside the **study.js** file. Here is the code:
 
 
 ```
@@ -88,10 +88,10 @@ finish: function () {
 }
 ```
 
-  * With `finish:function(){}` we declare a function and associate it to the `finish` attribute. Our `display-slide` JsPsych plugin will make sure to call this function first thing when participant clicks the *Next button*.
+  * With `finish:function(){}` we declare a function and associate it to the `finish` attribute. Our `display-slide` JsPsych plugin will make sure to call this function first thing when a participant clicks the *Next button*.
   * Afterwards, we build a JSON/dictionary object with the data from the survey page. For example, we use the JQuery call `$("input[name=science]:checked")` to get the selected radio button for the science motivation question, then we associate this button's value to the JSON property `motivationScience`.
   * Finally we call the `submitStudyData` provided by the LabintheWild data library to save the JSON object into the database.
-  
+
 ## That's it!
 
 Go through the study one more time and answer the survey. After clicking next you'll be able to check the saved data in the *studyData* table. If you haven't used your own database, you can inspect the development database by using any SQLite client to read the *api/db/template.db* file.

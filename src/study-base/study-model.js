@@ -32,42 +32,31 @@ module.exports = (function(exports) {
 	function configureStudy() {
 		// ******* BEGIN STUDY PROGRESSION ******** //
 		timeline.push({
-            name: "informed_consent",
-            type: "display-slide",
-            template: irbTemplate,
-            display_element: $("#irb"),
-            display_next_button: false,
-            finish: function(){
-            	let irb_data = {
+			name: "informed_consent",
+			type: "display-slide",
+			template: irbTemplate,
+			display_element: $("#irb"),
+			display_next_button: false,
+			finish: function(){
+				let irb_data = {
 					time_elapsed: getSlideTime()
 				}
-            	LITW.data.submitConsent(irb_data);
-            }
-        });
+				LITW.data.submitConsent(irb_data);
+			}
+		});
 
-		// // DEMOGRAPHICS
 		timeline.push({
-            type: "display-slide",
-            template: demographicsTemplate,
-            display_element: $("#demographics"),
-            name: "demographics",
-            finish: function(){
-            	var dem_data = $('#demographicsForm').alpaca().getValue();
+			type: "display-slide",
+			template: demographicsTemplate,
+			display_element: $("#demographics"),
+			name: "demographics",
+			finish: function(){
+				var dem_data = $('#demographicsForm').alpaca().getValue();
 				dem_data['time_elapsed'] = getSlideTime();
-            	jsPsych.data.addProperties({demographics:dem_data});
-            	LITW.data.submitDemographics(dem_data);
-            }
-        });
-
-		// timeline.push({
-		// 	type: "display-slide",
-        //     template: instructionsTemplate,
-		// 	template_data: {
-		// 		withTouch: window.litwWithTouch
-		// 	},
-        //     display_element: $("#instructions"),
-		// 	name: "instructions",
-		// });
+				jsPsych.data.addProperties({demographics:dem_data});
+				LITW.data.submitDemographics(dem_data);
+			}
+		});
 
 		timeline.push({
 			type: "display-slide",
@@ -85,7 +74,7 @@ module.exports = (function(exports) {
 
 		timeline.push({
 			type: "call-function",
-            name: "results",
+      name: "results",
 			func: function(){
 				// var results = getResults();
 				// LITW.data.submitStudyData(results);
@@ -105,7 +94,7 @@ module.exports = (function(exports) {
 	}
 
 	function showResults(showFooter = false, test = false) {
-		//TODO: we recommend creating a separate function that do necessary calculations.
+		//TODO: we recommend creating a separate function that does necessary calculations.
 		let results = {};
 		if('PID' in params.URL) {
 			//REASON: Default behavior for returning a unique PID when collecting data from other platforms
@@ -144,7 +133,7 @@ module.exports = (function(exports) {
 
 	function readSummaryData() {
 		$.getJSON( "summary.json", function( data ) {
-			//TODO: 'data' contains the produced summary form DB data 
+			//TODO: 'data' contains the produced summary form DB data
 			//      in case the study was loaded using 'index.php'
 			//SAMPLE: The example code gets the cities of study partcipants.
 			console.log(data);
@@ -169,7 +158,7 @@ module.exports = (function(exports) {
 	}
 
 	function startExperiment(){
-		//TODO This methods should be something like act1().then.act2().then...
+		//TODO These methods should be something like act1().then.act2().then...
 		//... it is close enough to that... maybe the translation need to be encapsulated next.
 		// get initial data from database (maybe needed for the results page!?)
 		//readSummaryData();

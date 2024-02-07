@@ -1,0 +1,26 @@
+<!-- Template for the results page -->
+<h3 class="bolded-blue" style="text-align: center" data-i18n="litw-results-header"></h3>
+
+<br>
+{{#if data.code}}
+<h5 style="text-align: center">
+    <span data-i18n="litw-results-code"></span>
+    <span>{{ data.code }}</span>
+</h5>
+<br>
+{{/if}}
+<br>
+
+<div class="container">
+    <p class="text-center" data-i18n="litw-results-explanation"></p>
+</div>
+
+<div id= "cat-container" class="text-center instructions-stim-container">
+</div>
+
+<br>
+<div id="results-footer"></div>
+
+<script type="text/javascript">
+	window.onload = calcResults();
+</script>
