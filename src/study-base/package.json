@@ -1,6 +1,6 @@
 {
   "name": "litw-study-base",
-  "version": "2.0.0-alpha",
+  "version": "2.0.0",
   "dependencies": {
     "alpaca": "^1.5.27",
     "bootstrap": "^4.3.1",

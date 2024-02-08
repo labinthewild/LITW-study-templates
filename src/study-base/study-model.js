@@ -13,6 +13,7 @@
 window.$ = window.jQuery = require("jquery");
 require("bootstrap");
 require("jquery-ui-bundle");
+var introTemplate = require("../templates/introduction.html");
 var irbTemplate = require("../templates/irb.html");
 var demographicsTemplate = require("../templates/demographics.html");
 var instructionsTemplate = require("../templates/instructions.html");
@@ -27,75 +28,69 @@ module.exports = (function(exports) {
 	var timeline = [],
 	params = {
 		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
+		slides: {
+			INTRODUCTION: {
+				name: "introduction",
+				type: "display-slide",
+				template: introTemplate,
+				display_element: $("#intro"),
+				display_next_button: false,
+			},
+			INFORMED_CONSENT: {
+				name: "informed_consent",
+				type: "display-slide",
+				template: irbTemplate,
+				display_element: $("#irb"),
+				display_next_button: false,
+			},
+			DEMOGRAPHICS: {
+				type: "display-slide",
+				template: demographicsTemplate,
+				display_element: $("#demographics"),
+				name: "demographics",
+				finish: function(){
+					var dem_data = $('#demographicsForm').alpaca().getValue();
+					LITW.data.submitDemographics(dem_data);
+				}
+			},
+			COMMENTS: {
+				type: "display-slide",
+				template: commentsTemplate,
+				display_element: $("#comments"),
+				name: "comments",
+				finish: function(){
+					var comments = $('#commentsForm').alpaca().getValue();
+					if (Object.keys(comments).length > 0) {
+						LITW.data.submitComments({
+							comments: comments
+						});
+					}
+				}
+			},
+			RESULTS: {
+				type: "call-function",
+				func: function(){
+					calculateResults();
+				}
+			}
+		}
 	};
 
 	function configureStudy() {
-		// ******* BEGIN STUDY PROGRESSION ******** //
-		timeline.push({
-			name: "informed_consent",
-			type: "display-slide",
-			template: irbTemplate,
-			display_element: $("#irb"),
-			display_next_button: false,
-			finish: function(){
-				let irb_data = {
-					time_elapsed: getSlideTime()
-				}
-				LITW.data.submitConsent(irb_data);
-			}
-		});
-
-		timeline.push({
-			type: "display-slide",
-			template: demographicsTemplate,
-			display_element: $("#demographics"),
-			name: "demographics",
-			finish: function(){
-				var dem_data = $('#demographicsForm').alpaca().getValue();
-				dem_data['time_elapsed'] = getSlideTime();
-				jsPsych.data.addProperties({demographics:dem_data});
-				LITW.data.submitDemographics(dem_data);
-			}
-		});
-
-		timeline.push({
-			type: "display-slide",
-			template: commentsTemplate,
-			display_element: $("#comments"),
-			name: "comments",
-			finish: function(){
-				var comments = $('#commentsForm').alpaca().getValue();
-				if (Object.keys(comments).length > 0) {
-					comments['time_elapsed'] = getSlideTime();
-					LITW.data.submitComments(comments);
-				}
-			}
-		});
-
-		timeline.push({
-			type: "call-function",
-      name: "results",
-			func: function(){
-				// var results = getResults();
-				// LITW.data.submitStudyData(results);
-				showResults(true, false);
-			}
-		});
-		// ******* END STUDY PROGRESSION ******** //
+		timeline.push(params.slides.INTRODUCTION);
+		timeline.push(params.slides.INFORMED_CONSENT);
+		timeline.push(params.slides.DEMOGRAPHICS);
+		timeline.push(params.slides.COMMENTS);
+		timeline.push(params.slides.RESULTS);
 	}
 
-    function getSlideTime() {
-		var data_size = jsPsych.data.getData().length;
-		if( data_size > 0 ) {
-			return jsPsych.totalTime() - jsPsych.data.getLastTrialData().time_elapsed;
-		} else {
-			return jsPsych.totalTime();
-		}
+	function calculateResults() {
+		//TODO: Nothing to calculate
+		let results_data = {}
+		showResults(results_data, true)
 	}
 
-	function showResults(showFooter = false, test = false) {
-		//TODO: we recommend creating a separate function that does necessary calculations.
-		let results = {};
+	function showResults(results = {}, showFooter = false) {
 		if('PID' in params.URL) {
 			//REASON: Default behavior for returning a unique PID when collecting data from other platforms
 			results.code = LITW.data.getParticipantId();
@@ -141,13 +136,6 @@ module.exports = (function(exports) {
 	}
 
 	function startStudy() {
-		jsPsych.init({
-		  timeline: timeline,
-		  on_finish: showResults
-		});
-	}
-
-	function initStudy() {
 		// generate unique participant id and geolocate participant
 		LITW.data.initialize();
 		// save URL params
@@ -155,6 +143,10 @@ module.exports = (function(exports) {
 		if( Object.keys(params.URL).length > 0 ) {
 			LITW.data.submitData(params.URL,'litw:paramsURL');
 		}
+		// initiate pages timeline
+		jsPsych.init({
+		  timeline: timeline
+		});
 	}
 
 	function startExperiment(){
@@ -186,7 +178,6 @@ module.exports = (function(exports) {
 				//start the study when resources are preloaded
 				jsPsych.pluginAPI.preloadImages(params.preLoad,
 					function () {
-						initStudy();
 						configureStudy();
 						startStudy();
 					},
