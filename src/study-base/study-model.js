@@ -27,6 +27,8 @@ require("../js/litw/jspsych-display-slide");
 module.exports = (function(exports) {
 	var timeline = [],
 	params = {
+		study_id: "TO_BE_ADDED_IF_USING_LITW_INFRA",
+		study_recommendation: [],
 		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
 		slides: {
 			INTRODUCTION: {
@@ -78,9 +80,9 @@ module.exports = (function(exports) {
 
 	function configureStudy() {
 		timeline.push(params.slides.INTRODUCTION);
-		timeline.push(params.slides.INFORMED_CONSENT);
-		timeline.push(params.slides.DEMOGRAPHICS);
-		timeline.push(params.slides.COMMENTS);
+		// timeline.push(params.slides.INFORMED_CONSENT);
+		// timeline.push(params.slides.DEMOGRAPHICS);
+		// timeline.push(params.slides.COMMENTS);
 		timeline.push(params.slides.RESULTS);
 	}
 
@@ -103,22 +105,10 @@ module.exports = (function(exports) {
 		if(showFooter) {
 			$("#results-footer").html(resultsFooter(
 				{
-					//TODO fix this before launching!
-					share_url: "https://labinthewild.org/studies/covid-dilemmas/index.php",
+					share_url: window.location.href,
 					share_title: $.i18n('litw-irb-header'),
 					share_text: $.i18n('litw-template-title'),
-					more_litw_studies: [{
-						study_url: "https://reading.labinthewild.org/",
-						study_logo: "http://labinthewild.org/images/reading-assessment.jpg",
-						study_slogan: $.i18n('litw-more-study1-slogan'),
-						study_description: $.i18n('litw-more-study1-description'),
-					},
-					{
-						study_url: "https://litw-sci-scomm.azurewebsites.net/LITW/consent",
-						study_logo: "http://labinthewild.org/images/sci-comm-img.png",
-						study_slogan: $.i18n('litw-more-study2-slogan'),
-						study_description: $.i18n('litw-more-study2-description'),
-					}]
+					more_litw_studies: params.study_recommendation
 				}
 			));
 		}
@@ -143,6 +133,10 @@ module.exports = (function(exports) {
 		if( Object.keys(params.URL).length > 0 ) {
 			LITW.data.submitData(params.URL,'litw:paramsURL');
 		}
+		// populate study recommendation
+		LITW.engage.getStudiesRecommendation(2, (studies_list) => {
+			params.study_recommendation = studies_list;
+		});
 		// initiate pages timeline
 		jsPsych.init({
 		  timeline: timeline

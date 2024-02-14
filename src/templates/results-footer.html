@@ -30,6 +30,7 @@
                 </a>
             </div>
         </div>
+        {{#if more_litw_studies}}
         <div class="litw-results-study-links-container litw-footer-element">
             <span class="litw-results-number">3</span>
             <span class="litw-results-study-links-header" data-i18n="litw-more-step3"></span>
@@ -37,20 +38,21 @@
                 {{#each more_litw_studies}}
                 <div class="litw-study-link row">
                     <div class="col-md-3">
-                        <a href="{{study_url}}" onclick='submit_slogan_choice("{{study_slogan}}")'>
-                            <img class="litw-study-link-img" src="{{study_logo}}"/>
+                        <a href="{{STUDY_URL}}" onclick='submit_slogan_choice("{{SLOGAN}}")'>
+                            <img class="litw-study-link-img" src="{{LOGO_URL}}"/>
                         </a>
                     </div>
                     <div class="col-md-9">
-                        <h3><a href="{{study_url}}" onclick='submit_slogan_choice("{{study_slogan}}")'>{{study_slogan}}</a></h3>
+                        <h3><a href="{{STUDY_URL}}" onclick='submit_slogan_choice("{{SLOGAN}}")'>{{SLOGAN}}</a></h3>
                         <br>
-                        <p class="litw-study-link-description">{{study_description}}
-                            <a href="{{study_url}}" onclick='submit_slogan_choice("{{study_slogan}}")' class="participate-link" data-i18n="litw-more-participate"></a>
+                        <p class="litw-study-link-description">{{DESCRIPTION}}
+                            <a href="{{STUDY_URL}}" onclick='submit_slogan_choice("{{SLOGAN}}")' class="participate-link" data-i18n="litw-more-participate"></a>
                         </p>
                     </div>
                 </div>
                 {{/each}}
             </div>
         </div>
+        {{/if}}
     </div>
 </div>

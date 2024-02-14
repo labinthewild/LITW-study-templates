@@ -18,6 +18,7 @@
 	const tracking_data = {
 		tracking_type: "",
 		tracking_info: null
+		//TODO: move tracking_type inside tracking_info!!!!?
 	},
 
 	submitData = function (type, info) {
