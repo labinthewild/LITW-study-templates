@@ -13,6 +13,7 @@
 window.$ = window.jQuery = require("jquery");
 require("bootstrap");
 require("jquery-ui-bundle");
+var _ = require('lodash');
 var introTemplate = require("../templates/introduction.html");
 var irbTemplate = require("../templates/irb.html");
 var demographicsTemplate = require("../templates/demographics.html");
@@ -80,9 +81,9 @@ module.exports = (function(exports) {
 
 	function configureStudy() {
 		timeline.push(params.slides.INTRODUCTION);
-		// timeline.push(params.slides.INFORMED_CONSENT);
-		// timeline.push(params.slides.DEMOGRAPHICS);
-		// timeline.push(params.slides.COMMENTS);
+		timeline.push(params.slides.INFORMED_CONSENT);
+		timeline.push(params.slides.DEMOGRAPHICS);
+		timeline.push(params.slides.COMMENTS);
 		timeline.push(params.slides.RESULTS);
 	}
 

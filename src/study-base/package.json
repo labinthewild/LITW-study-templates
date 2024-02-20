@@ -9,6 +9,7 @@
     "handlebars-loader": "^1.7.3",
     "jquery": "3.6.0",
     "jquery-ui-bundle": "^1.11.4",
+    "lodash": "^4.17.21",
     "popper.js": "^1.16.1",
     "webpack": "^5.77.0",
     "webpack-dev-server": "^4.15.0"
