@@ -28,7 +28,6 @@
 		fetch(`/config/${LITW.study.params.study_id}/study_references`)
 			.then((response) => {
 		  		response.json().then((result) => {
-					console.log('STUDIES RECOMMENDED', result);
 			  		callBack(result);
 		  		})
 			}).catch(function(err) {

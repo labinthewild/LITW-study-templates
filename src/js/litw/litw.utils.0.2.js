@@ -238,7 +238,6 @@
             for (let key of paramsURL.keys()) {
                 result[key] = paramsURL.get(key);
             }
-            console.log('URL params: ' + JSON.stringify(result));
             return result;
         };
 
