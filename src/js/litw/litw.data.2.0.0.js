@@ -21,6 +21,7 @@
             _isInitialized: false,
             participantId: 0,
             ipCountry: "not_fetched_or_initialized",
+            ipRegion: "not_fetched_or_initialized",
             ipCity: "not_fetched_or_initialized",
             userAgent: "not_fetched_or_initialized"
         },
@@ -41,7 +42,9 @@
         },
         initialize = function() {
             let litw_locale = LITW.locale.getLocale() || "";
-            let geoip_url = '/service/geoip/';
+            // TODO: This is not working because I did not figure how to get the client IP behind the NGINX yet!
+            // let geoip_url = '/service/geoip';
+            let geoip_url = 'https://api.labinthewild.org/service/geoip';
 
             if (!params._isInitialized) {
                 params._isInitialized = true;
@@ -50,12 +53,16 @@
                 params.url = getRequestParams();
                 return $.getJSON(geoip_url, function(data) {
                     params.ipCity = data.city;
+                    params.ipRegion = data.region;
                     params.ipCountry = data.country;
                 }).always(function() {
                     let data = {
                         contentLanguage: litw_locale,
-                        city: params.ipCity,
-                        country: params.ipCountry,
+                        geoLoc: {
+                            city: params.ipCity,
+                            region: params.ipRegion,
+                            country: params.ipCountry,
+                        },
                         userAgent: params.userAgent,
                         urlParams: params.url
                     };
