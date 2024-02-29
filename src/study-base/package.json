@@ -1,6 +1,10 @@
 {
   "name": "litw-study-base",
   "version": "2.0.0",
+  "author": "The LabintheWild Team",
+  "license": "MIT",
+  "homepage": "https://github.com/labinthewild/LITW-study-templates",
+  "description": "This is the bare bones of a LITW study. Please check the documentation to learn about how to use it.",
   "dependencies": {
     "alpaca": "^1.5.27",
     "bootstrap": "^4.3.1",
@@ -24,10 +28,6 @@
     "type": "git",
     "url": "git@github.com:labinthewild/LITW-study-templates.git"
   },
-  "author": "The LabintheWild Team",
-  "license": "MIT",
-  "homepage": "https://github.com/labinthewild/LITW-study-templates",
-  "description": "",
   "devDependencies": {
     "webpack-cli": "^5.1.3"
   }

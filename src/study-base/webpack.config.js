@@ -1,10 +1,10 @@
 var path = require("path");
 
 var config = {
-  entry: path.join(__dirname, "study-model.js"),
+  entry: path.join(__dirname, "study-manager.js"),
   output: {
     path: path.join(__dirname, "js"),
-    filename: "bundle-model.min.js"
+    filename: "study-bundle.min.js"
   },
   module: {
     rules: [
