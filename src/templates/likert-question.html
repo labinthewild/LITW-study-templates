@@ -1,0 +1,53 @@
+<div id="question-box" class="instructions-stim-container">
+    <div class="row">
+        <div class="col d-flex justify-content-center">
+            <h2 id="questionID" data-question_id="q1" class="bolded-blue" data-i18n="study-base-q1-title"></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="d-grid gap-2 d-md-block justify-content-center align-self-center">
+            <button id="button1" data-response_id="1" type="button" class="btn btn-primary" data-bs-toggle="button"
+                    data-i18n="study-base-q1-r1" onclick="selection('button1')"></button>
+            <button id="button2" data-response_id="2" type="button" class="btn btn-primary" data-bs-toggle="button"
+                    data-i18n="study-base-q1-r2" onclick="selection('button2')"></button>
+            <button id="button3" data-response_id="3" type="button" class="btn btn-primary" data-bs-toggle="button"
+                    data-i18n="study-base-q1-r3" onclick="selection('button3')"></button>
+            <button id="button4" data-response_id="4" type="button" class="btn btn-primary" data-bs-toggle="button"
+                    data-i18n="study-base-q1-r4" onclick="selection('button4')"></button>
+            <button id="button5" data-response_id="5" type="button" class="btn btn-primary" data-bs-toggle="button"
+                    data-i18n="study-base-q1-r5" onclick="selection('button5')"></button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    let selectionData = {}
+
+    let selection = function(buttonID) {
+        let clickedElem = document.getElementById(buttonID);
+        let questionID = document.getElementById('questionID').dataset.question_id;
+        if(clickedElem) {
+            document.querySelectorAll('button').forEach(btn => {
+                if(btn.id === clickedElem.id && !btn.classList.contains('active')) {
+                    bootstrap.Button.getInstance(btn).toggle();
+                }
+                if(btn.id !== clickedElem.id && btn.classList.contains('active')) {
+                    bootstrap.Button.getInstance(btn).toggle();
+                }
+            })
+            let responseID = clickedElem.dataset.response_id;
+            console.log(`CLICKED: ${responseID}`);
+            selectionData[questionID] = responseID;
+            LITW.utils.showNextButton(() => { saveSelection(selectionData) });
+        } else {
+            console.log(`CLICK ERROR: ID ${buttonID}`);
+        }
+    }
+
+    let saveSelection = function(selectionData) {
+        console.log('DATA SUBMIT', selectionData);
+        LITW.data.submitStudyData({
+            questionnaire: selectionData
+        });
+    }
+</script>

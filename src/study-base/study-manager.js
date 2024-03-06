@@ -11,7 +11,7 @@
 
 // load webpack modules
 window.$ = window.jQuery = require("jquery");
-require("bootstrap");
+window.bootstrap = require("bootstrap");
 require("jquery-ui-bundle");
 var _ = require('lodash');
 var introTemplate = require("../templates/introduction.html");
