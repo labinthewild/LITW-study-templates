@@ -25,6 +25,7 @@ var commentsTemplate = require("../templates/comments.html");
 require("../js/litw/jspsych-display-info");
 require("../js/litw/jspsych-display-slide");
 
+//TODO: document "params.study_id" when updating the docs/7-ManageData!!!
 module.exports = (function(exports) {
 	var timeline = [],
 	params = {

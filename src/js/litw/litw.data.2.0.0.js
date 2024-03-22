@@ -82,7 +82,7 @@
         },
         _submit = function(obj_data, finalAttempt) {
             $.ajax({
-                url: '/service/data/',
+                url: `/service/${LITW.study.params.study_id}/data/`,
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(obj_data),
