@@ -45,5 +45,5 @@ Please visit the docs folder and learn:
   * [How to change a page's text?](3-ChangePageText.md)
   * [How to create a new study page?](4-AddNewPage.md)
   * [How to include a page containing a survey?](5-CreateSurvey.md)
-  * [How to retrieve data from the database?](6-GetDataFromDatabase.md)
-  * [How to structure and retrieve your study data?](7-ManageData.md)
+  * [How to retrieve data from the database?](7-GetDataFromDatabase.md)
+  * [How to translate your study?](8-TranslateStudy.md)
