@@ -10,14 +10,13 @@
  *************************************************************/
 
 // load ESM modules
-import { configureStudy, startStudy, SLIDE_TYPE, loadTemplate } from '../js/litw/v2/litw.core.mjs';
+import { configureStudy, startStudy, SLIDE_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
 import {
     submitStudyData, submitDemographics, submitComments,
     addToLocal, loadFromLocal, getURLparams, getParticipantId,
     submitStudyConfig, setStudyId
 } from '../js/litw/v2/litw.data.mjs';
 import { getStudiesRecommendation } from '../js/litw/v2/litw.engagement.mjs';
-import { showSlide } from '../js/litw/v2/litw.utils.mjs';
 import { recordClick, recordSharing } from '../js/litw/v2/litw.tracking.mjs';
 
 // Third-party globals (loaded via <script> tags)
@@ -220,7 +219,7 @@ const _ = window._;
 			));
 		}
 		results_div.i18n();
-		showSlide("results");
+		showSlideById("results");
 	}
 
 	//TODO Move to LITW.DATA library

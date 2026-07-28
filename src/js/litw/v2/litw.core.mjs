@@ -11,7 +11,7 @@
  * © Copyright 2024 - The LabintheWild Team
  *************************************************************/
 
-import { initialize as initData } from './litw.data.mjs';
+import { initialize as initData, submitData } from './litw.data.mjs';
 import { recordSlideVisit, recordSlideTime } from './litw.tracking.mjs';
 import { getLocale } from './litw.locale.mjs';
 import { getStudiesRecommendation } from './litw.engagement.mjs';
@@ -175,6 +175,17 @@ function showSlide(slide) {
     return true;
 }
 
+/**
+ * Show a slide element by id: hides all .slide elements, then shows
+ * the one matching the given id. Useful for study-manager code that
+ * renders templates outside the engine's slide system (e.g. results).
+ */
+export function showSlideById(id) {
+    document.querySelectorAll('.slide').forEach(el => {
+        el.style.display = el.id === id ? 'block' : 'none';
+    });
+}
+
 function advanceStudy() {
     if (runtime.timeline.status === STUDY_STATUS.NEW) {
         startStudy();
@@ -227,7 +238,7 @@ function finishSlide() {
 
 function endStudy() {
     console.log("STUDY FINISHED!", Date.now());
-    import('./litw.data.mjs').then(m => m.submitData({}, "litw:complete"));
+    submitData({}, "litw:complete");
     runtime.timeline.status = STUDY_STATUS.FINISHED;
 }
 
