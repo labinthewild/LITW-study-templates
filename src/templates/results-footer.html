@@ -10,8 +10,9 @@
         <h5 class="card-title pt-4" data-i18n="litw-more-step2"></h5>
         <div class="shareon" data-title="{{ share_text }}" data-url="{{ share_url }}">
             <a class="facebook" onclick="LITW.tracking.recordSharing('facebook')"></a>
-            <a class="mastodon" onclick="LITW.tracking.recordSharing('mastodon')"></a>
             <a class="linkedin" onclick="LITW.tracking.recordSharing('linkedin')"></a>
+            <a class="mastodon" onclick="LITW.tracking.recordSharing('mastodon')"></a>
+            <a class="bluesky" onclick="LITW.tracking.recordSharing('bluesky')"></a>
             <a class="reddit" onclick="LITW.tracking.recordSharing('reddit')"></a>
             <a class="copy-url" onclick="LITW.tracking.recordSharing('copyURL')"></a>
         </div>
@@ -43,7 +44,7 @@
     </div>
 </div>
 <script type="module">
-    import {init} from "../js/shareon.es-2.5.0.js";
+    import {init} from "../js/shareon.es-2.7.0.js";
     // do something
     init();
 </script>

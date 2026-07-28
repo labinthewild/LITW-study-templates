@@ -1,0 +1,11 @@
+{
+  "name": "litw-study-templates",
+  "version": "2.0.0",
+  "author": "The LabintheWild Team",
+  "license": "MIT",
+  "description": "LITW study templates — no build step, native ESM.",
+  "scripts": {
+    "dev": "node js/dev-server.mjs",
+    "check": "node js/check.mjs"
+  }
+}

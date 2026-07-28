@@ -52,10 +52,10 @@
     function selectResponse (qID, rID) {
         document.querySelectorAll(`[data-qid='${qID}']`).forEach(btn => {
             if(btn.dataset.rid == rID && !btn.classList.contains('active')) {
-                bootstrap.Button.getOrCreateInstance(btn).toggle();
+                btn.classList.add('active');
             }
             if(btn.dataset.rid != rID && btn.classList.contains('active')) {
-                bootstrap.Button.getOrCreateInstance(btn).toggle();
+                btn.classList.remove('active');
             }
         })
     }
