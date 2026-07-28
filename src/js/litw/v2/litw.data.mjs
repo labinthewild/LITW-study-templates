@@ -3,7 +3,7 @@
  *
  * Study data operations using the LITW REST API.
  *
- * Dependencies: jQuery (window.$), litw.locale
+ * Dependencies: litw.locale
  *
  * © Copyright 2024 LabintheWild
  *************************************************************/
@@ -13,20 +13,10 @@ import { getLocale } from './litw.locale.mjs';
 let _studyId = null;
 let _isInitialized = false;
 let _participantId = null;
-let _ipCountry = "not_fetched";
-let _ipRegion = "not_fetched";
-let _ipCity = "not_fetched";
+let _ipCountry = "";
+let _ipRegion = "";
+let _ipCity = "";
 let _url = {};
-
-function _uuidv4() {
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(
-        /[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
-}
-
-function _getRequestParams() {
-    return Object.fromEntries(new URLSearchParams(window.location.search).entries());
-}
 
 /**
  * Set the study ID used for API endpoints.
@@ -59,8 +49,8 @@ export function getURLparams() {
 export function initialize() {
     if (_isInitialized) return;
     _isInitialized = true;
-    _participantId = _uuidv4();
-    _url = _getRequestParams();
+    _participantId = crypto.randomUUID();
+    _url = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     let locale = getLocale() || "";
 
     fetch('httpswps://api.labinthewild.org/service/geoip')
@@ -77,27 +67,23 @@ export function initialize() {
                 geoLoc: { city: _ipCity, region: _ipRegion, country: _ipCountry },
                 userAgent: navigator.userAgent,
                 urlParams: _url
-            }, false, "litw:initialize");
+            }, "litw:initialize");
         });
 }
 
-function _submit(obj_data, finalAttempt, dataType) {
-    let data = { ...obj_data };
-    if (dataType) data.data_type = dataType;
+function _submit(data, dataType) {
+    data.data_type = dataType;
     data.uuid = _participantId;
-
     fetch(`/service/${_studyId}/data/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
-    }).catch(e => {
-        if (!finalAttempt) _submit(obj_data, true, dataType);
-    });
+    }).catch(() => {});
 }
 
 export function submitData(data, dataType) {
     if (!_isInitialized) initialize();
-    _submit(data, false, dataType);
+    _submit(data, dataType);
 }
 
 export function submitComments(data) {
