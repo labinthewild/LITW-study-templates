@@ -1,71 +1,99 @@
 /*************************************************************
  * litw.locale.mjs — v2
  *
- * Locale detection for LITW studies.
+ * Locale detection and i18n for LITW studies.
  * Determines locale from: query string > cookie > browser > default.
- *
- * Dependencies: jQuery (window.$)
+ * Loads translation files and provides getString / DOM translation.
  *
  * © Copyright 2024 LabintheWild
  *************************************************************/
 
 const COOKIE_NAME = "litw_locale";
-const COOKIE_EXPIRATION = (() => {
-    let date = new Date();
-    return date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-})();
-
-let _locale = null;
-let _set = false;
 const DEFAULT_LOCALE = "en";
 
-function _checkQueryString() {
-    if (_set) return;
-    let url = new URL(window.location.href);
-    let url_locale = url.searchParams.get("locale");
-    if (url_locale) {
-        _locale = url_locale;
-        _set = true;
-    }
-}
+let _translations = {};
+let _chosenLang = null;
 
-function _checkCookies() {
-    if (_set) return;
+// ─── Locale detection ────────────────────────────────────────
+
+function _detectLocale(availableLangs) {
+    // 1. Query string
+    let url = new URL(window.location.href);
+    let qs = url.searchParams.get("locale");
+    if (qs && availableLangs[qs]) return qs;
+
+    // 2. Cookie
     for (let cookie of document.cookie.split(";")) {
         let parts = cookie.split("=");
-        if (parts[0].trim() === COOKIE_NAME) {
-            _locale = parts[1].trim();
-            _set = true;
-            return;
+        if (parts[0].trim() === COOKIE_NAME && availableLangs[parts[1].trim()]) {
+            return parts[1].trim();
         }
     }
-}
 
-function _checkBrowserLang() {
-    if (_set) return;
-    let browserLocale = navigator.languages
-        ? navigator.languages[0]
-        : (navigator.language || navigator.userLanguage);
+    // 3. Browser language
+    let browserLocale = (navigator.languages && navigator.languages[0])
+        || navigator.language || navigator.userLanguage;
     if (browserLocale) {
         browserLocale = browserLocale.split("-")[0];
-        document.cookie = `${COOKIE_NAME}=${browserLocale}; expires=${COOKIE_EXPIRATION}; path=/`;
-        _locale = browserLocale;
-    } else {
-        _locale = DEFAULT_LOCALE;
+        if (availableLangs[browserLocale]) return browserLocale;
     }
-    _set = true;
+
+    // 4. Fallback
+    return availableLangs['default'] || DEFAULT_LOCALE;
+}
+
+// ─── Public API ──────────────────────────────────────────────
+
+/**
+ * Configure locale: detect best language, load translation files.
+ * @param {object} availableLangs — e.g.
+ *   { 'default': 'en', 'en': './i18n/en.json', 'pt': './i18n/pt-br.json' }
+ *   Values can be a string (single file) or array of strings (multiple files).
+ * @returns {string} the chosen language code
+ */
+export async function configure(availableLangs) {
+    _chosenLang = _detectLocale(availableLangs);
+
+    // Normalize to array
+    let files = availableLangs[_chosenLang];
+    if (typeof files === 'string') files = [files];
+
+    // Load and merge translation files
+    let merged = {};
+    for (let url of files) {
+        let resp = await fetch(url);
+        let data = await resp.json();
+        Object.assign(merged, data);
+    }
+    _translations = merged;
+
+    // Set cookie for future visits
+    let expires = new Date();
+    expires.setTime(expires.getTime() + 365 * 24 * 60 * 60 * 1000);
+    document.cookie = `${COOKIE_NAME}=${_chosenLang}; expires=${expires.toUTCString()}; path=/`;
+
+    return _chosenLang;
 }
 
 /**
- * Determine the locale to use:
- * 1. Query parameter `locale` — highest priority
- * 2. Existing cookie
- * 3. Browser language (sets cookie as side effect)
- * 4. Default ("en")
+ * Returns the language code selected during configure().
  */
-export function getLocale() {
-    _checkQueryString();
-    _checkCookies();
-    _checkBrowserLang();
-    return _locale;
+export function getStudyLang() {
+    return _chosenLang;
+}
+
+/**
+ * Translate a key or apply translations to a DOM element.
+ *
+ *   i18n('study-title')       → returns translated string (or key if not found)
+ *   i18n(document.getElementById('intro'))  → applies [data-i18n] to element
+ */
+export function i18n(keyOrElement) {
+    if (typeof keyOrElement === 'string') {
+        return _translations[keyOrElement] ?? keyOrElement;
+    }
+    // DOM element — translate [data-i18n] children
+    keyOrElement.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = i18n(el.getAttribute('data-i18n'));
+    });
 }

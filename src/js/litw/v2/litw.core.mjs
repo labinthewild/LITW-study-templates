@@ -4,7 +4,6 @@
  * The LITW Engine: minimalist study timeline and slide manager.
  *
  * Dependencies:
- *   - jQuery (window.$) for $.i18n() and DOM manipulation
  *   - Handlebars (window.Handlebars) for template compilation
  *   - litw.data, litw.tracking, litw.locale (direct imports)
  *
@@ -13,7 +12,7 @@
 
 import { initialize as initData, submitData } from './litw.data.mjs';
 import { recordSlideVisit, recordSlideTime } from './litw.tracking.mjs';
-import { getLocale } from './litw.locale.mjs';
+import { configure as configureLocale, i18n, getStudyLang } from './litw.locale.mjs';
 import { getStudiesRecommendation } from './litw.engagement.mjs';
 
 // ─── Types ────────────────────────────────────────────────────
@@ -41,11 +40,8 @@ const runtime = {
         current_slide: null,
         slides: [],
         status: STUDY_STATUS.NEW
-    },
-    lang_to_load: { 'en': './i18n/en.json' }
+    }
 };
-
-const $ = window.$;
 
 // ─── Template loading ─────────────────────────────────────────
 
@@ -101,25 +97,6 @@ function preloadResources(preload, study_id = "") {
     return preload.length;
 }
 
-function setLangToLoad(available_langs) {
-    let language = getLocale().substring(0, 2);
-    $.i18n().locale = language;
-    if (language in available_langs) {
-        runtime.lang_to_load[language] = available_langs[language];
-        return available_langs[language];
-    } else if ('default' in available_langs) {
-        let default_lang = available_langs['default'];
-        console.log(`Loading default language: ${default_lang}`);
-        runtime.lang_to_load[default_lang] = available_langs[default_lang];
-        $.i18n().locale = default_lang;
-        return available_langs[default_lang];
-    } else {
-        console.error('No suitable language configuration found.');
-        runtime.lang_to_load = null;
-        return null;
-    }
-}
-
 /**
  * Configure the study: set up the next button, load language,
  * preload resources, fetch and compile templates, and initialize data.
@@ -132,8 +109,9 @@ export async function configureStudy(
     study_id = ""
 ) {
     document.getElementById('btn-next-page').onclick = () => finishSlide();
-    let lang_files = setLangToLoad(available_lang);
-    if (!lang_files) return false;
+    await configureLocale(available_lang);
+    i18n(document.head);
+    i18n(document.body);
 
     preloadResources(preload, study_id);
     await loadTemplates(slides_config);
@@ -170,7 +148,7 @@ function showSlide(slide) {
         }
         oldScript.replaceWith(newScript);
     });
-    $(el).i18n();       // apply i18n translations
+    i18n(el);       // apply i18n translations
     el.style.display = "block";
     return true;
 }
@@ -219,7 +197,13 @@ function advanceStudy() {
             console.error(`Unknown slide type "${slide.type}" for slide "${slide.name}".`);
     }
 
-    if (ok) recordSlideVisit(slide.name);
+    if (ok) {
+        recordSlideVisit(slide.name);
+        // Study is complete when the last slide loads
+        if (runtime.timeline.current_pos === runtime.timeline.slides.length - 1) {
+            endStudy();
+        }
+    }
     return ok;
 }
 
@@ -232,29 +216,23 @@ function finishSlide() {
     if (el) el.innerHTML = '';
     slide.runtime.duration = Date.now() - slide.runtime.start;
     recordSlideTime(slide.name, slide.runtime.duration);
-    console.log('FINISHED SLIDE', slide);
     advanceStudy();
 }
 
 function endStudy() {
+    if (runtime.timeline.status === STUDY_STATUS.FINISHED) return;
+    let totalTime = Date.now() - runtime.timeline.started_at;
     console.log("STUDY FINISHED!", Date.now());
-    submitData({}, "litw:complete");
+    submitData({ total_time: totalTime }, "litw:complete");
     runtime.timeline.status = STUDY_STATUS.FINISHED;
 }
 
 /**
- * Start the study: load i18n files, then advance through the timeline.
+ * Start the study: advance through the slides.
  */
 export function startStudy() {
-    if (!runtime.lang_to_load) {
-        console.error("No language files configured.");
-        return;
-    }
-    $.i18n().load(runtime.lang_to_load).done(() => {
-        $('head').i18n();
-        $('body').i18n();
-        console.log("STUDY STARTED!", Date.now());
-        runtime.timeline.status = STUDY_STATUS.RUNNING;
-        advanceStudy();
-    });
+    console.log("STUDY STARTED!", Date.now());
+    runtime.timeline.started_at = Date.now();
+    runtime.timeline.status = STUDY_STATUS.RUNNING;
+    advanceStudy();
 }

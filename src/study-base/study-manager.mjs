@@ -11,6 +11,7 @@
 
 // load ESM modules
 import { configureStudy, startStudy, SLIDE_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
+import { i18n } from '../js/litw/v2/litw.locale.mjs';
 import {
     submitStudyData, submitDemographics, submitComments,
     addToLocal, loadFromLocal, getURLparams, getParticipantId,
@@ -218,7 +219,7 @@ const _ = window._;
 				}
 			));
 		}
-		results_div.i18n();
+		i18n(results_div[0]);
 		showSlideById("results");
 	}
 
@@ -237,6 +238,10 @@ const _ = window._;
 	let resultsFooterTemplate = null;
 
 	async function bootstrap() {
+		// Backward compat: $.i18n() → our locale module
+		// TODO: update templates & study-manager to use i18n() directly, then remove
+		window.$.i18n = i18n;
+
 		// Load templates rendered outside the engine's slide system
 		let [r, rf] = await Promise.all([
 			loadTemplate("../templates/results.html"),

@@ -8,7 +8,7 @@
  * © Copyright 2024 LabintheWild
  *************************************************************/
 
-import { getLocale } from './litw.locale.mjs';
+import { getStudyLang } from './litw.locale.mjs';
 
 let _studyId = null;
 let _isInitialized = false;
@@ -51,9 +51,9 @@ export function initialize() {
     _isInitialized = true;
     _participantId = crypto.randomUUID();
     _url = Object.fromEntries(new URLSearchParams(window.location.search).entries());
-    let locale = getLocale() || "";
+    let locale = getStudyLang() || "";
 
-    fetch('httpswps://api.labinthewild.org/service/geoip')
+    fetch('https://api.labinthewild.org/service/geoip')
         .then(r => r.json())
         .then(data => {
             _ipCity = data.city || "";
