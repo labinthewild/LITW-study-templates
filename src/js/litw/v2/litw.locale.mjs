@@ -16,17 +16,28 @@ let _chosenLang = null;
 
 // ─── Locale detection ────────────────────────────────────────
 
+function _lookupLocale(code, availableLangs) {
+    if (availableLangs[code]) return code;
+    let base = code.split('-')[0];
+    if (base !== code && availableLangs[base]) return base;
+    return null;
+}
+
 function _detectLocale(availableLangs) {
     // 1. Query string
     let url = new URL(window.location.href);
     let qs = url.searchParams.get("locale");
-    if (qs && availableLangs[qs]) return qs;
+    if (qs) {
+        let found = _lookupLocale(qs, availableLangs);
+        if (found) return found;
+    }
 
     // 2. Cookie
     for (let cookie of document.cookie.split(";")) {
         let parts = cookie.split("=");
-        if (parts[0].trim() === COOKIE_NAME && availableLangs[parts[1].trim()]) {
-            return parts[1].trim();
+        if (parts[0].trim() === COOKIE_NAME) {
+            let found = _lookupLocale(parts[1].trim(), availableLangs);
+            if (found) return found;
         }
     }
 
@@ -34,8 +45,8 @@ function _detectLocale(availableLangs) {
     let browserLocale = (navigator.languages && navigator.languages[0])
         || navigator.language || navigator.userLanguage;
     if (browserLocale) {
-        browserLocale = browserLocale.split("-")[0];
-        if (availableLangs[browserLocale]) return browserLocale;
+        let found = _lookupLocale(browserLocale, availableLangs);
+        if (found) return found;
     }
 
     // 4. Fallback
