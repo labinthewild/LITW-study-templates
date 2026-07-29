@@ -26,7 +26,7 @@
     <link href="../css/bootstrap.min-5_3_0.css" rel="stylesheet" type="text/css">
     <link href="../css/bootstrap-icons-1.11.3.css" rel="stylesheet" type="text/css">
     <link href="../css/alpaca.min-1.5.23.css" rel="stylesheet" type="text/css">
-    <link href="../css/shareon.min-2.5.0.css" rel="stylesheet" type="text/css">
+    <link href="../css/shareon.min-2.7.0.css" rel="stylesheet" type="text/css">
     <link href="../css/litw-styles-2.0.0.css" rel="stylesheet" type="text/css">
 
 </head>
@@ -55,16 +55,14 @@
     <div id="empty" class="slide"></div>
 </div>
 
-<!-- LITW modules -->
-<!-- TODO: distribute these as one bundled package. -->
-<script src="../js/litw/litw.data.2.1.0.js"></script>
-<script src="../js/litw/litw.tracking.2.1.0.js"></script>
-<script src="../js/litw/litw.engagement.2.1.0.js"></script>
-<script src="../js/litw/litw.utils.0.2.js"></script>
-<script src="../js/litw/litw.locale.0.1.js"></script>
+<!-- Dependencies: plain scripts (loaded as globals) -->
+<script src="../js/jquery.min.js"></script>
+<script src="../js/bootstrap.bundle.5.3.0.min.js"></script>
+<script src="../js/handlebars.js"></script>
+<script src="../js/alpaca.min.js"></script>
 
-<!-- study code and content -->
-<script src="js/study-bundle.min.js?ver=1.0.0"></script>
+<!-- LITW modules: loaded as ESM via study-manager -->
+<script type="module" src="study-manager.mjs"></script>
 
 </body>
 </html>

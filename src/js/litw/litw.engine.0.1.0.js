@@ -114,6 +114,12 @@ let start_study = () => {
 
 let end_study = () => {
     console.log("STUDY FINISHED!", Date.now());
+    //TODO: SEMANTIC ISSUE - end_study() is currently called when trying to advance
+    // PAST the last slide (when current_pos >= slides.length), not when loading the
+    // last slide. This means it fires when user clicks "Next" on results page.
+    // Consider moving this call to trigger when the LAST slide LOADS instead
+    // of when trying to go BEYOND it. For now, this tracks "clicked through timeline".
+    LITW.data.submitData({}, "litw:complete");
     RUNTIME.timeline.status = STUDY_STATUS_OPTIONS.FINISHED;
 }
 
