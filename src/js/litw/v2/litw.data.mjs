@@ -17,6 +17,7 @@ let _ipCountry = "";
 let _ipRegion = "";
 let _ipCity = "";
 let _url = {};
+let _apiBase = "";
 
 /**
  * Set the study ID used for API endpoints.
@@ -24,6 +25,34 @@ let _url = {};
  */
 export function setStudyId(id) {
     _studyId = id;
+}
+
+/**
+ * Set the base URL for API calls. Empty string (default) means
+ * same-origin. Previews point this at a study server.
+ */
+export function setApiBase(base) {
+    _apiBase = (base || "").replace(/\/$/, "");
+}
+
+// ─── Data event listeners (used by the builder preview) ──────
+
+const _listeners = [];
+
+/** Subscribe to every submission. Returns an unsubscribe function. */
+export function onData(callback) {
+    _listeners.push(callback);
+    return () => {
+        const i = _listeners.indexOf(callback);
+        if (i >= 0) _listeners.splice(i, 1);
+    };
+}
+
+function _notify(payload, dataType) {
+    const event = { data: payload, dataType, uuid: _participantId, at: Date.now() };
+    for (let cb of _listeners) {
+        try { cb(event); } catch (e) { /* keep going */ }
+    }
 }
 
 export function getParticipantId() {
@@ -53,7 +82,7 @@ export function initialize() {
     _url = Object.fromEntries(new URLSearchParams(window.location.search).entries());
     let locale = getStudyLang() || "";
 
-    fetch('https://api.labinthewild.org/service/geoip')
+    fetch(`${_apiBase}/service/geoip`)
         .then(r => r.json())
         .then(data => {
             _ipCity = data.city || "";
@@ -72,12 +101,13 @@ export function initialize() {
 }
 
 function _submit(data, dataType) {
-    data.data_type = dataType;
-    data.uuid = _participantId;
-    fetch(`/service/${_studyId}/data/`, {
+    // Never mutate the caller's object (e.g. LITW.slide.data).
+    const payload = { ...data, data_type: dataType, uuid: _participantId };
+    _notify(payload, dataType);
+    fetch(`${_apiBase}/service/${_studyId}/data/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
     }).catch(() => {});
 }
 

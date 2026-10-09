@@ -67,6 +67,13 @@ http.createServer((req, res) => {
         return;
     }
 
+    // GET /service/geoip — placeholder geolocation
+    if (method === 'GET' && url === '/service/geoip') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ city: '', region: '', country: '' }));
+        return;
+    }
+
     // GET /config/<id>/study_references — fake recommendations
     let refMatch = url.match(/^\/config\/([^/]+)\/study_references$/);
     if (method === 'GET' && refMatch) {

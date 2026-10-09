@@ -1,274 +1,142 @@
 <div class="row">
-    <div id="local_data_id" data-local_id="{{ local_data_id }}"></div>
     <div class="col-12">
         <div id="title" class="h3 bolded-blue text-center">
             <span data-i18n="litw-demographics-title"></span>
-            <a class="bi bi-question-circle" style="cursor: pointer" onclick="show_data_info()"></a>
+            <a class="bi bi-question-circle" id="demographics-info-toggle" style="cursor: pointer"></a>
         </div>
-        <div id="data_info_alert" class="alert alert-warning alert-dismissible hidden" role="alert">
+        <div id="data_info_alert" class="alert alert-warning alert-dismissible" role="alert" hidden>
             <span data-i18n="litw-demographics-title-tip"></span>
-            <button type="button" class="btn-close" onclick="hide_data_info()"></button>
+            <button type="button" class="btn-close" id="demographics-info-close"></button>
         </div>
         <p class="text-center" id="requiredMessage" data-i18n="litw-demographics-required"></p>
         <br>
     </div>
 </div>
 
-<div id="demographicsForm" style="text-align: left"></div>
+<form id="demographics-form" class="text-start" novalidate>
+    <label class="form-label fw-bold" for="demographics-retake">
+        <span data-i18n="litw-demographics-retake"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-retake" name="demographics-retake" required>
+        <option value="">--</option>
+        <option value="no" data-i18n="litw-demographics-no"></option>
+        <option value="yes" data-i18n="litw-demographics-yes"></option>
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-country-grow">
+        <span data-i18n="litw-demographics-country-grow"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-country-grow" name="demographics-country-grow" required>
+        <option value="">--</option>
+        {{#each resources.countries}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-country-live">
+        <span data-i18n="litw-demographics-country-live"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-country-live" name="demographics-country-live" required>
+        <option value="">--</option>
+        {{#each resources.countries}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-age">
+        <span data-i18n="litw-demographics-age"></span> <span class="text-danger">*</span>
+    </label>
+    <input class="form-control mb-3" id="demographics-age" name="demographics-age"
+           type="number" min="0" style="width: 200px" required>
+
+    <label class="form-label fw-bold" for="demographics-language-native">
+        <span data-i18n="litw-demographics-language-native"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-language-native" name="demographics-language-native" required>
+        <option value="">--</option>
+        {{#each resources.languageNames}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-religion">
+        <span data-i18n="litw-demographics-religion"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-religion" name="demographics-religion" required>
+        <option value="">--</option>
+        {{#each resources.religions}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-gender">
+        <span data-i18n="litw-demographics-gender"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-gender" name="demographics-gender" required>
+        <option value="">--</option>
+        <option value="female" data-i18n="litw-demographics-female"></option>
+        <option value="male" data-i18n="litw-demographics-male"></option>
+        <option value="non-binary" data-i18n="litw-demographics-nonbinary"></option>
+        <option value="no-disclosure" data-i18n="litw-demographics-nodisclose"></option>
+        <option value="other" data-i18n="litw-demographics-other"></option>
+    </select>
+
+    <div id="demographics-gender-other-field" hidden>
+        <label class="form-label fw-bold" for="demographics-gender-other">
+            <span data-i18n="litw-demographics-gender-other"></span>
+        </label>
+        <input class="form-control mb-3" id="demographics-gender-other" name="demographics-gender-other"
+               type="text" style="width: 200px">
+    </div>
+
+    <label class="form-label fw-bold" for="demographics-education">
+        <span data-i18n="litw-demographics-education"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-education" name="demographics-education" required>
+        <option value="">--</option>
+        <option value="no-formal-edu" data-i18n="litw-demographics-education1"></option>
+        <option value="incomplete-primary" data-i18n="litw-demographics-education2"></option>
+        <option value="complete-primary" data-i18n="litw-demographics-education3"></option>
+        <option value="incomplete-sec-high" data-i18n="litw-demographics-education4"></option>
+        <option value="complete-sec-high" data-i18n="litw-demographics-education5"></option>
+        <option value="university-no-degree" data-i18n="litw-demographics-education6"></option>
+        <option value="university-degree" data-i18n="litw-demographics-education7"></option>
+        <option value="incomplete-grad" data-i18n="litw-demographics-education8"></option>
+        <option value="complete-grad" data-i18n="litw-demographics-education9"></option>
+    </select>
+</form>
 
 <script type="text/javascript">
-    let show_data_info = function(){
-        $('#data_info_alert').show();
-    }
+    (function () {
+        const form = document.getElementById('demographics-form');
+        if (!form) return;
 
-    let hide_data_info = function(){
-        $('#data_info_alert').hide();
-    }
+        const data = LITW.slide.data;
+        const next = document.getElementById('btn-next-page');
 
-    $(document).ready(function() {
-        const LOCAL_KEY = document.getElementById('local_data_id').dataset.local_id;
-        let localData = LITW.data.loadFromLocal(LOCAL_KEY);
-        let countries = {};
-        let languages = {};
-        let religions = {};
-        //TODO: load based on language
-        $.getJSON('../templates/i18n/countries-en.json', function (data) {
-            countries = data;
-        }).done(async function () {
-            $.getJSON('../templates/i18n/lang-en.json', function (data) {
-                languages = data;
-            }).done(async function () {
-                $.getJSON('../templates/i18n/religions-en.json', function (data) {
-                    religions = data;
-                }).done(function () {
-                    $("#demographicsForm").alpaca({
-                        "data": localData,
-                        "schema": {
-                            "description": "LITW Project - Demographics",
-                            "type": "object",
-                            "properties": {
-                                "demographics-retake": {
-                                    "title": $.i18n('litw-demographics-retake'),
-                                    "enum": ['no', 'yes'],
-                                    "required": true
-                                },
-                                "demographics-country-grow": {
-                                    "title": $.i18n('litw-demographics-country-grow'),
-                                    "enum": Object.keys(countries),
-                                    "required": true
-                                },
-                                "demographics-country-live": {
-                                    "title": $.i18n('litw-demographics-country-live'),
-                                    "enum": Object.keys(countries),
-                                    "required": true
-                                },
-                                "demographics-age": {
-                                    "title": $.i18n('litw-demographics-age'),
-                                    "required": true,
-                                    //"minimum": 18
-                                },
-                                "demographics-language-native": {
-                                    "title": $.i18n('litw-demographics-language-native'),
-                                    "enum": Object.keys(languages),
-                                    "required": true
-                                },
-                                "demographics-religion": {
-                                    "title": $.i18n('litw-demographics-religion'),
-                                    "enum": Object.keys(religions),
-                                    "required": true
-                                },
-                                "demographics-gender": {
-                                    "title": $.i18n('litw-demographics-gender'),
-                                    "enum": ['female', 'male', 'non-binary', 'no-disclosure', 'other'],
-                                    "required": true
-                                },
-                                "demographics-gender-other": {
-                                    "title": $.i18n('litw-demographics-gender-other'),
-                                    "required": false
-                                },
-                                "demographics-education": {
-                                    "title": $.i18n('litw-demographics-education'),
-                                    "enum": ['no-formal-edu', 'incomplete-primary', 'complete-primary',
-                                        'incomplete-sec-high', 'complete-sec-high', 'university-no-degree',
-                                        'university-degree', 'incomplete-grad', 'complete-grad'],
-                                    "required": true
-                                },
-                                "demographics-race": {
-                                    "title": $.i18n('litw-demographics-race'),
-                                    "enum": ['native', 'asian', 'black', 'latino', 'islander', 'white', 'no-disclosure',
-                                        'other'],
-                                    "required": false
-                                },
-                                "demographics-race-other": {
-                                    "title": $.i18n('litw-demographics-race-other'),
-                                    "required": false
-                                }
-                            }
-                        },
-                        "options": {
-                            //"hideInitValidationError":true,
-                            "fields": {
-                                "demographics-retake": {
-                                    "type": 'select',
-                                    "optionLabels": [$.i18n('litw-demographics-no'), $.i18n('litw-demographics-yes')],
-                                    "sort": false,
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-country-grow": {
-                                    "type": 'select',
-                                    "optionLabels": Object.values(countries),
-                                    "sort": false,
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-country-live": {
-                                    "type": 'select',
-                                    "optionLabels": Object.values(countries),
-                                    "sort": false,
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-age": {
-                                    "type": 'integer',
-                                    "showMessages": false
-                                },
-                                "demographics-language-native": {
-                                    "type": 'select',
-                                    "optionLabels": Object.values(languages),
-                                    "sort": false,
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-religion": {
-                                    "type": 'select',
-                                    "optionLabels": Object.values(religions),
-                                    "sort": false,
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-gender": {
-                                    "type": 'select',
-                                    "optionLabels": [$.i18n('litw-demographics-female'),
-                                        $.i18n('litw-demographics-male'), $.i18n('litw-demographics-nonbinary'),
-                                        $.i18n('litw-demographics-nodisclose'), $.i18n('litw-demographics-other')],
-                                    "sort": false,
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-gender-other": {
-                                    "type": 'text',
-                                    "showMessages": false,
-                                    "hidden": true
-                                },
-                                "demographics-education": {
-                                    "type": 'select',
-                                    "optionLabels": [$.i18n('litw-demographics-education1'),
-                                        $.i18n('litw-demographics-education2'), $.i18n('litw-demographics-education3'),
-                                        $.i18n('litw-demographics-education4'), $.i18n('litw-demographics-education5'),
-                                        $.i18n('litw-demographics-education6'), $.i18n('litw-demographics-education7'),
-                                        $.i18n('litw-demographics-education8'), $.i18n('litw-demographics-education9')
-                                    ],
-                                    "sort": false,
-                                    //"fieldClass": "row",
-                                    "noneLabel": "--",
-                                    "removeDefaultNone": false,
-                                    "showMessages": false,
-                                    "default": "--"
-                                },
-                                "demographics-race": {
-                                    "type": 'checkbox',
-                                    "optionLabels": [
-                                        $.i18n('litw-demographics-race-native'),
-                                        $.i18n('litw-demographics-race-asian'),
-                                        $.i18n('litw-demographics-race-black'),
-                                        $.i18n('litw-demographics-race-latino'),
-                                        $.i18n('litw-demographics-race-islander'),
-                                        $.i18n('litw-demographics-race-white'),
-                                        $.i18n('litw-demographics-nodisclose'),
-                                        $.i18n('litw-demographics-other'),
-                                    ],
-                                    "sort": false,
-                                    "removeDefaultNone": true,
-                                    //"fieldClass": "row",
-                                    "showMessages": false,
-                                    "hidden": true
-                                },
-                                "demographics-race-other": {
-                                    "type": 'text',
-                                    //"fieldClass": "row",
-                                    "showMessages": false,
-                                    "hidden": true
-                                }
-                            }
-                        },
-                        "postRender": function (control) {
-                            $('#btn-next-page').attr('style', 'display:none;');
-                            $(".alpaca-required-indicator").html(" *");
-                            $("input[type='text']").css('width', '200px');
+        const read = el => el.type === 'checkbox' ? el.checked
+            : (el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value);
+        const write = (el, v) => {
+            if (el.type === 'checkbox') el.checked = !!v;
+            else el.value = (v === undefined || v === null) ? '' : v;
+        };
 
-                            // AGE RESTRICTION CODE!!!
-                            // let age = control.childrenByPropertyId["demographics-age"];
-                            // age.subscribe(age, function(ageValue) {
-                            //     if(ageValue !== '' && !isNaN(ageValue) && Number(ageValue)<14) {
-                            //         $("#litw-body").html(
-                            //             "<H2>"+$.i18n('litw-demographics-minor-alert1') +"</H2>"+
-                            //             "<H3>"+$.i18n('litw-demographics-minor-alert2') + "</H3>"
-                            //         );
-                            //         window.setTimeout(function(){
-                            //             window.location.replace("https://www.labinthewild.org");
-                            //         }, 5000);
-                            //     }
-                            // });
+        const fields = [...form.querySelectorAll('[name]')];
+        const required = [...form.querySelectorAll('[required]')];
 
-                            let gender = control.childrenByPropertyId["demographics-gender"];
-                            let genderOther = control.childrenByPropertyId["demographics-gender-other"];
-                            genderOther.subscribe(gender, function (val) {
-                                this.options.hidden = val !== 'other';
-                                this.refresh();
-                                $("input[type='text']").css('width', '200px');
-                            });
+        function apply() {
+            const ok = required.every(el => String(el.value).trim() !== '');
+            if (next) next.style.display = ok ? 'block' : 'none';
+            document.getElementById('demographics-gender-other-field').hidden =
+                form.elements['demographics-gender'].value !== 'other';
+            return ok;
+        }
 
-                            let country = control.childrenByPropertyId["demographics-culture"];
-                            let race = control.childrenByPropertyId["demographics-race"];
-                            race.subscribe(country, function (val) {
-                                this.options.hidden = val !== 'United States';
-                                this.refresh();
-                            });
+        for (const el of fields) {
+            write(el, data[el.name]);
+            const sync = () => { data[el.name] = read(el); apply(); };
+            el.addEventListener('input', sync);
+            el.addEventListener('change', sync);
+        }
 
-                            let raceOther = control.childrenByPropertyId["demographics-race-other"];
-                            raceOther.subscribe(race, function (val) {
-                                this.options.hidden = !val.includes('other');
-                                this.refresh();
-                                $("input[type='text']").css('width', '200px');
-                            });
-                        },
-                        "view": {
-                            "callbacks": {
-                                "valid": function () {
-                                    $('#btn-next-page').attr('style', 'display:block;');
-                                    $('#btn-next-page')[0].scrollIntoView();
-                                },
-                                "invalid": function () {
-                                    $('#btn-next-page').attr('style', 'display:none;');
-                                }
-                            }
-                        },
-                    });
-                })
-            });
-        });
-    });
+        form.addEventListener('submit', e => e.preventDefault());
+        document.getElementById('demographics-info-toggle')
+            .addEventListener('click', () => { document.getElementById('data_info_alert').hidden = false; });
+        document.getElementById('demographics-info-close')
+            .addEventListener('click', () => { document.getElementById('data_info_alert').hidden = true; });
+
+        apply();
+    })();
 </script>

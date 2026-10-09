@@ -10,10 +10,10 @@
  *************************************************************/
 
 // load ESM modules
-import { configureStudy, startStudy, SLIDE_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
+import { configureStudy, startStudy, SLIDE_TYPE, DATA_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
 import { i18n } from '../js/litw/v2/litw.locale.mjs';
 import {
-    submitStudyData, submitDemographics, submitComments,
+    submitStudyData, submitComments,
     addToLocal, loadFromLocal, getURLparams, getParticipantId,
     submitStudyConfig, setStudyId
 } from '../js/litw/v2/litw.data.mjs';
@@ -33,10 +33,21 @@ const _ = window._;
 			LONG: 15,
 		};
 	let timeline = [];
+
+	// Retake memory: shared by all studies on this origin.
+	const DEMOGRAPHICS_KEY = 'LITW_DEMOGRAPHICS';
+
 	let config = {
 		languages: {
 			'default': 'en',
-			'en': './i18n/en.json?v=1.0',
+			'en': {
+				strings: './i18n/en.json?v=1.0',
+				resources: {
+					countries: '../templates/i18n/countries-en.json',
+					languageNames: '../templates/i18n/lang-en.json',
+					religions: '../templates/i18n/religions-en.json',
+				},
+			},
 			'pt': './i18n/pt-br.json?v=1.0',
 		},
 		study_id: "TO_BE_ADDED_IF_USING_LITW_INFRA",
@@ -77,13 +88,32 @@ const _ = window._;
 				display_element_id: "demographics",
 				display_next_button: false,
 				template_url: "../templates/demographics.html",
-				template_data: {
-					local_data_id: 'LITW_DEMOGRAPHICS'
+				data_type: DATA_TYPE.DEMOGRAPHICS,
+				data: {
+					"demographics-retake": "",
+					"demographics-country-grow": "",
+					"demographics-country-live": "",
+					"demographics-age": "",
+					"demographics-language-native": "",
+					"demographics-religion": "",
+					"demographics-gender": "",
+					"demographics-gender-other": "",
+					"demographics-education": ""
+				},
+				// Retake memory: fill blanks from a previous session, then store
+				// this session's answers. The framework keeps the data; the study
+				// owns the key and the retention policy.
+				setup: function(){
+					const stored = loadFromLocal(DEMOGRAPHICS_KEY);
+					const slideData = window.LITW.slide.data;
+					for (const key of Object.keys(slideData)) {
+						if (!slideData[key] && stored[key] !== undefined) {
+							slideData[key] = stored[key];
+						}
+					}
 				},
 				finish: function(){
-					let dem_data = $('#demographicsForm').alpaca().getValue();
-					addToLocal(this.template_data.local_data_id, dem_data);
-					submitDemographics(dem_data);
+					addToLocal(DEMOGRAPHICS_KEY, window.LITW.slide.data);
 				}
 			},
 			COMMENTS: {
@@ -252,8 +282,12 @@ const _ = window._;
 
 		setStudyId(config.study_id);
 		let timeline = configureTimeline();
-		let good = await configureStudy(config.preLoad, config.languages,
-			timeline, config.study_id);
+		let good = await configureStudy({
+			...config,
+			studyId: config.study_id,
+			preload: config.preLoad,
+			slides: timeline,
+		});
 		if (good) {
 			startStudy();
 		} else {
@@ -265,22 +299,7 @@ const _ = window._;
 	// when the page is loaded, start the study!
 	bootstrap();
 
-	// Single global bridge for inline <script> in templates
-	window.LITW = window.LITW || {};
-	window.LITW.study = { params: config };
-	window.LITW.data = {
-		loadFromLocal,
-		submitStudyData,
-		submitDemographics,
-		submitComments,
-		addToLocal,
-		getParticipantId,
-		getURLparams,
-	};
-	window.LITW.tracking = {
-		recordClick,
-		recordSharing,
-	};
+	// window.LITW is assembled by the engine (litw.core.mjs).
 
 
 

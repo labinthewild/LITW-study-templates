@@ -12,6 +12,7 @@ const COOKIE_NAME = "litw_locale";
 const DEFAULT_LOCALE = "en";
 
 let _translations = {};
+let _resources = {};
 let _chosenLang = null;
 
 // ─── Locale detection ────────────────────────────────────────
@@ -53,30 +54,70 @@ function _detectLocale(availableLangs) {
     return availableLangs['default'] || DEFAULT_LOCALE;
 }
 
+async function _fetchJSON(url) {
+    try {
+        let resp = await fetch(url);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        return await resp.json();
+    } catch (e) {
+        console.warn(`Could not load locale file "${url}": ${e}`);
+        return {};
+    }
+}
+
+function _resourceFiles(entry) {
+    return (entry && typeof entry === 'object' && !Array.isArray(entry) && entry.resources) || {};
+}
+
+/**
+ * Load each declared resource, preferring the chosen language's file and
+ * falling back to the default language's per name.
+ */
+async function _loadResources(fallbackEntry, entry) {
+    let sources = { ..._resourceFiles(fallbackEntry), ..._resourceFiles(entry) };
+    let out = {};
+    for (let [name, url] of Object.entries(sources)) {
+        out[name] = await _fetchJSON(url);
+    }
+    return out;
+}
+
 // ─── Public API ──────────────────────────────────────────────
 
 /**
- * Configure locale: detect best language, load translation files.
+ * Configure locale: detect the best language, then load its translation
+ * strings and reference data.
+ *
  * @param {object} availableLangs — e.g.
  *   { 'default': 'en', 'en': './i18n/en.json', 'pt': './i18n/pt-br.json' }
- *   Values can be a string (single file) or array of strings (multiple files).
+ * A language entry is either a bare file (a string, or an array of strings
+ * to merge) or an object `{ strings, data }`:
+ *   'en': {
+ *     strings: './i18n/en.json',
+ *     resources: { countries: '../i18n/countries-en.json', religions: '…' }
+ *   }
+ * `resources` names locale-dependent reference lists. A name the chosen
+ * language does not provide falls back to the default language's file.
  * @returns {string} the chosen language code
  */
 export async function configure(availableLangs) {
     _chosenLang = _detectLocale(availableLangs);
 
-    // Normalize to array
-    let files = availableLangs[_chosenLang];
-    if (typeof files === 'string') files = [files];
+    let entry = availableLangs[_chosenLang] || {};
+    let fallback = availableLangs[availableLangs['default']] || {};
 
-    // Load and merge translation files
+    // Strings: a bare file/array entry, or entry.strings.
+    let strings = (typeof entry === 'string' || Array.isArray(entry))
+        ? entry : (entry.strings || []);
+    if (typeof strings === 'string') strings = [strings];
+
     let merged = {};
-    for (let url of files) {
-        let resp = await fetch(url);
-        let data = await resp.json();
-        Object.assign(merged, data);
+    for (let url of strings) {
+        Object.assign(merged, await _fetchJSON(url));
     }
     _translations = merged;
+
+    _resources = await _loadResources(fallback, entry);
 
     // Set cookie for future visits
     let expires = new Date();
@@ -91,6 +132,22 @@ export async function configure(availableLangs) {
  */
 export function getStudyLang() {
     return _chosenLang;
+}
+
+/**
+ * Every resource the engine loaded for the study, keyed exactly as
+ * declared in the study config (`languages[<lang>].resources`).
+ */
+export function getResources() {
+    return _resources;
+}
+
+/**
+ * One named resource (e.g. countries, religions) declared under a
+ * language's `resources` in the study config.
+ */
+export function getResource(name) {
+    return _resources[name];
 }
 
 /**
