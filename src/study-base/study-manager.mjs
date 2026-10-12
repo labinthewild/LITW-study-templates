@@ -37,7 +37,10 @@ const _ = window._;
 	// Retake memory: shared by all studies on this origin.
 	const DEMOGRAPHICS_KEY = 'LITW_DEMOGRAPHICS';
 
-	let config = {
+	// Exported so preview hosts can read the study's declarations without
+	// booting it. Everything above is inert module state — the only top-level
+	// call is bootstrap() at the bottom, guarded by LITW_PREVIEW.
+	export const config = {
 		languages: {
 			'default': 'en',
 			'en': {
@@ -297,7 +300,8 @@ const _ = window._;
 
 
 	// when the page is loaded, start the study!
-	bootstrap();
+	// In preview the page is a host, not a study: it must not boot.
+	if (!window.LITW_PREVIEW) bootstrap();
 
 	// window.LITW is assembled by the engine (litw.core.mjs).
 

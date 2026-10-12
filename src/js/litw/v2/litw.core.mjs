@@ -77,10 +77,53 @@ let _previewMode = false;
 
 // ─── Template loading ─────────────────────────────────────────
 
+// A slide may declare its defaults at the top of its own template:
+//
+//   <script type="application/json" data-litw="slide">{ "name": … }</script>
+//   <h1>…</h1>
+//
+// The annotation is lifted *textually* (never through the DOM parser) so the
+// remaining source stays byte-for-byte what the author wrote for Handlebars.
+// One constraint follows from that: the JSON must not contain `</script>`.
+const SLIDE_ANNOTATION_RE =
+    /<script[^>]*\sdata-litw\s*=\s*["']slide["'][^>]*>([\s\S]*?)<\/script>\s*/i;
+
+function splitSlideAnnotation(source) {
+    const match = source.match(SLIDE_ANNOTATION_RE);
+    if (!match) return { meta: null, markup: source };
+    let meta = null;
+    try {
+        meta = JSON.parse(match[1]);
+    } catch (err) {
+        console.error("Invalid slide annotation JSON:", err);
+    }
+    const markup = source.slice(0, match.index) + source.slice(match.index + match[0].length);
+    return { meta, markup };
+}
+
+/**
+ * Compile a template's source into a Handlebars template, handing back the
+ * slide's declared defaults (if it carries an annotation) alongside it.
+ *
+ * This is the ONE place a template is read. Everything else about a slide is
+ * the browser's job: `<style>` in the markup is applied when it is injected,
+ * and `<script>` is re-created by showSlide() so it executes.
+ */
+export function compileTemplate(source) {
+    if (!window.Handlebars) {
+        console.error("Handlebars not loaded.");
+        return { template: null, meta: null };
+    }
+    const { meta, markup } = splitSlideAnnotation(source);
+    return { template: window.Handlebars.compile(markup), meta };
+}
+
 /**
  * Fetch and compile a single Handlebars template from a URL.
  * Useful for study-managers that need to load templates outside
  * the slide system (e.g. results footer).
+ *
+ * Use compileTemplate() directly when the slide's annotation is needed too.
  */
 export async function loadTemplate(url) {
     if (!window.Handlebars) {
@@ -89,7 +132,7 @@ export async function loadTemplate(url) {
     }
     let resp = await fetch(url);
     if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.status}`);
-    return window.Handlebars.compile(await resp.text());
+    return compileTemplate(await resp.text()).template;
 }
 
 /**

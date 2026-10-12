@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PGNFSBWM40"></script>
+    <!-- Preview mode: the builder drives a single slide, so the study must
+         NOT boot and analytics must not report an authoring session. -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-PGNFSBWM40');
+      const litwParams = new URLSearchParams(location.search);
+      // ?preview (builder host, or standalone with a slide picker)
+      // ?slide=<name> implies it, so a developer can jump straight to one slide.
+      window.LITW_PREVIEW = litwParams.has('preview') || litwParams.has('slide');
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script>
+      if (!window.LITW_PREVIEW) {
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){ window.dataLayer.push(arguments); };
+        gtag('js', new Date());
+        gtag('config', 'G-PGNFSBWM40');
+        const gtagScript = document.createElement('script');
+        gtagScript.async = true;
+        gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-PGNFSBWM40';
+        document.head.appendChild(gtagScript);
+      }
     </script>
 
     <meta charset="utf-8">
@@ -61,8 +75,15 @@
 <script src="../js/handlebars.js"></script>
 <script src="../js/alpaca.min.js"></script>
 
-<!-- LITW modules: loaded as ESM via study-manager -->
-<script type="module" src="study-manager.mjs"></script>
+<!-- LITW modules: study-manager boots the study; with ?preview the builder
+     drives a single slide through the engine's preview host instead. -->
+<script type="module">
+  if (window.LITW_PREVIEW) {
+    import('../js/litw/v2/litw.preview.mjs');
+  } else {
+    import('./study-manager.mjs');
+  }
+</script>
 
 </body>
 </html>
