@@ -9,7 +9,11 @@
 	</div>
 </div>
 <script type="application/javascript">
-    $(document).ready(function() {
-        document.getElementById('bar').style.width = "{{ value }}%";
-    });
+    // A partial is injected into an already-loaded page, so there is nothing to
+    // wait for — and the scope is an IIFE because an injected classic script
+    // shares the global lexical scope with every later one.
+    (function () {
+        const bar = document.getElementById('bar');
+        if (bar) bar.style.width = "{{ value }}%";
+    })();
 </script>

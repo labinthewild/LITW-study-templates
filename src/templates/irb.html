@@ -1,31 +1,75 @@
-<h2 class="bolded-blue" data-i18n='litw-irb-header'></h2>
-<p data-i18n='litw-irb-subheader-1'></p>
-<p><em data-i18n='litw-irb-subheader-2'></em></p>
+<h3 class="bolded-blue" data-i18n='litw-irb-header'></h3>
 
-{{#times 6}}
-	<div class="irb-paragraph">
-		<strong class="irb-paragraph-header" data-i18n='litw-irb-body-{{this}}-p1'></strong>
-		<p class="irb-paragraph-body" data-i18n='litw-irb-body-{{this}}-p2'></p>
-	</div>
-{{/times}}
+<div class="card mb-3 border-light">
+    <div class="row g-0">
+        <div class="col-md-4">
+            <img src="./img/researchers1.png" class="img-fluid rounded-start" alt="..." style="max-height: 300px">
+        </div>
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title" data-i18n="litw-irb-q1"></h5>
+                <p class="card-text" data-i18n="litw-irb-a1-p1"></p>
+                <p class="card-text">
+                    <span data-i18n="litw-irb-a1-p2"></span>
+                    <span data-i18n="litw-irb-a1-p2-time-{{ time }}"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="card mb-3 border-light">
+    <div class="row g-0">
+        <div class="col-md-8">
+            <div class="card-body">
+                <h5 class="card-title" data-i18n="litw-irb-q2"></h5>
+                <p class="card-text" data-i18n="litw-irb-a2"></p>
+                <h5 class="card-title" data-i18n="litw-irb-q3"></h5>
+                <p class="card-text" data-i18n="litw-irb-a3"></p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <img src="./img/diversity1.png" class="img-fluid rounded-start" alt="..." style="max-height: 300px">
+        </div>
+    </div>
+</div>
 
-<p data-i18n='litw-irb-body-final'></p>
+<div class="card mb-3 border-light">
+    <div class="row g-0">
+        <div class="col-md">
+            <div class="card-body">
+                <h5 class="card-title" data-i18n="litw-irb-q4"></h5>
+                <p class="card-text" data-i18n="litw-irb-a4-p1"></p>
+                <p class="card-text" data-i18n="litw-irb-a4-p2"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <form id="consent-form">
-	<input type="checkbox" id="agree-to-study" onclick="checkBoxVerification()"/>
+	<input type="checkbox" id="agree-to-study"/>
 	<label for="agree-to-study" data-i18n='litw-irb-consent'></label>
 </form>
 <span class="bolded-blue" id="approve-irb" data-i18n='litw-irb-warning'></span>
 
 <script type="text/javascript">
-    var checkBoxVerification = function (){
-        if($('#agree-to-study').is(':checked')){
-            $('#approve-irb').hide();
-            $('#btn-next-page').attr('style', 'display:block;');
-            $('#btn-next-page')[0].scrollIntoView();
-        } else {
-            $('#btn-next-page').hide();
-            $('#approve-irb').attr('style', 'display:block;');
+    (function () {
+        const agree = document.getElementById('agree-to-study');
+        const warning = document.getElementById('approve-irb');
+        const next = document.getElementById('btn-next-page');
+
+        // Consenting is the slide's own interaction. This template owns the
+        // continue affordance (`template.next_button: false`), so the engine
+        // hides the study's next button and this decides when it comes back.
+        function apply() {
+            warning.style.display = agree.checked ? 'none' : 'block';
+            next.style.display = agree.checked ? 'block' : 'none';
+            if (agree.checked) next.scrollIntoView();
         }
-    }
+
+        agree.addEventListener('change', apply);
+        document.getElementById('consent-form')
+            .addEventListener('submit', (e) => e.preventDefault());
+        apply();
+    })();
 </script>

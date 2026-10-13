@@ -113,7 +113,14 @@ http.createServer((req, res) => {
             return res.end(`404 — ${url}`);
         }
         let ext = path.extname(filePath);
-        res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
+        res.writeHead(200, {
+            'Content-Type': MIME[ext] || 'application/octet-stream',
+            // This is a DEV server: the whole point is that an edit shows up on
+            // reload. Without this, a browser may serve `study-manager.mjs` or a
+            // template from its own cache, and you end up debugging code that is
+            // no longer on disk.
+            'Cache-Control': 'no-store',
+        });
         res.end(data);
     });
 }).listen(PORT, () => {

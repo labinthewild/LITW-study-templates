@@ -68,10 +68,10 @@ src/
   Before: provide `init`, run `hooks.setup`, inject the template. After:
   `hooks.finish`, submit `produced`. Everything during the slide is the
   slide's.
-- **Legacy aliases belong to the engine, not to the study.** `configureEngine`
-  sets `window.$.i18n = i18n` so old templates (and Alpaca field configs) keep
-  working — and so a *preview*, which never runs `bootstrap()`, can render them
-  at all. TODO: remove once no template calls `$.i18n()`.
+- **Translation is `i18n()` and `data-i18n`, nothing else.** A `window.$.i18n`
+  alias lived in `configureEngine` while old templates needed it; the last
+  caller is gone, so the alias is gone with it. If a study's own inline code
+  still calls `$.i18n()`, it needs `i18n(...)`.
 
 ---
 
@@ -347,13 +347,30 @@ calls `i18n(el)`.
   engine-side, but it means a submission arrives per slide — so no client may
   treat "a submission arrived" as a reason to render the slide again. The
   builder learned this the hard way (see its AGENTS.md).
-- **`#results-footer` does not exist in `index.html`.** `showResults()` writes
-  the share footer there, so it has silently never rendered. Pre-existing; the
-  results slide is where it gets fixed.
-- **Still on jQuery/Alpaca:** `comments.html` (Alpaca, plus a study
-  `hooks.finish` that submits for it), `irb2-litw.html` (6 calls),
-  `introduction.html` (1). The engine sets `$.i18n` for them; that alias goes
-  when the last one does.
+- **`#results-footer` lives inside `results.html`, not `index.html`** — so the
+  share footer *was* rendering, despite what it looks like from `index.html`.
+  It is now a partial the page includes (`{{>results-footer}}`), part of the
+  same render rather than patched in afterwards.
+- **Inline scripts: `type` is preserved, and top-level `const` is a trap.**
+  `showSlide()` re-creates a template's `<script>` — `type` included, so a
+  `<script type="module">` still runs as one (results-footer's shareon does).
+  But an injected *classic* script shares the global **lexical** scope with
+  every later one, so `const`/`let` at the top level of a template script throws
+  `Identifier 'x' has already been declared` the second time that slide is
+  shown. Wrap template scripts in an IIFE, or use `var`.
+- **No template uses jQuery or Alpaca any more.** `index.html` still loads both,
+  and the vendor files stay: `study-cats` is a legacy sibling (webpack + the old
+  `litw.*.2.1.0.js` engine) that still needs them.
+- **Leftovers in `study-base/`:** `study-manager.js` (287 lines, unreferenced),
+  `readSummaryData()` in the manager (a TODO helper nobody calls, and the last
+  `$.` reference in study code), and six unreferenced shared templates:
+  `instructions`, `likert-question`, `loading`, `midTrialBreak`, `new-results`,
+  `preTrialBreak`.
+- **Consent is not recorded.** The `informed_consent` slide submits nothing — no
+  `data.type`, nothing written to `produced` — so the agreement itself is never
+  sent, only the engine's `litw:tracking` checkpoint. If IRB needs it on the
+  wire, that is a four-line change (`DATA_TYPE.INFORMED_CONSENT` is already
+  defined).
 - **Headless verification** works well here: Playwright's cached Chromium plus
   `--headless=new --virtual-time-budget=15000 --dump-dom <url>`. Real fetches
   settle within the budget. Quote `--host-resolver-rules` when blocking analytics
@@ -387,6 +404,16 @@ calls `i18n(el)`.
 - **Only `produced` is submitted; `init` never leaves the page.**
 - **A template declares nothing of its own** — the `data-litw` annotation was
   removed once `getTimeline()` made it redundant.
+- **`template.input` is evaluated on every render**, and stays *synchronous*.
+  The results page proves the first half: its emoji, hue and timestamp change
+  each time the slide is shown. The second half is why the study
+  recommendations come from the engine's cache — `preloadResources` warms it
+  during configuration, so `getStudiesRecommendation` calls back synchronously
+  inside `input`. If that warm-up ever goes away, the fix is async `input`, not
+  a hook.
+- **The results page is the worked example** of a function `input`: it shows a
+  computed demo block, the participant code, the share footer (a partial), and
+  the recommendations. Its `input_demo` block is meant to be deleted.
 
 ## Open questions
 

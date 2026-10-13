@@ -10,10 +10,9 @@
  *************************************************************/
 
 // load ESM modules
-import { configureStudy, startStudy, DATA_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
+import { configureStudy, startStudy, DATA_TYPE, loadTemplate } from '../js/litw/v2/litw.core.mjs';
 import { i18n } from '../js/litw/v2/litw.locale.mjs';
 import {
-    submitComments,
     addToLocal, loadFromLocal, getURLparams, getParticipantId,
     setStudyId
 } from '../js/litw/v2/litw.data.mjs';
@@ -61,7 +60,11 @@ const _ = window._;
 			},
 			INFORMED_CONSENT: {
 				name: "informed_consent",
-				template: { url: "../templates/irb2-litw.html", next_button: false },
+				template: {
+					url: "../templates/irb.html",
+					next_button: false,
+					input: { time: study_times.MEDIUM },
+				},
 			},
 			DEMOGRAPHICS: {
 				name: "demographics",
@@ -114,28 +117,18 @@ const _ = window._;
 			COMMENTS: {
 				name: "comments",
 				template: { url: "../templates/comments.html" },
-				// Alpaca collects the values; until this template is migrated, the
-				// hook submits them itself (a slide that writes nothing into
-				// `produced` submits nothing on the way out).
-				hooks: {
-					finish: function(){
-						let comments = $('#commentsForm').alpaca().getValue();
-						if (Object.keys(comments).length > 0) {
-							submitComments({
-								comments: comments
-							});
-						}
-					}
-				}
+				// Not trial data, so it keeps its own kind — as it had when this
+				// slide submitted itself through a study hook.
+				data: { type: DATA_TYPE.COMMENTS },
 			},
 			RESULTS: {
 				name: "results",
-				// No template, just work: the engine calls hooks.run and moves on.
-				hooks: {
-					run: function(){
-						calculateResults();
-					}
-				}
+				template: {
+					url: "../templates/results.html",
+					next_button: false,
+					// A function, so these values are computed when the slide renders.
+					input: () => resultsInput(),
+				},
 			}
 		}
 	};
@@ -160,27 +153,39 @@ const _ = window._;
 		config.slides.QUESTIONNAIRE_1.template.input = () => getQuest1Data('quest1', 50);
 		config.slides.QUESTIONNAIRE_2.template.input = () => getQuest2Data('quest2', './img/cat-computer.png', 100);
 
+		// Registered like `prog`: the results page includes this one itself
+		// ({{>results-footer}}), so the footer is part of the same render instead
+		// of being patched in afterwards.
+		const resultsFooter = await loadTemplate("../templates/results-footer.html").catch(() => null);
+		if (resultsFooter) Handlebars.registerPartial('results-footer', resultsFooter);
+
 		return Object.values(config.slides);
 	}
 
+	/**
+	 * The questionnaire's per-instance content. The values are i18n KEYS, not
+	 * translated strings: the template marks them with data-i18n and the engine
+	 * resolves them right after injection. So this stays a plain data structure
+	 * — nothing here waits on a language having been chosen, or on jQuery.
+	 */
 	function getQuest1Data(quest_id, completion) {
 		return {
-			title: $.i18n(`litw-study-${quest_id}-title`),
+			title: `litw-study-${quest_id}-title`,
 			progress: {
 				value: completion
 			},
 			quest_id: quest_id,
-			done_button: $.i18n(`litw-study-${quest_id}-save`),
+			done_button: `litw-study-${quest_id}-save`,
 			questions: [1, 2].map((x)=> {
 				return {
 					id: x,
-					text: $.i18n(`litw-study-${quest_id}-q${x}`)
+					text: `litw-study-${quest_id}-q${x}`
 				}
 			}),
 			responses: [1, 2, 3, 4, 5].map((x)=> {
 				return {
 					id: x,
-					text: $.i18n(`litw-study-quest-a${x}`)
+					text: `litw-study-quest-a${x}`
 				}
 			})
 		}
@@ -188,27 +193,27 @@ const _ = window._;
 
 	function getQuest2Data(quest_id, img_url, completion) {
 		return {
-			title: $.i18n(`litw-study-${quest_id}-title`),
+			title: `litw-study-${quest_id}-title`,
 			img_prompt: {
 				url: img_url,
-				text_before: $.i18n(`litw-study-${quest_id}-prompt`),
+				text_before: `litw-study-${quest_id}-prompt`,
 			},
 			progress: {
 				value: completion
 			},
 			quest_id: quest_id,
-			done_button: $.i18n(`litw-study-${quest_id}-save`),
+			done_button: `litw-study-${quest_id}-save`,
 			questions: [1, 2].map((q)=> {
 				return {
 					id: q,
-					text: $.i18n(`litw-study-${quest_id}-q${q}`),
+					text: `litw-study-${quest_id}-q${q}`,
 				}
 				//ALERT: You can also add responses for each question.
 			}),
 			responses: [1, 2, 3, 4, 5].map((x)=> {
 				return {
 					id: x,
-					text: $.i18n(`litw-study-quest-a${x}`)
+					text: `litw-study-quest-a${x}`
 				}
 			})
 		}
@@ -216,37 +221,42 @@ const _ = window._;
 
 	function calculateResults() {
 		//TODO: Nothing to calculate
-		let results_data = {}
-		showResults(results_data, true)
-	}
-
-	//TODO Should be better supported by the ENGINE to setup HTML and show "SLIDE"
-	function showResults(results = {}, showFooter = false) {
-		let results_div = $("#results");
-		let recom_studies = [];
-		getStudiesRecommendation(config.study_id, (studies) => {recom_studies = studies});
-
-		if('PID' in getURLparams()) {
+		const results = {};
+		if ('PID' in getURLparams()) {
 			//REASON: Default behavior for returning a unique PID when collecting data from other platforms
 			results.code = getParticipantId();
 		}
+		return results;
+	}
 
-		results_div.html(
-			resultsTemplate({
-				data: results
-			}));
-		if(showFooter) {
-			$("#results-footer").html(resultsFooterTemplate(
-				{
-					share_url: window.location.href,
-					share_title: $.i18n('litw-irb-header'),
-					share_text: $.i18n('litw-template-title'),
-					more_litw_studies: recom_studies
-				}
-			));
-		}
-		i18n(results_div[0]);
-		showSlideById("results");
+	/**
+	 * What the results slide renders with. `template.input` is a FUNCTION, so
+	 * this runs at render time and may read whatever is only true then.
+	 *
+	 * The recommendations are already cached by the engine (preloadResources
+	 * warms them during configuration), so this callback fires synchronously; if
+	 * it ever does not, the footer's list is simply empty.
+	 */
+	function resultsInput() {
+		getStudiesRecommendation(config.study_id, (studies) => {
+			recommendations = studies || [];
+		});
+
+		return {
+			data: calculateResults(),
+			footer: {
+				share_url: window.location.href,
+				share_text: i18n('litw-template-title'),
+				more_litw_studies: recommendations,
+			},
+			// A demo of what `input` can do — these change on every render. Delete
+			// this block, here and in results.html, when you write your own page.
+			input_demo: {
+				emoji: ['🎉', '🐱', '🔬', '🌟', '🧪'][Math.floor(Math.random() * 5)],
+				hue: Math.floor(Math.random() * 360),
+				rendered_at: new Date().toLocaleTimeString(),
+			},
+		};
 	}
 
 	//TODO Move to LITW.DATA library
@@ -260,18 +270,10 @@ const _ = window._;
 	}
 
 
-	let resultsTemplate = null;
-	let resultsFooterTemplate = null;
+	// Filled by resultsInput() from the engine's (already warmed) cache.
+	let recommendations = [];
 
 	async function bootstrap() {
-		// Load templates rendered outside the engine's slide system
-		let [r, rf] = await Promise.all([
-			loadTemplate("../templates/results.html"),
-			loadTemplate("../templates/results-footer.html")
-		]);
-		resultsTemplate = r;
-		resultsFooterTemplate = rf;
-
 		setStudyId(config.study_id);
 		const timeline = await getTimeline();
 		const good = await configureStudy({

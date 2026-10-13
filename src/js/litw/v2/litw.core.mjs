@@ -158,12 +158,6 @@ export async function configureEngine(config = {}) {
 
     await configureLocale(languages);
 
-    // Legacy alias: older templates (and Alpaca field configs) call $.i18n().
-    // The engine owns translation, so it exposes it under that name — which
-    // also means a preview gets it without booting the study.
-    // TODO: remove once no template calls $.i18n().
-    if (window.$) window.$.i18n = i18n;
-
     // The engine owns LITW.study; the study only reads it. `resources`
     // holds the loaded reference lists, keyed exactly as declared.
     window.LITW = window.LITW || {};
@@ -220,9 +214,14 @@ function showSlide(slide) {
     const el = ensureElement(slide.name);
     // `resources` is reserved: the engine's loaded lists are always in scope.
     el.innerHTML = slide.template.compiled({ ...slideInput(slide), resources: getResources() });
-    // Re-execute inline scripts (innerHTML doesn't run them)
+    // Re-execute inline scripts (innerHTML doesn't run them). The `type` comes
+    // along too: a template may ship a `<script type="module">` — results-footer
+    // does, for shareon — and re-created as a classic script it would throw on
+    // its own `import`.
     el.querySelectorAll('script').forEach(oldScript => {
         const newScript = document.createElement('script');
+        const type = oldScript.getAttribute('type');
+        if (type) newScript.setAttribute('type', type);
         if (oldScript.src) {
             newScript.src = oldScript.src;
         } else {

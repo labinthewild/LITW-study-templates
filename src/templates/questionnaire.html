@@ -6,25 +6,26 @@
     <div id="quest-id" data-value="{{ quest_id }}"></div>
     <div id="questionnaire">
         <div class="row gap-2">
-            <h3 class="bolded-blue">{{ title }}</h3>
+            <h3 class="bolded-blue" data-i18n="{{ title }}"></h3>
         </div>
     {{#if img_prompt}}
-        <h4>{{ img_prompt.text_before }}</h4>
+        <h4 data-i18n="{{ img_prompt.text_before }}"></h4>
         <div id="img_prompt" class="pb-4">
             <img src="{{img_prompt.url}}" style="width: 100%; height: auto;">
         </div>
-        <h4>{{ img_prompt.text_after }}</h4>
+        <h4 data-i18n="{{ img_prompt.text_after }}"></h4>
     {{/if}}
 
     {{#each questions}}
         <div class="row mt-4">
-            <h6 id="question-{{ this.id }}" data-type="question" class="bolded-blue">{{ this.text }}</h6>
+            <h6 id="question-{{ this.id }}" data-type="question" class="bolded-blue"
+                data-i18n="{{ this.text }}"></h6>
             <div class="col justify-content-center litw-button-group-container">
                 <div class="btn-group me-2 litw-button-group" role="group" aria-label="First group">
     {{#each ../responses}}
-                    <button type="button" data-qid="{{ ../this.id }}" data-rid="{{ this.id }}" class="btn btn-outline-primary" onclick="respondQuestion({{ ../this.id }}, {{ this.id }})">
-                        {{ this.text }}
-                    </button>
+                    <button type="button" data-qid="{{ ../this.id }}" data-rid="{{ this.id }}"
+                            class="btn btn-outline-primary" data-i18n="{{ this.text }}"
+                            onclick="respondQuestion({{ ../this.id }}, {{ this.id }})"></button>
     {{/each}}
                 </div>
             </div>
@@ -32,19 +33,22 @@
     {{/each}}
         <div id="submit" class="row mt-4 invisible">
             <button id="button-save" type="button" class="btn btn-primary" data-bs-toggle="button"
-                    onclick="finishQuestions()"> {{ done_button }} </button>
+                    data-i18n="{{ done_button }}" onclick="finishQuestions()"></button>
         </div>
     </div>
 </div>
 
 <script type="text/javascript">
+    // The answers ARE the slide's produced data, written as they are given —
+    // one model, and the same object the engine submits. (`responses`, the
+    // answer scale, comes from `input` and is a different thing entirely.)
     TOTAL_Q = document.querySelectorAll('[data-type="question"]').length;
-    responses = {}
+    produced = LITW.slide.data.produced;
 
     function respondQuestion (qID, rID) {
         selectResponse(qID, rID);
-        responses[qID] = rID;
-        if(Object.keys(responses).length === TOTAL_Q) {
+        produced[qID] = rID;
+        if(Object.keys(produced).length === TOTAL_Q) {
             document.getElementById('submit').classList.remove('invisible');
         }
     }
@@ -61,9 +65,8 @@
     }
 
     function finishQuestions () {
-        // The slide writes only what it produced; the engine wraps it in the
-        // slide's name (quest1/quest2) and submits it on the way out.
-        Object.assign(LITW.slide.data.produced, responses);
+        // Nothing to copy — the answers are already there. The engine wraps
+        // them in the slide's name (quest1/quest2) and submits on the way out.
         document.getElementById('btn-next-page').click();
     }
 

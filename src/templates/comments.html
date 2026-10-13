@@ -1,92 +1,62 @@
 <h2 class="h3 bolded-blue" data-i18n="litw-comment-title"></h2>
 <span class="text-left" data-i18n="litw-comment-subtitle"></span>
 
-<div id="commentsForm" style="text-align: left"></div>
-<script type="text/javascript">
-    $(document).ready(function() {
-        $("#commentsForm").alpaca({
-            "data": false,
-            "schema": {
-                "description": "LITW Comments",
-                "type": "object",
-                "properties": {
-                    "comment-general": {
-                        "title": $.i18n('litw-comment-q1'),
-                        "required": false,
-                        "type": "string",
-                    },
-                    "comment-hadissue": {
-                        "title": $.i18n('litw-comment-q21'),
-                        "enum": ['no', 'yes'],
-                        "required":false
-                    },
-                    "comment-issue": {
-                        "title": $.i18n('litw-comment-q22'),
-                        "type": "string",
-                        "required": false
-                    },
-                    "comment-shouldexclude": {
-                        "title": $.i18n('litw-comment-q31'),
-                        "enum": ['no', 'yes'],
-                        "required":false
-                    },
-                    "comment-whyexclude": {
-                        "title": $.i18n('litw-comment-q32'),
-                        "type": "string",
-                        "required":false
-                    }
-                },
-            },
-            "options": {
-                "fields": {
-                    "comment-general": {
-                        "type": "textarea"
-                    },
-                    "comment-hadissue": {
-                        "type": 'select',
-                        "optionLabels": [$.i18n('litw-demographics-no'),
-                            $.i18n('litw-demographics-yes')],
-                        "sort": false,
-                        "noneLabel": "--",
-                        "removeDefaultNone": false,
-                        "showMessages": false,
-                        "default": "--"
-                    },
-                    "comment-issue": {
-                        "type": "textarea",
-                        "hidden": true
-                    },
-                    "comment-shouldexclude": {
-                        "type": 'select',
-                        "optionLabels": [$.i18n('litw-demographics-no'),
-                            $.i18n('litw-demographics-yes')],
-                        "sort": false,
-                        "noneLabel": "--",
-                        "removeDefaultNone": false,
-                        "showMessages": false,
-                        "default": "--"
-                    },
-                    "comment-whyexclude": {
-                        "type": "textarea",
-                        "hidden": true
-                    },
-                }
-            },
-            "postRender": function(control) {
-                let hadissue = control.childrenByPropertyId["comment-hadissue"];
-                let issue = control.childrenByPropertyId["comment-issue"];
-                issue.subscribe(hadissue, function(val) {
-                    this.options.hidden = val !== 'yes';
-                    this.refresh();
-                });
+<form id="comments-form" class="text-start mt-3">
+    <label class="form-label fw-bold" for="comment-general" data-i18n="litw-comment-q1"></label>
+    <textarea class="form-control mb-3" id="comment-general" name="comment-general" rows="4"></textarea>
 
-                let shouldexclude = control.childrenByPropertyId["comment-shouldexclude"];
-                let whyexclude = control.childrenByPropertyId["comment-whyexclude"];
-                whyexclude.subscribe(shouldexclude, function(val) {
-                    this.options.hidden = val !== 'yes';
-                    this.refresh();
-                });
-            }
-        });
-    });
+    <label class="form-label fw-bold" for="comment-hadissue" data-i18n="litw-comment-q21"></label>
+    <select class="form-select mb-3" id="comment-hadissue" name="comment-hadissue">
+        <option value="">--</option>
+        <option value="no" data-i18n="litw-demographics-no"></option>
+        <option value="yes" data-i18n="litw-demographics-yes"></option>
+    </select>
+
+    <div id="comment-issue-field" hidden>
+        <label class="form-label fw-bold" for="comment-issue" data-i18n="litw-comment-q22"></label>
+        <textarea class="form-control mb-3" id="comment-issue" name="comment-issue" rows="4"></textarea>
+    </div>
+
+    <label class="form-label fw-bold" for="comment-shouldexclude" data-i18n="litw-comment-q31"></label>
+    <select class="form-select mb-3" id="comment-shouldexclude" name="comment-shouldexclude">
+        <option value="">--</option>
+        <option value="no" data-i18n="litw-demographics-no"></option>
+        <option value="yes" data-i18n="litw-demographics-yes"></option>
+    </select>
+
+    <div id="comment-whyexclude-field" hidden>
+        <label class="form-label fw-bold" for="comment-whyexclude" data-i18n="litw-comment-q32"></label>
+        <textarea class="form-control mb-3" id="comment-whyexclude" name="comment-whyexclude" rows="4"></textarea>
+    </div>
+</form>
+
+<script type="text/javascript">
+    (function () {
+        const form = document.getElementById('comments-form');
+        if (!form) return;
+
+        // Nothing here is required and nothing is remembered, so there is no
+        // seed to hydrate from — the form is purely a collecting schema. (The
+        // full binder, with `init`, is in demographics.html.)
+        const produced = LITW.slide.data.produced;
+
+        const issue = document.getElementById('comment-issue-field');
+        const why = document.getElementById('comment-whyexclude-field');
+
+        // Two selects gate two textareas. That is the slide's own interaction:
+        // the engine neither knows about it nor needs to.
+        function reveal() {
+            issue.hidden = form.elements['comment-hadissue'].value !== 'yes';
+            why.hidden = form.elements['comment-shouldexclude'].value !== 'yes';
+        }
+
+        for (const el of form.querySelectorAll('[name]')) {
+            const sync = () => { produced[el.name] = el.value; reveal(); };
+            el.addEventListener('input', sync);
+            el.addEventListener('change', sync);
+        }
+
+        form.addEventListener('submit', (e) => e.preventDefault());
+        reveal();
+    })();
 </script>
