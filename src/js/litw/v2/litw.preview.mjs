@@ -7,8 +7,8 @@
  * time, outside a study run.
  *
  * The page configures itself from the study's OWN declarations
- * (study-manager.mjs → `config`), so nothing has to be told twice: there
- * is no second copy of the languages, resources or slide list anywhere.
+ * (study-manager.mjs → `config` and `getTimeline()`), so nothing has to be
+ * told twice: no second copy of the languages, resources or slide list.
  *
  * Two modes, decided by where it was loaded:
  *
@@ -16,11 +16,11 @@
  *   standalone (opened directly)       `?preview&slide=<name>`, plus a picker
  *
  * Protocol (postMessage, builder ⇄ preview page)
- *   in : { type: 'testSlide', slide: { …, source? | template_url? } }
+ *   in : { type: 'testSlide', slide: { name, source? } }
  *        { type: 'next' }
- *   out: { type: 'ready' }              engine configured; send slides now
- *        { type: 'rendered', id, ok }
- *        { type: 'slideData', data }     live LITW.slide.data
+ *   out: { type: 'ready', slides }       configured; here is the study's timeline
+ *        { type: 'rendered', name, ok }
+ *        { type: 'slideData', data }     what the slide produced (the payload)
  *        { type: 'data', event }         a submission
  *        { type: 'error', message }
  *
@@ -37,58 +37,71 @@ function post(message) {
     if (isHosted) window.parent.postMessage(message, '*');
 }
 
-/**
- * Make sure the slide has somewhere to render. The real page names its
- * slides up front, but a preview may show a slide the page has never
- * heard of — so create the element if it is missing.
- */
-function ensureElement(id) {
-    if (!id || document.getElementById(id)) return;
-    const el = document.createElement('div');
-    el.id = id;
-    el.className = 'slide';
-    const content = document.getElementById('content');
-    const next = document.getElementById('btn-next-page');
-    // Before the next button: it floats right, so it has to come after the
-    // slide in order to land below it — exactly as in a real study page.
-    if (content && next) content.insertBefore(el, next);
-    else if (content) content.appendChild(el);
-}
-
-/**
- * Resolve a slide: the template's declared defaults first, the caller's
- * slide over the top — the caller wins, key by key. A slide that declares
- * nothing gets the sensible defaults instead of an engine error.
- */
-function resolveSlide(meta, slide) {
-    const merged = { ...(meta || {}), ...slide };
-    if (meta && meta.data && slide.data) merged.data = { ...meta.data, ...slide.data };
-    merged.type = merged.type || 'SHOW_SLIDE';
-    merged.display_element_id = merged.display_element_id || merged.name;
-    return merged;
-}
-
-/** Render one slide: fetch/compile its template, then let the engine show it. */
+/** Render one slide, then let the engine show it and run its lifecycle. */
 async function renderSlide(spec) {
     if (!window.Handlebars) throw new Error('Handlebars is not loaded on this page.');
-    const { source, template_url, ...slide } = spec;
+    const { source, ...slide } = spec;
+    // A slide with no template is a function-only slide: nothing to compile.
+    if (!slide.template) return testSlide(slide);
     const text = source == null
-        ? await fetch(template_url).then(r => r.text())
+        ? await fetch(slide.template.url).then(r => r.text())
         : source;
-    const { template, meta } = compileTemplate(text);
-    const resolved = resolveSlide(meta, slide);
-    ensureElement(resolved.display_element_id);
-    return testSlide({ ...resolved, template });
+    return testSlide({
+        ...slide,
+        template: { ...slide.template, compiled: compileTemplate(text) },
+    });
 }
 
 /**
- * Read the study's own declarations. The manager is imported for its
- * `config` only — its one top-level call, bootstrap(), is guarded by
- * LITW_PREVIEW, so importing it never starts a study.
+ * Read the study's own declarations: its `config` and its `getTimeline()`.
+ * The manager is imported for those only — its one top-level call,
+ * bootstrap(), is guarded by LITW_PREVIEW, so importing it never starts a
+ * study. The timeline is awaited, so the partials it registers are in place
+ * before any template is compiled.
  */
-async function loadStudyConfig() {
+async function loadStudy() {
     const mod = await import(new URL('./study-manager.mjs', document.baseURI));
-    return mod.config;
+    return { config: mod.config, timeline: await mod.getTimeline() };
+}
+
+// The study's own slide declarations, by name — kept so a request can be
+// resolved against them.
+let studySlides = {};
+
+/**
+ * The study's slides as a builder may see them: plain data only. Functions do
+ * not cross postMessage (structured clone throws on them), so the study's own
+ * entries — which carry hooks and a compiled template — are projected down to
+ * what a timeline needs to draw. This is description only; the builder drives
+ * by NAME, and this page resolves that name against the full slide.
+ *
+ * The order is the timeline's. The catalogue supplies nothing but a label:
+ * INFORMED_CONSENT reads better than informed_consent on a button. Template
+ * URLs are made absolute here, because only this page knows how its own
+ * relative paths resolve.
+ */
+function describeSlides(config, timeline) {
+    const keyByName = Object.fromEntries(
+        Object.entries(config.slides).map(([key, slide]) => [slide.name, key]));
+    return timeline.map(slide => ({
+        key: keyByName[slide.name] || slide.name,
+        name: slide.name,
+        template: slide.template ? {
+            url: new URL(slide.template.url, document.baseURI).href,
+            next_button: slide.template.next_button,
+        } : undefined,
+        data: slide.data ? { type: slide.data.type } : undefined,
+    }));
+}
+
+/**
+ * A request is a slide name, plus (later) edited `source`. The study's own
+ * declaration goes underneath it, so a preview runs the real slide — its
+ * defaults and lifecycle hooks included. The caller still wins, key by key.
+ */
+function resolveStudySlide(request) {
+    const base = request.name ? studySlides[request.name] : null;
+    return base ? { ...base, ...request } : request;
 }
 
 /**
@@ -96,7 +109,7 @@ async function loadStudyConfig() {
  * configuration. Returns that config.
  */
 async function startEngine() {
-    const config = await loadStudyConfig();
+    const { config, timeline } = await loadStudy();
     await configureEngine({
         studyId: config.study_id,
         languages: config.languages,
@@ -106,21 +119,25 @@ async function startEngine() {
     onData(event => (isHosted
         ? post({ type: 'data', event })
         : console.log('[litw.preview] data', event)));
-    return config;
+
+    studySlides = {};
+    for (const slide of timeline) studySlides[slide.name] = slide;
+    return { config, timeline };
 }
 
 // ─── Hosted mode: a builder is driving us ─────────────────────
 
 async function startHostMode() {
-    await startEngine();
+    const { config, timeline } = await startEngine();
 
     window.addEventListener('message', async (e) => {
         const msg = e.data;
         if (!msg || typeof msg !== 'object') return;
         try {
             if (msg.type === 'testSlide') {
-                const ok = await renderSlide(msg.slide || {});
-                post({ type: 'rendered', id: (msg.slide || {}).display_element_id, ok });
+                const spec = resolveStudySlide(msg.slide || {});
+                const ok = await renderSlide(spec);
+                post({ type: 'rendered', name: spec.name, ok });
             } else if (msg.type === 'next') {
                 nextSlide();
             }
@@ -135,21 +152,23 @@ async function startHostMode() {
     let lastSnapshot = '';
     window.setInterval(() => {
         const live = window.LITW && window.LITW.slide;
-        const data = (live && live.data) || {};
-        const snapshot = JSON.stringify(data);
+        // What the slide produced: the payload the engine submits. The seed
+        // (`init`) is the slide's own business and stays on this page.
+        const produced = (live && live.data && live.data.produced) || {};
+        const snapshot = JSON.stringify(produced);
         if (snapshot !== lastSnapshot) {
             lastSnapshot = snapshot;
-            post({ type: 'slideData', data });
+            post({ type: 'slideData', data: produced });
         }
     }, 300);
 
-    post({ type: 'ready' });
+    post({ type: 'ready', slides: describeSlides(config, timeline) });
 }
 
 // ─── Standalone mode: a developer, no builder ─────────────────
 
 /**
- * A small dev bar listing every slide the study declares, so checking one
+ * A small dev bar listing every slide in the study's timeline, so checking one
  * slide no longer means editing the timeline. Preview chrome only — it is
  * never mounted in a real study run.
  */
@@ -183,21 +202,29 @@ function mountSlidePicker(keys, current, onPick) {
 }
 
 async function startStandaloneMode() {
-    const { slides } = await startEngine();
-    const keys = Object.keys(slides);
-    const wanted = new URLSearchParams(location.search).get('slide');
-    // Match by key (DEMOGRAPHICS) or by the slide's own name (demographics).
-    const key = keys.find(k => k === wanted || slides[k].name === wanted) || keys[0];
+    const { config, timeline } = await startEngine();
 
-    const show = async (k) => {
+    // ?slide accepts the slide's own name (demographics) or its catalogue key
+    // (DEMOGRAPHICS); anything else falls back to the study's first slide.
+    const keyByName = Object.fromEntries(
+        Object.entries(config.slides).map(([key, slide]) => [slide.name, key]));
+    const alias = {};
+    for (const slide of timeline) {
+        alias[slide.name] = slide.name;
+        if (keyByName[slide.name]) alias[keyByName[slide.name]] = slide.name;
+    }
+    const wanted = new URLSearchParams(location.search).get('slide');
+    const name = alias[wanted] || (timeline[0] && timeline[0].name);
+
+    const show = async (slideName) => {
         try {
-            await renderSlide(slides[k]);
+            await renderSlide(resolveStudySlide({ name: slideName }));
         } catch (err) {
             console.error('[litw.preview]', err);
         }
     };
-    await show(key);
-    mountSlidePicker(keys, key, show);
+    await show(name);
+    mountSlidePicker(timeline.map(slide => slide.name), name, show);
 }
 
 if (isHosted) startHostMode().catch(err => console.error('[litw.preview]', err));

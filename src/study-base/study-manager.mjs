@@ -10,15 +10,14 @@
  *************************************************************/
 
 // load ESM modules
-import { configureStudy, startStudy, SLIDE_TYPE, DATA_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
+import { configureStudy, startStudy, DATA_TYPE, loadTemplate, showSlideById } from '../js/litw/v2/litw.core.mjs';
 import { i18n } from '../js/litw/v2/litw.locale.mjs';
 import {
-    submitStudyData, submitComments,
+    submitComments,
     addToLocal, loadFromLocal, getURLparams, getParticipantId,
-    submitStudyConfig, setStudyId
+    setStudyId
 } from '../js/litw/v2/litw.data.mjs';
 import { getStudiesRecommendation } from '../js/litw/v2/litw.engagement.mjs';
-import { recordClick, recordSharing } from '../js/litw/v2/litw.tracking.mjs';
 
 // Third-party globals (loaded via <script> tags)
 const $ = window.$;
@@ -32,9 +31,8 @@ const _ = window._;
 			MEDIUM: 10,
 			LONG: 15,
 		};
-	let timeline = [];
-
-	// Retake memory: shared by all studies on this origin.
+	// Demographics answers remembered in browser memory (localStorage), across
+	// every study on this origin — so a returning participant does not retype them.
 	const DEMOGRAPHICS_KEY = 'LITW_DEMOGRAPHICS';
 
 	// Exported so preview hosts can read the study's declarations without
@@ -59,115 +57,110 @@ const _ = window._;
 		slides: {
 			INTRODUCTION: {
 				name: "introduction",
-				type: SLIDE_TYPE.SHOW_SLIDE,
-				display_element_id: "intro",
-				template_url: "../templates/introduction.html",
-				display_next_button: false,
+				template: { url: "../templates/introduction.html", next_button: false },
 			},
 			INFORMED_CONSENT: {
 				name: "informed_consent",
-				type: SLIDE_TYPE.SHOW_SLIDE,
-				display_element_id: "irb",
-				template_url: "../templates/irb2-litw.html",
-				display_next_button: false,
-			},
-			QUESTIONNAIRE_1: {
-				name: "quest1",
-				type: SLIDE_TYPE.SHOW_SLIDE,
-				display_element_id: "quest1",
-				template_url: "../templates/questionnaire.html",
-				display_next_button: false,
-			},
-			QUESTIONNAIRE_2: {
-				name: "quest2",
-				type: SLIDE_TYPE.SHOW_SLIDE,
-				display_element_id: "quest2",
-				template_url: "../templates/questionnaire.html",
-				display_next_button: false,
+				template: { url: "../templates/irb2-litw.html", next_button: false },
 			},
 			DEMOGRAPHICS: {
 				name: "demographics",
-				type: SLIDE_TYPE.SHOW_SLIDE,
-				display_element_id: "demographics",
-				display_next_button: false,
-				template_url: "../templates/demographics.html",
-				data_type: DATA_TYPE.DEMOGRAPHICS,
+				template: { url: "../templates/demographics.html", next_button: false },
 				data: {
-					"demographics-retake": "",
-					"demographics-country-grow": "",
-					"demographics-country-live": "",
-					"demographics-age": "",
-					"demographics-language-native": "",
-					"demographics-religion": "",
-					"demographics-gender": "",
-					"demographics-gender-other": "",
-					"demographics-education": ""
+					// Only a slide that submits a special kind names it; unset ⇒ study:data.
+					type: DATA_TYPE.DEMOGRAPHICS,
+					// The seed. A field may start empty and still be declared: the recall
+					// below fills it, and the slide's binder copies it into `produced`
+					// only if it accepts it — so a stale value can never leak.
+					init: {
+						"demographics-retake": "",
+						"demographics-country-grow": "",
+						"demographics-country-live": "",
+						"demographics-age": "",
+						"demographics-language-native": "",
+						"demographics-religion": "",
+						"demographics-gender": "",
+						"demographics-gender-other": "",
+						"demographics-education": ""
+					},
 				},
-				// Retake memory: fill blanks from a previous session, then store
-				// this session's answers. The framework keeps the data; the study
-				// owns the key and the retention policy.
-				setup: function(){
-					const stored = loadFromLocal(DEMOGRAPHICS_KEY);
-					const slideData = window.LITW.slide.data;
-					for (const key of Object.keys(slideData)) {
-						if (!slideData[key] && stored[key] !== undefined) {
-							slideData[key] = stored[key];
+				hooks: {
+					// Load demographics answers from browser memory: fill what is blank
+					// from a previous visit, and store this session's answers back on the
+					// way out. The framework keeps the data; the study owns the key and
+					// the retention policy.
+					setup: function(){
+						const stored = loadFromLocal(DEMOGRAPHICS_KEY);
+						const init = window.LITW.slide.data.init;
+						for (const key of Object.keys(init)) {
+							if (!init[key] && stored[key] !== undefined) {
+								init[key] = stored[key];
+							}
 						}
+					},
+					finish: function(){
+						addToLocal(DEMOGRAPHICS_KEY, window.LITW.slide.data.produced);
 					}
-				},
-				finish: function(){
-					addToLocal(DEMOGRAPHICS_KEY, window.LITW.slide.data);
 				}
+			},
+			QUESTIONNAIRE_1: {
+				name: "quest1",
+				template: { url: "../templates/questionnaire.html", next_button: false },
+			},
+			QUESTIONNAIRE_2: {
+				name: "quest2",
+				template: { url: "../templates/questionnaire.html", next_button: false },
 			},
 			COMMENTS: {
 				name: "comments",
-				type: SLIDE_TYPE.SHOW_SLIDE,
-				display_element_id: "comments",
-				display_next_button: true,
-				template_url: "../templates/comments.html",
-				finish: function(){
-					let comments = $('#commentsForm').alpaca().getValue();
-					if (Object.keys(comments).length > 0) {
-						submitComments({
-							comments: comments
-						});
+				template: { url: "../templates/comments.html" },
+				// Alpaca collects the values; until this template is migrated, the
+				// hook submits them itself (a slide that writes nothing into
+				// `produced` submits nothing on the way out).
+				hooks: {
+					finish: function(){
+						let comments = $('#commentsForm').alpaca().getValue();
+						if (Object.keys(comments).length > 0) {
+							submitComments({
+								comments: comments
+							});
+						}
 					}
 				}
 			},
 			RESULTS: {
 				name: "results",
-				display_next_button: false,
-				type: SLIDE_TYPE.CALL_FUNCTION,
-				call_fn: function(){
-					calculateResults();
+				// No template, just work: the engine calls hooks.run and moves on.
+				hooks: {
+					run: function(){
+						calculateResults();
+					}
 				}
 			}
 		}
 	};
 
-	function configureTimeline() {
-		timeline.push(config.slides.INTRODUCTION);
-		timeline.push(config.slides.INFORMED_CONSENT);
-		timeline.push(config.slides.DEMOGRAPHICS);
-
+	/**
+	 * The study's own sequence — and THE source of truth for what runs.
+	 * config.slides above declares ready-made structures; this decides the
+	 * order and does whatever setup a run needs. Async, so whatever it
+	 * prepares is ready before any template compiles. The preview host calls
+	 * it too, which is why the per-instance inputs and the partial live here.
+	 *
+	 * One rule: it must not start or submit anything.
+	 */
+	export async function getTimeline() {
 		// Progress bar example: registers a Handlebars partial (named "prog")
 		// so templates can render a progress indicator with {{>prog}}
-		loadTemplate("../templates/progress.html")
-			.then(t => { if (t) Handlebars.registerPartial('prog', t); })
-			.catch(() => {});
+		const prog = await loadTemplate("../templates/progress.html").catch(() => null);
+		if (prog) Handlebars.registerPartial('prog', prog);
 
-		// MUST BE a function because we don't have $.i18() available at configuration time! SHOULD WE?
-		config.slides.QUESTIONNAIRE_1.template_data = () => {
-			return getQuest1Data('quest1', 50)
-		};
-		timeline.push(config.slides.QUESTIONNAIRE_1);
-		config.slides.QUESTIONNAIRE_2.template_data = () => {
-			return getQuest2Data('quest2', './img/cat-computer.png', 100);
-		}
-		timeline.push(config.slides.QUESTIONNAIRE_2);
-		timeline.push(config.slides.COMMENTS);
-		timeline.push(config.slides.RESULTS);
-		return timeline;
+		// Per-instance content for a template used twice. Deferred (a function)
+		// because the values depend on the chosen language.
+		config.slides.QUESTIONNAIRE_1.template.input = () => getQuest1Data('quest1', 50);
+		config.slides.QUESTIONNAIRE_2.template.input = () => getQuest2Data('quest2', './img/cat-computer.png', 100);
+
+		return Object.values(config.slides);
 	}
 
 	function getQuest1Data(quest_id, completion) {
@@ -271,10 +264,6 @@ const _ = window._;
 	let resultsFooterTemplate = null;
 
 	async function bootstrap() {
-		// Backward compat: $.i18n() → our locale module
-		// TODO: update templates & study-manager to use i18n() directly, then remove
-		window.$.i18n = i18n;
-
 		// Load templates rendered outside the engine's slide system
 		let [r, rf] = await Promise.all([
 			loadTemplate("../templates/results.html"),
@@ -284,8 +273,8 @@ const _ = window._;
 		resultsFooterTemplate = rf;
 
 		setStudyId(config.study_id);
-		let timeline = configureTimeline();
-		let good = await configureStudy({
+		const timeline = await getTimeline();
+		const good = await configureStudy({
 			...config,
 			studyId: config.study_id,
 			preload: config.preLoad,

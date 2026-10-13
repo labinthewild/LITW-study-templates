@@ -8,12 +8,13 @@
  *   - litw.data, litw.tracking, litw.locale (direct imports)
  *
  * Public API (study managers import these from this module):
- *   study   — SLIDE_TYPE, DATA_TYPE, configureStudy, startStudy, loadTemplate, showSlideById
- *   preview — configureEngine, setPreviewMode, testSlide, nextSlide (builder only)
+ *   study   — DATA_TYPE, configureStudy, configureEngine, startStudy,
+ *             loadTemplate, compileTemplate, showSlideById
+ *   preview — setPreviewMode, testSlide, nextSlide (builder only)
  *   events  — onData (re-exported from litw.data)
  *
- * window.LITW is runtime STATE only: data, tracking, study.config, slide.data.
- * It is never the engine's API.
+ * window.LITW is runtime STATE only — never the engine's API:
+ *   { data, tracking, study: { config, resources }, slide: { data: { init, produced } } }
  *
  * © Copyright 2024 - The LabintheWild Team
  *************************************************************/
@@ -29,12 +30,6 @@ import { getStudiesRecommendation } from './litw.engagement.mjs';
 export { onData } from './litw.data.mjs';
 
 // ─── Types ────────────────────────────────────────────────────
-
-export const SLIDE_TYPE = {
-    version: '1.0',
-    SHOW_SLIDE: 'SHOW_SLIDE',
-    CALL_FUNCTION: 'CALL_FUNCTION'
-};
 
 /**
  * Data kinds a slide may declare via `data_type`. The engine submits the
@@ -77,53 +72,28 @@ let _previewMode = false;
 
 // ─── Template loading ─────────────────────────────────────────
 
-// A slide may declare its defaults at the top of its own template:
-//
-//   <script type="application/json" data-litw="slide">{ "name": … }</script>
-//   <h1>…</h1>
-//
-// The annotation is lifted *textually* (never through the DOM parser) so the
-// remaining source stays byte-for-byte what the author wrote for Handlebars.
-// One constraint follows from that: the JSON must not contain `</script>`.
-const SLIDE_ANNOTATION_RE =
-    /<script[^>]*\sdata-litw\s*=\s*["']slide["'][^>]*>([\s\S]*?)<\/script>\s*/i;
-
-function splitSlideAnnotation(source) {
-    const match = source.match(SLIDE_ANNOTATION_RE);
-    if (!match) return { meta: null, markup: source };
-    let meta = null;
-    try {
-        meta = JSON.parse(match[1]);
-    } catch (err) {
-        console.error("Invalid slide annotation JSON:", err);
-    }
-    const markup = source.slice(0, match.index) + source.slice(match.index + match[0].length);
-    return { meta, markup };
-}
-
 /**
- * Compile a template's source into a Handlebars template, handing back the
- * slide's declared defaults (if it carries an annotation) alongside it.
+ * Compile a template's source into a Handlebars template.
  *
  * This is the ONE place a template is read. Everything else about a slide is
  * the browser's job: `<style>` in the markup is applied when it is injected,
  * and `<script>` is re-created by showSlide() so it executes.
+ *
+ * A template declares nothing of its own: the study's config — and
+ * getTimeline() — is the single source of truth for what a slide is.
  */
 export function compileTemplate(source) {
     if (!window.Handlebars) {
         console.error("Handlebars not loaded.");
-        return { template: null, meta: null };
+        return null;
     }
-    const { meta, markup } = splitSlideAnnotation(source);
-    return { template: window.Handlebars.compile(markup), meta };
+    return window.Handlebars.compile(source);
 }
 
 /**
  * Fetch and compile a single Handlebars template from a URL.
  * Useful for study-managers that need to load templates outside
- * the slide system (e.g. results footer).
- *
- * Use compileTemplate() directly when the slide's annotation is needed too.
+ * the slide system (e.g. results footer), and for slides.
  */
 export async function loadTemplate(url) {
     if (!window.Handlebars) {
@@ -132,12 +102,12 @@ export async function loadTemplate(url) {
     }
     let resp = await fetch(url);
     if (!resp.ok) throw new Error(`Failed to load ${url}: ${resp.status}`);
-    return compileTemplate(await resp.text()).template;
+    return compileTemplate(await resp.text());
 }
 
 /**
- * Fetches and compiles all slides that have a template_url
- * but no pre-compiled template. Registers shared partials.
+ * Fetches and compiles every slide that declares a template, leaving the
+ * compiled function on the declaration as `template.compiled`.
  */
 async function loadTemplates(slides_config) {
     if (!window.Handlebars) {
@@ -145,8 +115,9 @@ async function loadTemplates(slides_config) {
         return;
     }
     let fetches = slides_config
-        .filter(s => s.template_url && !s.template)
-        .map(s => loadTemplate(s.template_url).then(t => { s.template = t; }));
+        .filter(s => s.template && s.template.url && !s.template.compiled)
+        .map(s => loadTemplate(s.template.url)
+            .then(compiled => { s.template.compiled = compiled; }));
     await Promise.all(fetches);
 }
 
@@ -187,6 +158,12 @@ export async function configureEngine(config = {}) {
 
     await configureLocale(languages);
 
+    // Legacy alias: older templates (and Alpaca field configs) call $.i18n().
+    // The engine owns translation, so it exposes it under that name — which
+    // also means a preview gets it without booting the study.
+    // TODO: remove once no template calls $.i18n().
+    if (window.$) window.$.i18n = i18n;
+
     // The engine owns LITW.study; the study only reads it. `resources`
     // holds the loaded reference lists, keyed exactly as declared.
     window.LITW = window.LITW || {};
@@ -212,20 +189,37 @@ export async function configureStudy(config = {}) {
 
 // ─── Slide lifecycle ──────────────────────────────────────────
 
+/**
+ * Every slide renders into an element named after it. A study page may name
+ * those elements up front, but it does not have to: the engine creates any
+ * that is missing, so index.html needs no per-slide markup.
+ */
+function ensureElement(id) {
+    let el = document.getElementById(id);
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'slide';
+    const content = document.getElementById('content');
+    const next = document.getElementById('btn-next-page');
+    // Before the next button: it floats right, so it has to come after the
+    // slide in order to land below it — exactly as in a real study page.
+    if (content && next) content.insertBefore(el, next);
+    else if (content) content.appendChild(el);
+    return el;
+}
+
+/** What a slide hands its template: `template.input`, evaluated if it is a function. */
+function slideInput(slide) {
+    const input = slide.template && slide.template.input;
+    if (typeof input === 'function') return input();
+    return input || {};
+}
+
 function showSlide(slide) {
-    let el = document.getElementById(slide.display_element_id);
-    if (!el) {
-        console.error(`Could not find element "${slide.display_element_id}" for slide "${slide.name}".`);
-        return false;
-    }
-    let templateData = {};
-    if (slide.template_data) {
-        templateData = typeof slide.template_data === "function"
-            ? slide.template_data()
-            : slide.template_data;
-    }
+    const el = ensureElement(slide.name);
     // `resources` is reserved: the engine's loaded lists are always in scope.
-    el.innerHTML = slide.template({ ...templateData, resources: getResources() });
+    el.innerHTML = slide.template.compiled({ ...slideInput(slide), resources: getResources() });
     // Re-execute inline scripts (innerHTML doesn't run them)
     el.querySelectorAll('script').forEach(oldScript => {
         const newScript = document.createElement('script');
@@ -264,25 +258,24 @@ function displaySlide(slide) {
     setupSlideData(slide);
     slide.runtime = { start: Date.now(), duration: 0, data: {} };
 
-    if (typeof slide.setup === "function") slide.setup();
+    ensureElement(slide.name);   // even a function-only slide owns a slot
+
+    if (slide.hooks && typeof slide.hooks.setup === "function") slide.hooks.setup();
 
     const next = document.getElementById('btn-next-page');
     if (next) next.style.display =
-        (slide.display_next_button === false) ? 'none' : 'block';
+        (slide.template && slide.template.next_button === false) ? 'none' : 'block';
 
+    // The slide's kind is DERIVED, never declared: a template means render and
+    // wait; a run hook with no template means execute and advance.
     let ok = false;
-    switch (slide.type) {
-        case SLIDE_TYPE.SHOW_SLIDE:
-            ok = showSlide(slide);
-            break;
-        case SLIDE_TYPE.CALL_FUNCTION:
-            if (typeof slide.call_fn === "function") {
-                slide.call_fn();
-                ok = true;
-            }
-            break;
-        default:
-            console.error(`Unknown slide type "${slide.type}" for slide "${slide.name}".`);
+    if (slide.template) {
+        ok = showSlide(slide);
+    } else if (slide.hooks && typeof slide.hooks.run === "function") {
+        slide.hooks.run();
+        ok = true;
+    } else {
+        console.error(`Slide "${slide.name}" declares neither a template nor hooks.run.`);
     }
 
     if (ok) tracking.recordSlideVisit(slide.name);
@@ -321,9 +314,9 @@ function finishSlide() {
     if (next) next.style.display = 'none';
 
     submitSlideData(slide);
-    if (typeof slide.finish === "function") slide.finish();
+    if (slide.hooks && typeof slide.hooks.finish === "function") slide.hooks.finish();
 
-    let el = document.getElementById(slide.display_element_id);
+    let el = document.getElementById(slide.name);
     // In a preview, keep the slide on screen so its data can be inspected.
     if (el && !_previewMode) el.innerHTML = '';
     slide.runtime.duration = Date.now() - slide.runtime.start;
@@ -351,34 +344,40 @@ export function startStudy() {
 }
 
 /**
- * Give the slide a fresh, isolated data object: `LITW.slide.data`.
- * Whatever ends up in it is what the engine submits when leaving the
- * slide. Cloned from the slide's declared defaults so slides never share
- * state.
+ * Give the slide a fresh, isolated `LITW.slide.data`, in two halves: `init`,
+ * the seed (declared under `data.init`, optionally extended by hooks.setup),
+ * and `produced`, which the slide writes and which is all the engine submits.
+ * Cloned, so slides never share state.
  */
 function setupSlideData(slide) {
-    const initial = (slide.data && typeof slide.data === "object") ? slide.data : {};
-    let slideData;
+    const declared = (slide.data && typeof slide.data === 'object') ? slide.data : {};
+    const seed = declared.init || {};
+    let init;
     try {
-        slideData = structuredClone(initial);
+        init = structuredClone(seed);
     } catch (e) {
-        slideData = JSON.parse(JSON.stringify(initial));
+        init = JSON.parse(JSON.stringify(seed));
     }
     window.LITW = window.LITW || {};
-    window.LITW.slide = { data: slideData };
+    window.LITW.slide = { data: { init, produced: {} } };
 }
 
 /**
- * Submit a slide's data (if the slide produced any). The kind is the
- * slide's `data_type`, defaulting to `study:data`.
+ * Submit what the slide produced, wrapped in the slide's name:
+ *
+ *   { [slide.name]: produced, data_type: 'study:<kind>', uuid: … }
+ *
+ * The payload is the slide's; the envelope — its name, kind and participant —
+ * is the engine's, so every row is self-describing. The kind is `data.type`,
+ * defaulting to `study:data`. A slide that produced nothing submits nothing.
  */
 function submitSlideData(slide) {
     const live = window.LITW && window.LITW.slide;
-    const slideData = live ? live.data : null;
-    if (!slideData || typeof slideData !== "object") return;
-    if (Object.keys(slideData).length === 0) return;
-    const kind = (slide && slide.data_type) ? slide.data_type : DATA_TYPE.DATA;
-    data.submitData(slideData, `study:${kind}`);
+    const produced = live && live.data && live.data.produced;
+    if (!produced || typeof produced !== 'object') return;
+    if (Object.keys(produced).length === 0) return;
+    const kind = (slide.data && slide.data.type) || DATA_TYPE.DATA;
+    data.submitData({ [slide.name]: produced }, `study:${kind}`);
 }
 
 /**
@@ -421,4 +420,4 @@ window.LITW = window.LITW || {};
 window.LITW.data = { ...data };
 window.LITW.tracking = { ...tracking };
 window.LITW.study = window.LITW.study || { config: {} };
-window.LITW.slide = window.LITW.slide || { data: {} };
+window.LITW.slide = window.LITW.slide || { data: { init: {}, produced: {} } };

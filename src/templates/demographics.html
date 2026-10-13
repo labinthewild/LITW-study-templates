@@ -103,7 +103,7 @@
         const form = document.getElementById('demographics-form');
         if (!form) return;
 
-        const data = LITW.slide.data;
+        const { init, produced } = LITW.slide.data;
         const next = document.getElementById('btn-next-page');
 
         const read = el => el.type === 'checkbox' ? el.checked
@@ -124,9 +124,17 @@
             return ok;
         }
 
+        // One list drives hydration AND collection: the form is the schema.
         for (const el of fields) {
-            write(el, data[el.name]);
-            const sync = () => { data[el.name] = read(el); apply(); };
+            // Accept the seed: a declared field whose init has a value (here, a
+            // value recalled from browser memory) becomes part of what is
+            // submitted. Stale keys cannot leak, because `init` is only ever
+            // consulted per declared field name.
+            if (produced[el.name] === undefined && init[el.name] !== undefined) {
+                produced[el.name] = init[el.name];
+            }
+            write(el, produced[el.name]);
+            const sync = () => { produced[el.name] = read(el); apply(); };
             el.addEventListener('input', sync);
             el.addEventListener('change', sync);
         }

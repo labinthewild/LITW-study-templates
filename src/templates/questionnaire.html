@@ -61,11 +61,9 @@
     }
 
     function finishQuestions () {
-        let quest_id = document.getElementById('quest-id').dataset.value;
-        LITW.study.params[quest_id] = JSON.parse(JSON.stringify(responses));
-        let data = {}
-        data[quest_id] = responses
-        LITW.data.submitStudyData(data);
+        // The slide writes only what it produced; the engine wraps it in the
+        // slide's name (quest1/quest2) and submits it on the way out.
+        Object.assign(LITW.slide.data.produced, responses);
         document.getElementById('btn-next-page').click();
     }
 
