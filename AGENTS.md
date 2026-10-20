@@ -12,63 +12,96 @@ It loads the engine through a dev proxy (`/runtime` → this repo's dev server).
 ## Running it
 
 ```bash
-cd src && node js/dev-server.mjs study-base 8080
+# the server that serves this tree (and mocks the API)
+cd ../LITW-study-server
+STUDIES_DIR=../LITW-study-templates/src npm run dev
 ```
 
-Serves `src/` at the root. Mocked endpoints: `POST /service/<id>/data/` (logs
-the JSON, returns `{status:'ok (dev placeholder)'}`), `GET /config/<id>/study_references`,
-`GET /service/geoip`.
+Its root is this repo's `src/`, so the URLs below are what a deployment serves
+(dev responses are `no-store`).
 
 | URL | what |
 |---|---|
-| `/study-base/` | the real study — boots normally, analytics included |
-| `/study-base/?preview` | preview host, standalone: slide picker, **no analytics, no boot** |
-| `/study-base/?preview&slide=demographics` | one slide, by key or by name |
-| `/study-base/?slide=comments` | `?slide` implies `?preview` |
+| `/starters/study-base/` | the starter, served read-only in place |
+| `/study-base/` | the same starter at depth 1 — the URL the builder previews |
+| `…?preview` | preview host, standalone: slide picker, **no analytics, no boot** |
+| `…?preview&slide=demographics` | one slide, by key or by name |
+| `…?slide=comments` | `?slide` implies `?preview` |
 
-## Serving a study
+`src/js/dev-server.mjs` is the older stand-in and only knows the pre-move
+layout (it has no `/library`, `/engine` or `/starters`). It stays until its
+mocked endpoints — `POST /service/<id>/data/`, `GET /config/<id>/study_references`,
+`GET /service/geoip` — move into the study server.
 
-In deployment, studies are served by **`LITW-study-server`** (a sibling
-module), not by `dev-server.mjs`. That server's root is one directory whose
-contents are this repo's shared dirs plus every study as a **depth-1 sibling**:
+## The layout, and what each folder is for
 
-    /studies/
-      templates/  js/  css/  img/     ← this repo
-      study-base/                     ← the starter
-      <uuid>/                         ← a study cloned by /build
+`src/` is not a flat tree: the folders exist so the server can apply a
+different policy to each.
 
-Depth is load-bearing: a study's `../templates/…` and `../js/…` resolve to the
-origin root only from depth 1. Clones land there and work unchanged. Moving
-starters into a `starters/` directory — which would make "what can be a
-starter" a directory listing instead of a denylist — puts them at depth 2, so
-their own in-place preview breaks. Solve that with a depth-1 URL mapping or
-with root-absolute paths, never by adding a level of `../`.
+    src/
+      library/    slide templates, partials, i18n — ships with the image
+      engine/     the v2 runtime modules — ships with the image
+      vendor/     jquery, handlebars, bootstrap, alpaca, shareon, jsPsych
+      css/ img/   shared assets
+      legacy/     the v1 runtime, kept because published studies fetch it
+      starters/   clone sources: what /build can make a study from
+      studies/    authored studies — user content, gitignored here
+      js/         dev tools only; not served
+      include/    data export script; not served
 
-`dev-server.mjs` stays the dependency-free local stand-in: same URL shapes,
-mocked endpoints. And **`AGENTS.md` must stay at or above any study directory**
-— pi discovers context files by walking up from its working directory.
+**What a study page loads.** Handlebars (the template engine) and Bootstrap's
+bundle (the results accordions, the likert control) as plain scripts; the
+engine as ES modules; shareon from inside the results footer. jQuery and Alpaca
+are not among them any more — the HTML-first migration removed both, and the
+manager kept only `window.Handlebars` from the old globals.
+
+**URLs are not the disk.** The public shapes are:
+
+    /<slug>/…              a study, at depth 1, live (no-cache)
+    /starters/<name>/…     a starter, read-only, previewed in place
+    /library|/engine|/vendor|/css|/img/…   shared, stable
+
+    /templates/<x>         → library/<x>          frozen forever
+    /js/litw/v2/<x>        → engine/<x>           frozen forever
+    /js/litw/<x>           → legacy/litw-v1/<x>   frozen forever
+    /js/jsPsych-5.0.3/<x>  → vendor/jsPsych/<x>   frozen forever
+    /js/<file>             → vendor/<file>        frozen forever
+
+**The old URLs are frozen, not deprecated.** A published study fetches
+`../templates/irb.html`, which resolves to `/templates/irb.html` only because
+the study is at depth 1 *and* the alias exists. Moving files on disk must never
+move a URL a published study can reach.
+
+Depth 1 is load-bearing for the same reason: `studies/` and `starters/` both
+answer at `/<slug>/`, so every existing study's relative paths keep resolving
+without touching the study. New code should use root-absolute paths for shared
+things (`/engine/…`, `/library/…`, `/vendor/…`) and keep relative paths for its
+own files (`./i18n/en.json`) — **shared is absolute, own is relative**. That is
+what makes a study directory copyable.
+
+`AGENTS.md` must stay at or above any study directory: pi discovers context
+files by walking up from its working directory.
 
 ## File map
 
 ```
 src/
-  study-base/
+  starters/study-base/
     index.html          # the study page: shell, stylesheets, script tags, boot
     study-manager.mjs   # the study: config + getTimeline() + study logic
     i18n/{en.json,pt-br.json}
-  js/
-    dev-server.mjs      # mock study server
-    handlebars.js       # global
-    litw/v2/
-      litw.core.mjs     # engine: config, timeline, slide lifecycle, templates
-      litw.locale.mjs   # language + resources
-      litw.data.mjs     # submissions, local storage, participant id
-      litw.tracking.mjs # timing + events
-      litw.engagement.mjs
-      litw.preview.mjs  # preview host (loaded only with ?preview)
-  templates/*.html      # slide templates (snippets) + i18n resource JSON
-  css/                  # bootstrap, alpaca, shareon, litw-styles-2.0.0
-  img/
+  library/              # slide templates (snippets) + i18n resource JSON
+  engine/
+    litw.core.mjs       # engine: config, timeline, slide lifecycle, templates
+    litw.locale.mjs     # language + resources
+    litw.data.mjs       # submissions, local storage, participant id
+    litw.tracking.mjs   # timing + events
+    litw.engagement.mjs
+    litw.preview.mjs    # preview host (loaded only with ?preview)
+  legacy/litw-v1/       # the old runtime, still fetched by published studies
+  vendor/               # third-party JS, pinned by filename
+  css/  img/            # shared assets
+  js/                   # dev tools, not served
 ```
 
 ---
@@ -383,13 +416,13 @@ calls `i18n(el)`.
 - **No template uses jQuery or Alpaca any more.** `index.html` still loads both,
   and the vendor files stay: `study-cats` is a legacy sibling (webpack + the old
   `litw.*.2.1.0.js` engine) that still needs them.
-- **Leftovers in `study-base/`:** `readSummaryData()` in the manager (a TODO
-  helper nobody calls, and the last `$.` reference in study code), and six
-  unreferenced shared templates: `instructions`, `likert-question`, `loading`,
-  `midTrialBreak`, `new-results`, `preTrialBreak`. The webpack era is gone:
-  `study-manager.js`, the 3.9 MB bundle, `package.json` and the lockfile were
-  removed, so a study is now `index.html` + `study-manager.mjs` + `i18n/` +
-  `img/`.
+- **Leftovers in `study-base/`:** six unreferenced shared templates —
+  `instructions`, `likert-question`, `loading`, `midTrialBreak`,
+  `new-results`, `preTrialBreak`. They are library parts in waiting, not dead
+  code. The webpack era is gone: `study-manager.js`, the 3.9 MB bundle,
+  `package.json`, the lockfile and `readSummaryData()` (the last `$.` in study
+  code) were removed, so a study is now `index.html` + `study-manager.mjs` +
+  `i18n/` + `img/`.
 - **Consent is not recorded.** The `informed_consent` slide submits nothing — no
   `data.type`, nothing written to `produced` — so the agreement itself is never
   sent, only the engine's `litw:tracking` checkpoint. If IRB needs it on the

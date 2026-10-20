@@ -10,18 +10,18 @@
  *************************************************************/
 
 // load ESM modules
-import { configureStudy, startStudy, DATA_TYPE, loadTemplate } from '../js/litw/v2/litw.core.mjs';
-import { i18n } from '../js/litw/v2/litw.locale.mjs';
+// Shared things are absolute (`/engine`, `/library`); this study's own files
+// stay relative, which is what makes the directory copyable.
+import { configureStudy, startStudy, DATA_TYPE, loadTemplate } from '/engine/litw.core.mjs';
+import { i18n } from '/engine/litw.locale.mjs';
 import {
     addToLocal, loadFromLocal, getURLparams, getParticipantId,
     setStudyId
-} from '../js/litw/v2/litw.data.mjs';
-import { getStudiesRecommendation } from '../js/litw/v2/litw.engagement.mjs';
+} from '/engine/litw.data.mjs';
+import { getStudiesRecommendation } from '/engine/litw.engagement.mjs';
 
-// Third-party globals (loaded via <script> tags)
-const $ = window.$;
+// Handlebars is the one third-party global the manager still needs.
 const Handlebars = window.Handlebars;
-const _ = window._;
 
 //TODO: document "params.study_id" when updating the docs/7-ManageData!!!
 
@@ -43,32 +43,32 @@ const _ = window._;
 			'en': {
 				strings: './i18n/en.json?v=1.0',
 				resources: {
-					countries: '../templates/i18n/countries-en.json',
-					languageNames: '../templates/i18n/lang-en.json',
-					religions: '../templates/i18n/religions-en.json',
+					countries: '/library/i18n/countries-en.json',
+					languageNames: '/library/i18n/lang-en.json',
+					religions: '/library/i18n/religions-en.json',
 				},
 			},
 			'pt': './i18n/pt-br.json?v=1.0',
 		},
 		study_id: "TO_BE_ADDED_IF_USING_LITW_INFRA",
 		study_recommendation: [],
-		preLoad: ["../img/btn-next.png","../img/btn-next-active.png","../img/ajax-loader.gif"],
+		preLoad: ["/img/btn-next.png","/img/btn-next-active.png","/img/ajax-loader.gif"],
 		slides: {
 			INTRODUCTION: {
 				name: "introduction",
-				template: { url: "../templates/introduction.html", next_button: false },
+				template: { url: "/library/introduction.html", next_button: false },
 			},
 			INFORMED_CONSENT: {
 				name: "informed_consent",
 				template: {
-					url: "../templates/irb.html",
+					url: "/library/irb.html",
 					next_button: false,
 					input: { time: study_times.MEDIUM },
 				},
 			},
 			DEMOGRAPHICS: {
 				name: "demographics",
-				template: { url: "../templates/demographics.html", next_button: false },
+				template: { url: "/library/demographics.html", next_button: false },
 				data: {
 					// Only a slide that submits a special kind names it; unset ⇒ study:data.
 					type: DATA_TYPE.DEMOGRAPHICS,
@@ -108,15 +108,15 @@ const _ = window._;
 			},
 			QUESTIONNAIRE_1: {
 				name: "quest1",
-				template: { url: "../templates/questionnaire.html", next_button: false },
+				template: { url: "/library/questionnaire.html", next_button: false },
 			},
 			QUESTIONNAIRE_2: {
 				name: "quest2",
-				template: { url: "../templates/questionnaire.html", next_button: false },
+				template: { url: "/library/questionnaire.html", next_button: false },
 			},
 			COMMENTS: {
 				name: "comments",
-				template: { url: "../templates/comments.html" },
+				template: { url: "/library/comments.html" },
 				// Not trial data, so it keeps its own kind — as it had when this
 				// slide submitted itself through a study hook.
 				data: { type: DATA_TYPE.COMMENTS },
@@ -124,7 +124,7 @@ const _ = window._;
 			RESULTS: {
 				name: "results",
 				template: {
-					url: "../templates/results.html",
+					url: "/library/results.html",
 					next_button: false,
 					// A function, so these values are computed when the slide renders.
 					input: () => resultsInput(),
@@ -145,7 +145,7 @@ const _ = window._;
 	export async function getTimeline() {
 		// Progress bar example: registers a Handlebars partial (named "prog")
 		// so templates can render a progress indicator with {{>prog}}
-		const prog = await loadTemplate("../templates/progress.html").catch(() => null);
+		const prog = await loadTemplate("/library/progress.html").catch(() => null);
 		if (prog) Handlebars.registerPartial('prog', prog);
 
 		// Per-instance content for a template used twice. Deferred (a function)
@@ -156,7 +156,7 @@ const _ = window._;
 		// Registered like `prog`: the results page includes this one itself
 		// ({{>results-footer}}), so the footer is part of the same render instead
 		// of being patched in afterwards.
-		const resultsFooter = await loadTemplate("../templates/results-footer.html").catch(() => null);
+		const resultsFooter = await loadTemplate("/library/results-footer.html").catch(() => null);
 		if (resultsFooter) Handlebars.registerPartial('results-footer', resultsFooter);
 
 		return Object.values(config.slides);
@@ -258,17 +258,6 @@ const _ = window._;
 			},
 		};
 	}
-
-	//TODO Move to LITW.DATA library
-	function readSummaryData() {
-		$.getJSON( "summary.json", function( data ) {
-			//TODO: 'data' contains the produced summary form DB data
-			//      in case the study was loaded using 'index.php'
-			//SAMPLE: The example code gets the cities of study particpants.
-			console.log(data);
-		});
-	}
-
 
 	// Filled by resultsInput() from the engine's (already warmed) cache.
 	let recommendations = [];

@@ -37,11 +37,10 @@
     <meta property="og:description" content="This is the start of my own LabintheWild Study!!!"/>
 
     <!-- ***** stylesheets ***** -->
-    <link href="../css/bootstrap.min-5_3_0.css" rel="stylesheet" type="text/css">
-    <link href="../css/bootstrap-icons-1.11.3.css" rel="stylesheet" type="text/css">
-    <link href="../css/alpaca.min-1.5.23.css" rel="stylesheet" type="text/css">
-    <link href="../css/shareon.min-2.7.0.css" rel="stylesheet" type="text/css">
-    <link href="../css/litw-styles-2.0.0.css" rel="stylesheet" type="text/css">
+    <link href="/css/bootstrap.min-5_3_0.css" rel="stylesheet" type="text/css">
+    <link href="/css/bootstrap-icons-1.11.3.css" rel="stylesheet" type="text/css">
+    <link href="/css/shareon.min-2.7.0.css" rel="stylesheet" type="text/css">
+    <link href="/css/litw-styles-2.0.0.css" rel="stylesheet" type="text/css">
 
 </head>
 
@@ -49,7 +48,7 @@
 <div id="content">
     <div id="header">
         <a href='https://www.labinthewild.org'>
-            <img src='../img/LITW-logo2020.png' id='logo'
+            <img src='/img/LITW-logo2020.png' id='logo'
                  alt='The Lab in the Wild logo showing an Earth globe and the name of the site in green colors.'/>
         </a>
         <div id='header-share' class='sharing-buttons'></div>
@@ -61,17 +60,17 @@
     <div id="ajax-working"></div>
 </div>
 
-<!-- Dependencies: plain scripts (loaded as globals) -->
-<script src="../js/jquery.min.js"></script>
-<script src="../js/bootstrap.bundle.5.3.0.min.js"></script>
-<script src="../js/handlebars.js"></script>
-<script src="../js/alpaca.min.js"></script>
+<!-- Dependencies: plain scripts (loaded as globals). Bootstrap's bundle is
+     kept for the results page's accordions and the likert control; jQuery and
+     Alpaca are gone — the engine and the templates are plain DOM + fetch. -->
+<script src="/vendor/bootstrap.bundle.5.3.0.min.js"></script>
+<script src="/vendor/handlebars.js"></script>
 
 <!-- LITW modules: study-manager boots the study; with ?preview the builder
      drives a single slide through the engine's preview host instead. -->
 <script type="module">
   if (window.LITW_PREVIEW) {
-    import('../js/litw/v2/litw.preview.mjs');
+    import('/engine/litw.preview.mjs');
   } else {
     import('./study-manager.mjs');
   }
