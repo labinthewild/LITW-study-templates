@@ -26,6 +26,28 @@ the JSON, returns `{status:'ok (dev placeholder)'}`), `GET /config/<id>/study_re
 | `/study-base/?preview&slide=demographics` | one slide, by key or by name |
 | `/study-base/?slide=comments` | `?slide` implies `?preview` |
 
+## Serving a study
+
+In deployment, studies are served by **`LITW-study-server`** (a sibling
+module), not by `dev-server.mjs`. That server's root is one directory whose
+contents are this repo's shared dirs plus every study as a **depth-1 sibling**:
+
+    /studies/
+      templates/  js/  css/  img/     ← this repo
+      study-base/                     ← the starter
+      <uuid>/                         ← a study cloned by /build
+
+Depth is load-bearing: a study's `../templates/…` and `../js/…` resolve to the
+origin root only from depth 1. Clones land there and work unchanged. Moving
+starters into a `starters/` directory — which would make "what can be a
+starter" a directory listing instead of a denylist — puts them at depth 2, so
+their own in-place preview breaks. Solve that with a depth-1 URL mapping or
+with root-absolute paths, never by adding a level of `../`.
+
+`dev-server.mjs` stays the dependency-free local stand-in: same URL shapes,
+mocked endpoints. And **`AGENTS.md` must stay at or above any study directory**
+— pi discovers context files by walking up from its working directory.
+
 ## File map
 
 ```
@@ -361,11 +383,13 @@ calls `i18n(el)`.
 - **No template uses jQuery or Alpaca any more.** `index.html` still loads both,
   and the vendor files stay: `study-cats` is a legacy sibling (webpack + the old
   `litw.*.2.1.0.js` engine) that still needs them.
-- **Leftovers in `study-base/`:** `study-manager.js` (287 lines, unreferenced),
-  `readSummaryData()` in the manager (a TODO helper nobody calls, and the last
-  `$.` reference in study code), and six unreferenced shared templates:
-  `instructions`, `likert-question`, `loading`, `midTrialBreak`, `new-results`,
-  `preTrialBreak`.
+- **Leftovers in `study-base/`:** `readSummaryData()` in the manager (a TODO
+  helper nobody calls, and the last `$.` reference in study code), and six
+  unreferenced shared templates: `instructions`, `likert-question`, `loading`,
+  `midTrialBreak`, `new-results`, `preTrialBreak`. The webpack era is gone:
+  `study-manager.js`, the 3.9 MB bundle, `package.json` and the lockfile were
+  removed, so a study is now `index.html` + `study-manager.mjs` + `i18n/` +
+  `img/`.
 - **Consent is not recorded.** The `informed_consent` slide submits nothing — no
   `data.type`, nothing written to `produced` — so the agreement itself is never
   sent, only the engine's `litw:tracking` checkpoint. If IRB needs it on the
@@ -382,6 +406,13 @@ calls `i18n(el)`.
 
 - **Catalogue vs sequence**: `config.slides` declares structures; `getTimeline()`
   is the truth for what runs.
+- **The timeline stays code, deliberately.** Real studies construct sequences —
+  conditional branches, repeats over generated instances, participant-dependent
+  order — so a static list cannot be the truth. What the builder edits is a
+  *conventional* flat list where the study has one; what the checks validate is
+  the **realization** (unique names, refs resolving, contracts satisfied), not
+  the construction's syntax. Where a study computes its timeline, the builder
+  opens the file rather than pretending to understand it.
 - **Engine = before/after only**; the slide owns its interaction.
 - **`data` is the umbrella at both levels** — config and runtime — and the
   runtime nests the two stages: `LITW.slide.data = { init, produced }`.
@@ -419,7 +450,14 @@ calls `i18n(el)`.
 
 - Where the browser-memory key for the demographics answers lives (manager vs
   slide) now that hydration happens per form field.
-- A declarative timeline (list + shuffle groups) so the builder could reorder.
+- ~~A declarative timeline (list + shuffle groups) so the builder could reorder.~~
+  **Answered: no** — see *The timeline stays code*. Planned instead: **slide
+  packages** (one directory per slide with an optional `template.html`,
+  `en.json` and `index.mjs`, the kind derived from what is present) and a
+  versioned **library** (`library/<name>/<version>/`, where the version is a
+  path, immutable, and the engine resolves it). Locale must **layer**: library
+  defaults underneath, the study's strings on top — otherwise adding one string
+  to a shared template would break every study. Neither is landed yet.
 - `data.contract` is declared but nothing consumes it: implement the check
   (validate `produced` against it, and let the builder show expected shapes) or
   drop the key.
