@@ -1,42 +1,46 @@
 # AGENTS.md — LITW-study-templates
 
-The **study runtime**: the engine, the study manager, the slide templates, and a
-mock dev server. Studies *and* the builder consume these modules — there is one
-engine version, never a fork.
-
-Sibling module: **LITW-studies** (the builder, a separate app, its own AGENTS.md).
-It loads the engine through a dev proxy (`/runtime` → this repo's dev server).
+The **study runtime**: the engine, the study manager, the slide templates and
+the starter. Everything here is static files — a study is a web page, and any
+HTTP server rooted at `src/` runs it. Every study consumes these modules, so
+there is one engine version, never a fork.
 
 ---
 
 ## Running it
 
-```bash
-# the server that serves this tree (and mocks the API)
-cd ../LITW-study-server
-STUDIES_DIR=../LITW-study-templates/src npm run dev
-```
+Any static server rooted at `src/` is enough. No build step, no dependencies
+to install, nothing to configure:
 
-Its root is this repo's `src/`, so the URLs below are what a deployment serves
-(dev responses are `no-store`).
+```bash
+cd src
+python3 -m http.server 8080
+```
 
 | URL | what |
 |---|---|
-| `/starters/study-base/` | the starter, served read-only in place |
-| `/study-base/` | the same starter at depth 1 — the URL the builder previews |
+| `/starters/study-base/` | the starter, a full run |
 | `…?preview` | preview host, standalone: slide picker, **no analytics, no boot** |
 | `…?preview&slide=demographics` | one slide, by key or by name |
 | `…?slide=comments` | `?slide` implies `?preview` |
+| `/studies/<id>/` | a study in the workspace area |
 
-`src/js/dev-server.mjs` is the older stand-in and only knows the pre-move
-layout (it has no `/library`, `/engine` or `/starters`). It stays until its
-mocked endpoints — `POST /service/<id>/data/`, `GET /config/<id>/study_references`,
-`GET /service/geoip` — move into the study server.
+A static server cannot store submissions: a study POSTs to
+`/service/<id>/data/`, so with nothing behind the origin that request fails —
+and nothing else about the study is affected. Navigation, templates, the
+preview host and the results page need files and nothing else.
+
+`starters/study-base` is fully static. `starters/study-cats` is a pre-layout
+study — it asks for `/js/litw/…` — and needs migrating before it can be served
+the same way.
+
+A **deployment** may also answer `/templates/…` and `/js/…` on behalf of
+published studies, resolving them to `library/` and `engine/`. That mapping
+belongs to the infrastructure, not to this repo: new code must not use it.
 
 ## The layout, and what each folder is for
 
-`src/` is not a flat tree: the folders exist so the server can apply a
-different policy to each.
+`src/` is not a flat tree; the split gives each part its own policy.
 
     src/
       library/    slide templates, partials, i18n — ships with the image
@@ -44,9 +48,8 @@ different policy to each.
       vendor/     jquery, handlebars, bootstrap, alpaca, shareon, jsPsych
       css/ img/   shared assets
       legacy/     the v1 runtime, kept because published studies fetch it
-      starters/   clone sources: what /build can make a study from
+      starters/   clone sources: what a new study is copied from
       studies/    authored studies — user content, gitignored here
-      js/         dev tools only; not served
       include/    data export script; not served
 
 **What a study page loads.** Handlebars (the template engine) and Bootstrap's
@@ -55,29 +58,15 @@ engine as ES modules; shareon from inside the results footer. jQuery and Alpaca
 are not among them any more — the HTML-first migration removed both, and the
 manager kept only `window.Handlebars` from the old globals.
 
-**URLs are not the disk.** The public shapes are:
+**Shared is absolute, own is relative.** A study reaches the runtime through
+root-absolute URLs (`/engine/…`, `/library/…`, `/vendor/…`) and its own files
+relatively (`./i18n/en.json`, `./img/…`). That one rule is what makes a study's
+URL depth irrelevant — the origin root is the only thing that has to be right —
+and it is why a study directory can be copied, cloned or moved without an edit.
 
-    /<slug>/…              a study, at depth 1, live (no-cache)
-    /starters/<name>/…     a starter, read-only, previewed in place
-    /library|/engine|/vendor|/css|/img/…   shared, stable
-
-    /templates/<x>         → library/<x>          frozen forever
-    /js/litw/v2/<x>        → engine/<x>           frozen forever
-    /js/litw/<x>           → legacy/litw-v1/<x>   frozen forever
-    /js/jsPsych-5.0.3/<x>  → vendor/jsPsych/<x>   frozen forever
-    /js/<file>             → vendor/<file>        frozen forever
-
-**The old URLs are frozen, not deprecated.** A published study fetches
-`../templates/irb.html`, which resolves to `/templates/irb.html` only because
-the study is at depth 1 *and* the alias exists. Moving files on disk must never
-move a URL a published study can reach.
-
-Depth 1 is load-bearing for the same reason: `studies/` and `starters/` both
-answer at `/<slug>/`, so every existing study's relative paths keep resolving
-without touching the study. New code should use root-absolute paths for shared
-things (`/engine/…`, `/library/…`, `/vendor/…`) and keep relative paths for its
-own files (`./i18n/en.json`) — **shared is absolute, own is relative**. That is
-what makes a study directory copyable.
+Because published studies fetch `/templates/…` and `/js/…`, those requests
+must keep resolving wherever the files now live. When moving a shared file,
+assume something in the wild still asks for its old path.
 
 `AGENTS.md` must stay at or above any study directory: pi discovers context
 files by walking up from its working directory.
@@ -101,7 +90,6 @@ src/
   legacy/litw-v1/       # the old runtime, still fetched by published studies
   vendor/               # third-party JS, pinned by filename
   css/  img/            # shared assets
-  js/                   # dev tools, not served
 ```
 
 ---
@@ -155,7 +143,7 @@ the preview calls this function too.
 Only one guarantee: **calling it must not start or submit anything.** Attaching
 content, registering partials and mutating declarations is fine.
 
-> The builder cannot *edit* an arrangement that lives inside a function. If
+> An arrangement that lives inside a function cannot be *edited as data*. If
 > drag-to-reorder ever matters, the timeline needs a declarative form for the
 > common case (`['intro', {shuffle: ['q1','q2']}, 'results']`) with the function
 > kept as the escape hatch. Not decided, not needed yet.
@@ -204,7 +192,7 @@ address by key, and don't reach for `.length`.
 
 `name` is the element id, the key tracking records, and the wrapper the payload
 is submitted under. `template.compiled` (the Handlebars function) is added by
-`loadTemplates` — never declared by hand, and never posted to a builder.
+`loadTemplates` — never declared by hand, and never posted anywhere.
 
 - **`name` is the element id.** The engine creates the `<div class="slide">` if
   it does not exist, for **every** slide — including a function-only one, which
@@ -314,7 +302,7 @@ own rows — `litw:initialize`, `litw:tracking`, `litw:complete` — are flat an
 carry no slide payload.)
 
 **The seed never leaves the page.** Only `produced` is submitted; `init` stays in
-the browser. The builder's Data pane shows exactly the same object.
+the browser. Any inspector sees exactly the same object.
 
 `DATA_TYPE` is kept for genuinely special kinds; per-slide kinds are not
 required. The named `submitComments` / `submitDemographics` /
@@ -330,7 +318,7 @@ which guards both its boot and its analytics behind `window.LITW_PREVIEW`).
 
 Two modes, decided by `window.parent !== window`:
 
-- **hosted** (in the builder's iframe) — speaks the postMessage protocol.
+- **hosted** (inside another page's frame) — speaks the postMessage protocol.
   In: `{type:'testSlide', slide:{name, source?}}`, `{type:'next'}`.
   Out: `{type:'ready', slides}`, `{type:'rendered', name, ok}`,
   `{type:'slideData', data}`, `{type:'data', event}`, `{type:'error', message}`.
@@ -349,7 +337,7 @@ would run in a preview.
 `{key, name, template: {url, next_button}, data: {type}}`. The study's entries
 carry `hooks` and a compiled template, and **functions do not cross
 postMessage** — structured clone throws `DataCloneError` on them. Description is
-therefore serialisable while *driving* is by **name**: the builder asks for
+therefore serialisable while *driving* is by **name**: a host asks for
 `quest1`, and this page resolves that against the full declaration, hooks
 included.
 
@@ -359,11 +347,11 @@ matched by `name`. Template URLs are made absolute here, because only this page
 knows how its relative paths resolve.
 
 **Preview vs a real run (implemented):** the preview runs the slide's **whole
-lifecycle** — `hooks.setup` and `hooks.finish` included — so the builder shows
-what a participant experiences, submissions and all. A preview therefore *does*
+lifecycle** — `hooks.setup` and `hooks.finish` included — so a host shows what
+a participant experiences, submissions and all. A preview therefore *does*
 write to browser memory (the demographics answers, for instance) and *does* POST
-to whatever host it is pointed at; that is deliberate, because the builder's
-"Submitted data" pane should show the real rows. The one thing a preview never
+to whatever host it is pointed at; that is deliberate, because a host's
+"submitted data" view should show the real rows. The one thing a preview never
 does is **complete a study**: `endStudy()` is inert, so no `litw:complete` row
 is sent.
 
@@ -400,8 +388,8 @@ calls `i18n(el)`.
   listeners.
 - **Every `displaySlide` emits a `litw:tracking` checkpoint.** Correct
   engine-side, but it means a submission arrives per slide — so no client may
-  treat "a submission arrived" as a reason to render the slide again. The
-  builder learned this the hard way (see its AGENTS.md).
+  treat "a submission arrived" as a reason to render the slide again. This was
+  learned the hard way.
 - **`#results-footer` lives inside `results.html`, not `index.html`** — so the
   share footer *was* rendering, despite what it looks like from `index.html`.
   It is now a partial the page includes (`{{>results-footer}}`), part of the
@@ -441,10 +429,10 @@ calls `i18n(el)`.
   is the truth for what runs.
 - **The timeline stays code, deliberately.** Real studies construct sequences —
   conditional branches, repeats over generated instances, participant-dependent
-  order — so a static list cannot be the truth. What the builder edits is a
+  order — so a static list cannot be the truth. What an editor edits is a
   *conventional* flat list where the study has one; what the checks validate is
   the **realization** (unique names, refs resolving, contracts satisfied), not
-  the construction's syntax. Where a study computes its timeline, the builder
+  the construction's syntax. Where a study computes its timeline, an editor
   opens the file rather than pretending to understand it.
 - **Engine = before/after only**; the slide owns its interaction.
 - **`data` is the umbrella at both levels** — config and runtime — and the
@@ -483,7 +471,7 @@ calls `i18n(el)`.
 
 - Where the browser-memory key for the demographics answers lives (manager vs
   slide) now that hydration happens per form field.
-- ~~A declarative timeline (list + shuffle groups) so the builder could reorder.~~
+- ~~A declarative timeline (list + shuffle groups) so an editor could reorder.~~
   **Answered: no** — see *The timeline stays code*. Planned instead: **slide
   packages** (one directory per slide with an optional `template.html`,
   `en.json` and `index.mjs`, the kind derived from what is present) and a
@@ -492,10 +480,10 @@ calls `i18n(el)`.
   defaults underneath, the study's strings on top — otherwise adding one string
   to a shared template would break every study. Neither is landed yet.
 - `data.contract` is declared but nothing consumes it: implement the check
-  (validate `produced` against it, and let the builder show expected shapes) or
+  (validate `produced` against it, and let a UI show expected shapes) or
   drop the key.
-- Whether the builder's frame should keep the engine's own `litw:*` rows in its
-  "Submitted data" list, which currently mixes them with study rows.
+- Whether a driving frame should keep the engine's own `litw:*` rows in its
+  "submitted data" list, which currently mixes them with study rows.
 - CSS migration of the id-keyed rules, per template, as each one moves.
 
 ## Working agreements
@@ -503,6 +491,5 @@ calls `i18n(el)`.
 - Follow the root `AGENTS.md`. Leave commits to the maintainer unless asked.
 - Keep the runtime dependency-free; templates are HTML + Handlebars on purpose.
 - **No test runner yet.** While this is a prototype, a change is verified by
-  driving the three paths — the real run, the standalone preview, the builder —
-  and reading the result off the DOM. Real automated tests land when the
-  prototype nears a first version, not before.
+  driving the three paths — the real run, the standalone preview, a hosted
+  frame — and reading the result off the DOM.
