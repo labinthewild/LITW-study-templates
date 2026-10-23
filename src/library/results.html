@@ -71,11 +71,21 @@
     </div>
 </div>
 
-<br>
-<div id="results-footer"></div>
+{{#if input_demo}}
+<div class="alert alert-secondary text-center" id="input-demo">
+    <span style="font-size: 1.6rem">{{ input_demo.emoji }}</span>
+    <p class="mb-1">
+        This box is here to show what <code>template.input</code> does: it is a
+        <strong>function</strong>, so it runs when the slide renders.
+    </p>
+    <p class="mb-0" style="color: hsl({{ input_demo.hue }} 70% 40%)">
+        Rendered at {{ input_demo.rendered_at }}. Reload this slide and both the
+        emoji and this colour change.
+    </p>
+</div>
+{{/if}}
 
-<script type="text/javascript">
-    $(document).ready(function () {
-        //TODO: trigger post-loading functions?
-    });
-</script>
+<br>
+{{#if footer}}
+{{>results-footer share_url=footer.share_url share_text=footer.share_text more_litw_studies=footer.more_litw_studies}}
+{{/if}}

@@ -1,0 +1,508 @@
+# AGENTS.md — LITW-study-templates
+
+The **study runtime**: the engine, the study manager, the slide templates, and a
+mock dev server. Studies *and* the builder consume these modules — there is one
+engine version, never a fork.
+
+Sibling module: **LITW-studies** (the builder, a separate app, its own AGENTS.md).
+It loads the engine through a dev proxy (`/runtime` → this repo's dev server).
+
+---
+
+## Running it
+
+```bash
+# the server that serves this tree (and mocks the API)
+cd ../LITW-study-server
+STUDIES_DIR=../LITW-study-templates/src npm run dev
+```
+
+Its root is this repo's `src/`, so the URLs below are what a deployment serves
+(dev responses are `no-store`).
+
+| URL | what |
+|---|---|
+| `/starters/study-base/` | the starter, served read-only in place |
+| `/study-base/` | the same starter at depth 1 — the URL the builder previews |
+| `…?preview` | preview host, standalone: slide picker, **no analytics, no boot** |
+| `…?preview&slide=demographics` | one slide, by key or by name |
+| `…?slide=comments` | `?slide` implies `?preview` |
+
+`src/js/dev-server.mjs` is the older stand-in and only knows the pre-move
+layout (it has no `/library`, `/engine` or `/starters`). It stays until its
+mocked endpoints — `POST /service/<id>/data/`, `GET /config/<id>/study_references`,
+`GET /service/geoip` — move into the study server.
+
+## The layout, and what each folder is for
+
+`src/` is not a flat tree: the folders exist so the server can apply a
+different policy to each.
+
+    src/
+      library/    slide templates, partials, i18n — ships with the image
+      engine/     the v2 runtime modules — ships with the image
+      vendor/     jquery, handlebars, bootstrap, alpaca, shareon, jsPsych
+      css/ img/   shared assets
+      legacy/     the v1 runtime, kept because published studies fetch it
+      starters/   clone sources: what /build can make a study from
+      studies/    authored studies — user content, gitignored here
+      js/         dev tools only; not served
+      include/    data export script; not served
+
+**What a study page loads.** Handlebars (the template engine) and Bootstrap's
+bundle (the results accordions, the likert control) as plain scripts; the
+engine as ES modules; shareon from inside the results footer. jQuery and Alpaca
+are not among them any more — the HTML-first migration removed both, and the
+manager kept only `window.Handlebars` from the old globals.
+
+**URLs are not the disk.** The public shapes are:
+
+    /<slug>/…              a study, at depth 1, live (no-cache)
+    /starters/<name>/…     a starter, read-only, previewed in place
+    /library|/engine|/vendor|/css|/img/…   shared, stable
+
+    /templates/<x>         → library/<x>          frozen forever
+    /js/litw/v2/<x>        → engine/<x>           frozen forever
+    /js/litw/<x>           → legacy/litw-v1/<x>   frozen forever
+    /js/jsPsych-5.0.3/<x>  → vendor/jsPsych/<x>   frozen forever
+    /js/<file>             → vendor/<file>        frozen forever
+
+**The old URLs are frozen, not deprecated.** A published study fetches
+`../templates/irb.html`, which resolves to `/templates/irb.html` only because
+the study is at depth 1 *and* the alias exists. Moving files on disk must never
+move a URL a published study can reach.
+
+Depth 1 is load-bearing for the same reason: `studies/` and `starters/` both
+answer at `/<slug>/`, so every existing study's relative paths keep resolving
+without touching the study. New code should use root-absolute paths for shared
+things (`/engine/…`, `/library/…`, `/vendor/…`) and keep relative paths for its
+own files (`./i18n/en.json`) — **shared is absolute, own is relative**. That is
+what makes a study directory copyable.
+
+`AGENTS.md` must stay at or above any study directory: pi discovers context
+files by walking up from its working directory.
+
+## File map
+
+```
+src/
+  starters/study-base/
+    index.html          # the study page: shell, stylesheets, script tags, boot
+    study-manager.mjs   # the study: config + getTimeline() + study logic
+    i18n/{en.json,pt-br.json}
+  library/              # slide templates (snippets) + i18n resource JSON
+  engine/
+    litw.core.mjs       # engine: config, timeline, slide lifecycle, templates
+    litw.locale.mjs     # language + resources
+    litw.data.mjs       # submissions, local storage, participant id
+    litw.tracking.mjs   # timing + events
+    litw.engagement.mjs
+    litw.preview.mjs    # preview host (loaded only with ?preview)
+  legacy/litw-v1/       # the old runtime, still fetched by published studies
+  vendor/               # third-party JS, pinned by filename
+  css/  img/            # shared assets
+  js/                   # dev tools, not served
+```
+
+---
+
+## Working rules
+
+- **No build step.** Native ESM, templates fetched at runtime. Adding a bundler
+  to the runtime is out of scope; that constraint is why the formats below are
+  plain HTML/JSON.
+- **A template is a snippet**, not a page: Handlebars markup plus an optional
+  inline `<script type="text/javascript">`. `showSlide()` re-creates inline
+  scripts after injection, because `innerHTML` does not run them. A `<style>` in
+  the markup is applied by the browser when injected — no work needed.
+- **One name, three places.** A concept reads the same in the study config, in
+  `window.LITW`, and in the template context.
+- **Functions live in modules; config holds references.** The only functions in
+  a slide declaration are its `hooks`.
+- **The engine deals with before and after a slide, nothing in between.**
+  Before: provide `init`, run `hooks.setup`, inject the template. After:
+  `hooks.finish`, submit `produced`. Everything during the slide is the
+  slide's.
+- **Translation is `i18n()` and `data-i18n`, nothing else.** A `window.$.i18n`
+  alias lived in `configureEngine` while old templates needed it; the last
+  caller is gone, so the alias is gone with it. If a study's own inline code
+  still calls `$.i18n()`, it needs `i18n(...)`.
+
+---
+
+## The study contract
+
+### `config.slides` — the catalogue
+
+The best place to declare **ready-made slide structures**: named, reorderable,
+referenceable. Order in this object is *catalogue* order, not run order.
+
+### `getTimeline()` — the truth for what runs
+
+Exported from `study-manager.mjs`. It may compute, shuffle, counterbalance, or
+conditionally include slides, and may attach per-slide content before returning.
+Both the study's own `bootstrap()` and the preview host call it, so they run the
+same code path.
+
+    export const config = { languages, study_id, preLoad, slides: { … } };
+    export async function getTimeline() { return [ …config.slides values… ]; }
+
+It is **async** on purpose: whatever it prepares (here, registering the `prog`
+partial) is awaited, so it is in place before any template compiles. Registering
+that partial here and nowhere else is also why `{{>prog}}` works in a preview —
+the preview calls this function too.
+
+Only one guarantee: **calling it must not start or submit anything.** Attaching
+content, registering partials and mutating declarations is fine.
+
+> The builder cannot *edit* an arrangement that lives inside a function. If
+> drag-to-reorder ever matters, the timeline needs a declarative form for the
+> common case (`['intro', {shuffle: ['q1','q2']}, 'results']`) with the function
+> kept as the escape hatch. Not decided, not needed yet.
+
+### `window.LITW` — state only, never an API
+
+    window.LITW = {
+      data,                                 // the submissions library
+      tracking,
+      study: { config, resources },
+      slide: { data: { init, produced } },
+    }
+
+Studies import the engine's exported API directly
+(`import { configureStudy, startStudy, … } from '…/litw.core.mjs'`).
+
+**Locale.** A language entry is a bare file/array (strings only) or
+`{ strings, resources }`. `resources` names locale-dependent reference lists
+(countries, religions, …), loaded per language with **per-name fallback to the
+default language**. `LITW.study.resources` is a name→value map whose keys are
+*exactly* the declared names — the engine resolves values, never reshapes keys.
+It is injected into every template context as the reserved key `resources`.
+
+Note: the resource values are **maps**, not arrays
+(`{"Afghanistan": "Afghanistan", …}`) — iterate with `{{#each resources.countries}}`,
+address by key, and don't reach for `.length`.
+
+---
+
+## The slide contract
+
+    {
+      name: 'demographics',                 // the element id, and the study's name for it
+      template: {
+        url: '../templates/demographics.html',
+        input: { … },                       // object OR function — see below
+        next_button: false,                 // the template reveals it itself
+      },
+      data: {
+        type: DATA_TYPE.DEMOGRAPHICS,       // optional; unset ⇒ study:data
+        init: { … },                        // the seed (see Data)
+        contract: { … },                    // reserved, UNUSED — see Open questions
+      },
+      hooks: { setup, finish, run },        // behaviour — the only functions
+    }
+
+`name` is the element id, the key tracking records, and the wrapper the payload
+is submitted under. `template.compiled` (the Handlebars function) is added by
+`loadTemplates` — never declared by hand, and never posted to a builder.
+
+- **`name` is the element id.** The engine creates the `<div class="slide">` if
+  it does not exist, for **every** slide — including a function-only one, which
+  owns a slot even though it has no template (that is what keeps
+  `showSlideById('results')` working). It is inserted **before
+  `#btn-next-page`**: the button floats right, so a `.slide` appended after it
+  lands at the top. `index.html` now lists no slides at all; page chrome
+  (`#content`, `#header`, `#btn-next-page`, `#ajax-working`) stays.
+- **The slide kind is derived**, never declared: a `template` means render and
+  wait; `hooks.run` with no template means execute and advance. `SLIDE_TYPE` and
+  `CALL_FUNCTION` are gone.
+- **`template.next_button`** lives with the template because the template owns
+  the continue affordance: `false` = the engine hides the study's next button on
+  entry and the slide reveals it when ready. Same rule as `{{>prog}}`: chrome a
+  template manages is declared with the template.
+- **`template.input` is object or function.** Object for static content;
+  function when the values are runtime-dependent, evaluated immediately before
+  render — the questionnaire's two instances are the live example:
+  `template.input = () => getQuest1Data('quest1', 50)`.
+- **Commands for cascading/precomputing** belong in hooks, not in input.
+- **A template declares nothing of its own.** An earlier design let a template
+  carry a `data-litw` JSON annotation; `getTimeline()` made it redundant and it
+  was removed. The study's declarations are the only source of truth.
+
+### Template context
+
+    { input, resources }
+
+`data` is deliberately **not** in the context: it is the slide's output, not an
+input. A template that needs computed presentation values gets them through
+`input` (function form). The slide's own script reads `LITW.slide.data.produced`
+and `LITW.slide.data.init` directly.
+
+### i18n
+
+Values in `input` that need translating are **keys**, and the markup marks them
+(`data-i18n="{{title}}"`); `showSlide()` calls `i18n(el)` after injection. This
+is why a declared `input` can be static even though translation happens at
+render time — the keys travel, not the strings. (Option (b); the alternative,
+one template per questionnaire, was rejected because it kills reuse.)
+
+---
+
+## Data
+
+`data` is the umbrella at **both** levels — the config declares it, the runtime
+exposes it — and the runtime nests the two stages of its life:
+
+    window.LITW.slide = {
+      data: {
+        init:     {},   // the seed — provided before load, read-only to the slide
+        produced: {},   // written by the slide only; all the engine submits
+      },
+    }
+
+This is why the halves are named `init` and `produced` rather than `data`: each
+carries its invariant **in its name**, so two of the load-bearing rules below
+stop being rules anyone has to remember.
+
+- **`produced` starts `{}`** and only ever receives what the slide's own code
+  puts there. Nothing else writes it — not the engine, not declared defaults.
+- **`init` is the seed**, produced by the `data.init` declaration and/or by
+  `setup()`. A slide chooses what to accept from it.
+- **Stale seeds cannot leak**: an old key in `init` is simply never copied into
+  `produced`, so it is never submitted. (This replaces the old "filter the
+  declared keys" hack — there is nothing to filter.)
+- **An untouched field is absent**, not empty. Consequently a slide that
+  collected nothing submits nothing (`submitSlideData` skips `{}`).
+
+Config and runtime share the path `data.init`; the only level that is
+runtime-only is `produced` — the stage that has no declaration to make.
+
+The standard form binder (a slide's own code — the engine stays out of it):
+
+    const { init, produced } = LITW.slide.data;
+    for (const el of form.querySelectorAll('[name]')) {
+      if (produced[el.name] === undefined && init[el.name] !== undefined) {
+        produced[el.name] = init[el.name];   // accepted, therefore submitted
+      }
+      write(el, produced[el.name]);          // hydrate DOM ← produced
+      el.addEventListener('input', () => { produced[el.name] = read(el); });
+    }
+
+**The cost of the naming, paid once.** `LITW.slide.data.produced.x = 1` is
+longer than `LITW.slide.data.x = 1` would be. Every binder destructures, so the
+extra hop is paid once per slide — in exchange the seed/output split is
+unmissable at the point where it matters.
+
+**The form is the schema** — one list drives hydration and collection. No
+prune, no declared key list, no per-slide `template_data`.
+
+**The payload is the slide's; the envelope is the engine's.**
+
+    { [slide.name]: produced, data_type: 'study:<kind>', uuid: … }
+
+The engine wraps what the slide produced under the slide's own name, so every
+row is self-describing: a template used twice (quest1/quest2) needs no ad-hoc
+key nesting of its own, and a payload with no special kind still says which
+slide it came from. `data.type` names the kind (one of `DATA_TYPE`) ⇒
+`study:${type}`; unset ⇒ `study:data`. `uuid` identifies the participant. Every
+kind posts to the **same endpoint** — the kind is a label on the row, not a
+route.
+
+A slide that produced nothing submits nothing: the engine skips an empty
+`produced`, so merely *showing* a slide never posts a study row. (The engine's
+own rows — `litw:initialize`, `litw:tracking`, `litw:complete` — are flat and
+carry no slide payload.)
+
+**The seed never leaves the page.** Only `produced` is submitted; `init` stays in
+the browser. The builder's Data pane shows exactly the same object.
+
+`DATA_TYPE` is kept for genuinely special kinds; per-slide kinds are not
+required. The named `submitComments` / `submitDemographics` /
+`submitInformedConsent` helpers are unreachable once nothing calls them —
+cleanup deferred (`submitComments` still backs the un-migrated comments hook).
+
+---
+
+## The preview host (`litw.preview.mjs`)
+
+Loaded only when the page is opened with `?preview` (see `study-base/index.html`,
+which guards both its boot and its analytics behind `window.LITW_PREVIEW`).
+
+Two modes, decided by `window.parent !== window`:
+
+- **hosted** (in the builder's iframe) — speaks the postMessage protocol.
+  In: `{type:'testSlide', slide:{name, source?}}`, `{type:'next'}`.
+  Out: `{type:'ready', slides}`, `{type:'rendered', name, ok}`,
+  `{type:'slideData', data}`, `{type:'data', event}`, `{type:'error', message}`.
+  `slideData` carries the slide's `produced` — the very object the engine would
+  submit — and is posted only when it changes.
+- **standalone** (opened directly) — `?slide=<key|name>` plus a small picker bar
+  listing every slide. Dev chrome only, never mounted in a real run.
+
+It reads the study by **convention**: it imports `./study-manager.mjs` (next to
+`index.html`) for `config`, and calls `getTimeline()` for the sequence. Importing
+the manager is safe *because* its only top-level call, `bootstrap()`, is guarded
+by `LITW_PREVIEW` — **keep it that way**; anything else added at module scope
+would run in a preview.
+
+`describeSlides(config, timeline)` posts a **projection**:
+`{key, name, template: {url, next_button}, data: {type}}`. The study's entries
+carry `hooks` and a compiled template, and **functions do not cross
+postMessage** — structured clone throws `DataCloneError` on them. Description is
+therefore serialisable while *driving* is by **name**: the builder asks for
+`quest1`, and this page resolves that against the full declaration, hooks
+included.
+
+The **order is the timeline's**. The catalogue supplies nothing but a display
+label (`INFORMED_CONSENT` reads better on a button than `informed_consent`),
+matched by `name`. Template URLs are made absolute here, because only this page
+knows how its relative paths resolve.
+
+**Preview vs a real run (implemented):** the preview runs the slide's **whole
+lifecycle** — `hooks.setup` and `hooks.finish` included — so the builder shows
+what a participant experiences, submissions and all. A preview therefore *does*
+write to browser memory (the demographics answers, for instance) and *does* POST
+to whatever host it is pointed at; that is deliberate, because the builder's
+"Submitted data" pane should show the real rows. The one thing a preview never
+does is **complete a study**: `endStudy()` is inert, so no `litw:complete` row
+is sent.
+
+---
+
+## Template parsing
+
+`compileTemplate(source)` in `litw.core.mjs` is the **one** place a template is
+read, and it is now a plain `Handlebars.compile`. `loadTemplate(url)` fetches and
+delegates; `loadTemplates(slides)` leaves the result on each declaration as
+`slide.template.compiled` — added by the engine, never declared by hand.
+
+Injection is the browser's job: `showSlide()` writes the rendered markup, then
+re-creates any inline `<script>` (because `innerHTML` does not run scripts) and
+calls `i18n(el)`.
+
+---
+
+## Gotchas (earned, not theoretical)
+
+- **`innerHTML` runs no scripts.** `showSlide()` re-creates them. Any new
+  script-injection path must do the same.
+- **A `.slide` inserted after `#btn-next-page` floats to the top.** The button is
+  `float: right; clear: both`. Insert slides *before* it.
+- **`#content` has `padding-bottom: 5rem` that never lands below the button** —
+  floats escape the container. The preview fixes this with `display: flow-root`;
+  studies still have the bug. Unfixed, deliberately (it changes every study's look).
+- **Shared CSS styles slides by id** (`#irb h2`, `#likert-scale`, `#trials`, …).
+  Renaming a slide's element breaks those rules. Migration policy: reusable
+  format → a class in `litw-styles-2.0.0.css`; one-off → the slide's own markup.
+- **One module instance.** Reach the data API through the engine
+  (`onData` re-exported by `litw.core.mjs`), never by a second URL — a second
+  path (`?import`, absolute vs relative) creates a second module with its own
+  listeners.
+- **Every `displaySlide` emits a `litw:tracking` checkpoint.** Correct
+  engine-side, but it means a submission arrives per slide — so no client may
+  treat "a submission arrived" as a reason to render the slide again. The
+  builder learned this the hard way (see its AGENTS.md).
+- **`#results-footer` lives inside `results.html`, not `index.html`** — so the
+  share footer *was* rendering, despite what it looks like from `index.html`.
+  It is now a partial the page includes (`{{>results-footer}}`), part of the
+  same render rather than patched in afterwards.
+- **Inline scripts: `type` is preserved, and top-level `const` is a trap.**
+  `showSlide()` re-creates a template's `<script>` — `type` included, so a
+  `<script type="module">` still runs as one (results-footer's shareon does).
+  But an injected *classic* script shares the global **lexical** scope with
+  every later one, so `const`/`let` at the top level of a template script throws
+  `Identifier 'x' has already been declared` the second time that slide is
+  shown. Wrap template scripts in an IIFE, or use `var`.
+- **No template uses jQuery or Alpaca any more.** `index.html` still loads both,
+  and the vendor files stay: `study-cats` is a legacy sibling (webpack + the old
+  `litw.*.2.1.0.js` engine) that still needs them.
+- **Leftovers in `study-base/`:** six unreferenced shared templates —
+  `instructions`, `likert-question`, `loading`, `midTrialBreak`,
+  `new-results`, `preTrialBreak`. They are library parts in waiting, not dead
+  code. The webpack era is gone: `study-manager.js`, the 3.9 MB bundle,
+  `package.json`, the lockfile and `readSummaryData()` (the last `$.` in study
+  code) were removed, so a study is now `index.html` + `study-manager.mjs` +
+  `i18n/` + `img/`.
+- **Consent is not recorded.** The `informed_consent` slide submits nothing — no
+  `data.type`, nothing written to `produced` — so the agreement itself is never
+  sent, only the engine's `litw:tracking` checkpoint. If IRB needs it on the
+  wire, that is a four-line change (`DATA_TYPE.INFORMED_CONSENT` is already
+  defined).
+- **Headless verification** works well here: Playwright's cached Chromium plus
+  `--headless=new --virtual-time-budget=15000 --dump-dom <url>`. Real fetches
+  settle within the budget. Quote `--host-resolver-rules` when blocking analytics
+  (`*` and `~` expand if unquoted).
+
+---
+
+## Agreed decisions
+
+- **Catalogue vs sequence**: `config.slides` declares structures; `getTimeline()`
+  is the truth for what runs.
+- **The timeline stays code, deliberately.** Real studies construct sequences —
+  conditional branches, repeats over generated instances, participant-dependent
+  order — so a static list cannot be the truth. What the builder edits is a
+  *conventional* flat list where the study has one; what the checks validate is
+  the **realization** (unique names, refs resolving, contracts satisfied), not
+  the construction's syntax. Where a study computes its timeline, the builder
+  opens the file rather than pretending to understand it.
+- **Engine = before/after only**; the slide owns its interaction.
+- **`data` is the umbrella at both levels** — config and runtime — and the
+  runtime nests the two stages: `LITW.slide.data = { init, produced }`.
+- **`init` / `produced` split**; each half states its invariant in its name
+  (read-only seed / output-only result). `produced` starts `{}`.
+- **`example` dropped.** If a shape needs documenting and checking, it is
+  `data.contract` (documentation + validation of produced data), never a driver
+  of behaviour.
+- **`name` is the element id**; the engine creates the div.
+- **`template: {url, input, next_button}`**, **`data: {type, init, contract}`**,
+  **`hooks: {setup, finish, run}`**; slide type derived.
+- **`template.input`: object when static, function when runtime-dependent.**
+- **Template context is `{input, resources}`** — `data` is not an input.
+- **A template is a snippet**; `compileTemplate` is the only parse; CSS needs no
+  handling.
+- **`study:data` is the default kind**; `DATA_TYPE` is kept for special kinds.
+- **The data endpoint is single**; the kind is a label, not a route.
+- **The envelope is the engine's, the payload is the slide's** —
+  `{[slide.name]: produced, data_type, uuid}`.
+- **Only `produced` is submitted; `init` never leaves the page.**
+- **A template declares nothing of its own** — the `data-litw` annotation was
+  removed once `getTimeline()` made it redundant.
+- **`template.input` is evaluated on every render**, and stays *synchronous*.
+  The results page proves the first half: its emoji, hue and timestamp change
+  each time the slide is shown. The second half is why the study
+  recommendations come from the engine's cache — `preloadResources` warms it
+  during configuration, so `getStudiesRecommendation` calls back synchronously
+  inside `input`. If that warm-up ever goes away, the fix is async `input`, not
+  a hook.
+- **The results page is the worked example** of a function `input`: it shows a
+  computed demo block, the participant code, the share footer (a partial), and
+  the recommendations. Its `input_demo` block is meant to be deleted.
+
+## Open questions
+
+- Where the browser-memory key for the demographics answers lives (manager vs
+  slide) now that hydration happens per form field.
+- ~~A declarative timeline (list + shuffle groups) so the builder could reorder.~~
+  **Answered: no** — see *The timeline stays code*. Planned instead: **slide
+  packages** (one directory per slide with an optional `template.html`,
+  `en.json` and `index.mjs`, the kind derived from what is present) and a
+  versioned **library** (`library/<name>/<version>/`, where the version is a
+  path, immutable, and the engine resolves it). Locale must **layer**: library
+  defaults underneath, the study's strings on top — otherwise adding one string
+  to a shared template would break every study. Neither is landed yet.
+- `data.contract` is declared but nothing consumes it: implement the check
+  (validate `produced` against it, and let the builder show expected shapes) or
+  drop the key.
+- Whether the builder's frame should keep the engine's own `litw:*` rows in its
+  "Submitted data" list, which currently mixes them with study rows.
+- CSS migration of the id-keyed rules, per template, as each one moves.
+
+## Working agreements
+
+- Follow the root `AGENTS.md`. Leave commits to the maintainer unless asked.
+- Keep the runtime dependency-free; templates are HTML + Handlebars on purpose.
+- **No test runner yet.** While this is a prototype, a change is verified by
+  driving the three paths — the real run, the standalone preview, the builder —
+  and reading the result off the DOM. Real automated tests land when the
+  prototype nears a first version, not before.
