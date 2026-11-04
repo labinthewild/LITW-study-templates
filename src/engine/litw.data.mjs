@@ -48,8 +48,16 @@ export function onData(callback) {
     };
 }
 
-function _notify(payload, dataType) {
-    const event = { data: payload, dataType, uuid: _participantId, at: Date.now() };
+/**
+ * Tell listeners a row was submitted.
+ *
+ * `payload` is what goes on the wire, and it already carries `data_type` and
+ * `uuid` — so the event does not repeat them. `slide` is passed by whoever
+ * submits, because only that caller knows it: for a study row it is the key
+ * the payload is wrapped in, for a tracking row it is a field inside it.
+ */
+function _notify(payload, slide) {
+    const event = { slide, data: payload, at: Date.now() };
     for (let cb of _listeners) {
         try { cb(event); } catch (e) { /* keep going */ }
     }
@@ -100,10 +108,10 @@ export function initialize() {
         });
 }
 
-function _submit(data, dataType) {
+function _submit(data, dataType, slide) {
     // Never mutate the caller's object (e.g. LITW.slide.data).
     const payload = { ...data, data_type: dataType, uuid: _participantId };
-    _notify(payload, dataType);
+    _notify(payload, slide);
     fetch(`${_apiBase}/service/${_studyId}/data/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -111,9 +119,14 @@ function _submit(data, dataType) {
     }).catch(() => {});
 }
 
-export function submitData(data, dataType) {
+/**
+ * Submit one row. `slide` is the slide it came from, when there is one: the
+ * engine knows it at every call site, and a listener should not have to infer
+ * it from the payload's shape.
+ */
+export function submitData(data, dataType, slide) {
     if (!_isInitialized) initialize();
-    _submit(data, dataType);
+    _submit(data, dataType, slide);
 }
 
 export function submitComments(data) {

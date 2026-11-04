@@ -12,7 +12,7 @@ import { submitData } from './litw.data.mjs';
 
 function _track(type, info = {}) {
     let data = { tracking_type: type, ...info };
-    submitData(data, "litw:tracking");
+    submitData(data, "litw:tracking", info.slide);
 }
 
 export function recordSlideVisit(slide_name) {

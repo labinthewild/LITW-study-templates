@@ -20,9 +20,13 @@
  *        { type: 'next' }
  *   out: { type: 'ready', slides }       configured; here is the study's timeline
  *        { type: 'rendered', name, ok }
- *        { type: 'slideData', data }     what the slide produced (the payload)
- *        { type: 'data', event }         a submission
+ *        { type: 'data_updated', slide, data }
+ *                                        snapshot: what the slide has produced
+ *        { type: 'data_submitted', slide, data, at }
+ *                                        one row that was POSTed; `data` is the
+ *                                        body, so it carries data_type and uuid
  *        { type: 'error', message }
+ *        { type: 'finished', slide }      the slide's lifecycle completed
  *
  * © Copyright 2024 - The LabintheWild Team
  *************************************************************/
@@ -67,6 +71,11 @@ async function loadStudy() {
 // The study's own slide declarations, by name — kept so a request can be
 // resolved against them.
 let studySlides = {};
+// What the builder last asked for, and what is on screen. A rehearsal replays
+// the same request (edited source included), and only for the slide that is
+// actually current.
+let lastRequest = null;
+let currentSlide = null;
 
 /**
  * The study's slides as a builder may see them: plain data only. Functions do
@@ -105,6 +114,33 @@ function resolveStudySlide(request) {
 }
 
 /**
+ * Rehearse a finished slide.
+ *
+ * A preview holds one slide, so finishing it leaves nothing on screen and no
+ * way back except the timeline. Re-rendering the same request gives the slide
+ * its fresh state back — the buttons, the fields, the hooks.
+ *
+ * Only interactive slides: a slide with no template runs its hooks on every
+ * render, so replaying one whose hook advances would advance forever.
+ */
+async function replayFinished(name) {
+    const declared = studySlides[name];
+    if (!declared || !declared.template) return;
+    if (name !== currentSlide) return;
+    const request = lastRequest && lastRequest.name === name ? lastRequest : { name };
+    // Out of the finish hook's stack: this is a new render, not a continuation.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    if (name !== currentSlide) return;
+    try {
+        const ok = await renderSlide(resolveStudySlide(request));
+        post({ type: 'rendered', name, ok });
+    } catch (err) {
+        console.error('[litw.preview] replay', err);
+        post({ type: 'error', message: String(err) });
+    }
+}
+
+/**
  * Bring the engine up for one-slide rendering, using the study's own
  * configuration. Returns that config.
  */
@@ -115,10 +151,15 @@ async function startEngine() {
         languages: config.languages,
         preload: config.preLoad,
     });
-    setPreviewMode(true);
+    // A preview cannot advance, but the study has every right to try: its own
+    // next button and any nextSlide() call land here. Report, do not swallow.
+    setPreviewMode(true, (name) => {
+        post({ type: 'finished', slide: name });
+        replayFinished(name);
+    });
     onData(event => (isHosted
-        ? post({ type: 'data', event })
-        : console.log('[litw.preview] data', event)));
+        ? post({ type: 'data_submitted', ...event })
+        : console.log('[litw.preview] data_submitted', event)));
 
     studySlides = {};
     for (const slide of timeline) studySlides[slide.name] = slide;
@@ -135,7 +176,9 @@ async function startHostMode() {
         if (!msg || typeof msg !== 'object') return;
         try {
             if (msg.type === 'testSlide') {
-                const spec = resolveStudySlide(msg.slide || {});
+                lastRequest = msg.slide || {};
+                const spec = resolveStudySlide(lastRequest);
+                currentSlide = spec.name;
                 const ok = await renderSlide(spec);
                 post({ type: 'rendered', name: spec.name, ok });
             } else if (msg.type === 'next') {
@@ -155,10 +198,12 @@ async function startHostMode() {
         // What the slide produced: the payload the engine submits. The seed
         // (`init`) is the slide's own business and stays on this page.
         const produced = (live && live.data && live.data.produced) || {};
-        const snapshot = JSON.stringify(produced);
+        // The slide is part of the snapshot: two slides can both hold `{}`,
+        // and switching between them is still a change.
+        const snapshot = `${currentSlide} ${JSON.stringify(produced)}`;
         if (snapshot !== lastSnapshot) {
             lastSnapshot = snapshot;
-            post({ type: 'slideData', data: produced });
+            post({ type: 'data_updated', slide: currentSlide, data: produced });
         }
     }, 300);
 
@@ -217,6 +262,7 @@ async function startStandaloneMode() {
     const name = alias[wanted] || (timeline[0] && timeline[0].name);
 
     const show = async (slideName) => {
+        currentSlide = slideName;
         try {
             await renderSlide(resolveStudySlide({ name: slideName }));
         } catch (err) {

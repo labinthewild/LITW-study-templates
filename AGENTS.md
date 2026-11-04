@@ -321,9 +321,20 @@ Two modes, decided by `window.parent !== window`:
 - **hosted** (inside another page's frame) — speaks the postMessage protocol.
   In: `{type:'testSlide', slide:{name, source?}}`, `{type:'next'}`.
   Out: `{type:'ready', slides}`, `{type:'rendered', name, ok}`,
-  `{type:'slideData', data}`, `{type:'data', event}`, `{type:'error', message}`.
-  `slideData` carries the slide's `produced` — the very object the engine would
-  submit — and is posted only when it changes.
+  `{type:'data_updated', slide, data}`, `{type:'data_submitted', slide, data, at}`,
+  `{type:'error', message}`, `{type:'finished', slide}`.
+  `finished` reports that a slide's lifecycle completed — its own next button,
+  or a `nextSlide()` call. It is a report, not a veto: the data was submitted
+  and `hooks.finish` ran. A preview holds one slide, so the timeline does not
+  move; the host decides what that means (the builder rehearses the slide and
+  says so). `setPreviewMode(true, onAdvance)` is how a host subscribes.
+
+  `data_updated` carries the slide's `produced` — the very object the engine
+  would submit — and is posted only when it changes. `data_submitted` carries
+  one row that was already sent: `data` is the body that was POSTed, so it
+  already carries `data_type` and `uuid`, and `slide` is passed by the
+  submitter rather than inferred from the payload's shape. Same field names, a
+  different kind of thing — one is state, the other is an event.
 - **standalone** (opened directly) — `?slide=<key|name>` plus a small picker bar
   listing every slide. Dev chrome only, never mounted in a real run.
 

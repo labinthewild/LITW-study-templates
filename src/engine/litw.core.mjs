@@ -11,6 +11,7 @@
  *   study   — DATA_TYPE, configureStudy, configureEngine, startStudy,
  *             loadTemplate, compileTemplate, showSlideById
  *   preview — setPreviewMode, testSlide, nextSlide (builder only)
+ *             setPreviewMode(on, onAdvance) reports a blocked advance
  *   events  — onData (re-exported from litw.data)
  *
  * window.LITW is runtime STATE only — never the engine's API:
@@ -69,6 +70,8 @@ const runtime = {
 // Preview mode: shows slides outside a sequence and never treats a
 // single slide as the end of a study (see testSlide).
 let _previewMode = false;
+/** A preview's answer to "the study asked to move on" — see setPreviewMode. */
+let _onPreviewAdvance = null;
 
 // ─── Template loading ─────────────────────────────────────────
 
@@ -321,6 +324,11 @@ function finishSlide() {
     slide.runtime.duration = Date.now() - slide.runtime.start;
     tracking.recordSlideTime(slide.name, slide.runtime.duration);
     advanceStudy();
+
+    // A preview holds ONE slide: the advance is exercised — the data was
+    // submitted and the finish hook ran — but the timeline does not move, and
+    // endStudy() is inert. Say so, or the click looks broken.
+    if (_previewMode && _onPreviewAdvance) _onPreviewAdvance(slide.name);
 }
 
 function endStudy() {
@@ -376,7 +384,7 @@ function submitSlideData(slide) {
     if (!produced || typeof produced !== 'object') return;
     if (Object.keys(produced).length === 0) return;
     const kind = (slide.data && slide.data.type) || DATA_TYPE.DATA;
-    data.submitData({ [slide.name]: produced }, `study:${kind}`);
+    data.submitData({ [slide.name]: produced }, `study:${kind}`, slide.name);
 }
 
 /**
@@ -390,9 +398,14 @@ export function nextSlide() {
 /**
  * Toggle preview mode. When on, a single slide is never treated as the
  * end of a study, so no completion is submitted.
+ *
+ * `onAdvance(slideName)` is called whenever the study asks to move on in a
+ * preview — its next button, or a call to nextSlide(). It is a report, not a
+ * veto: everything else about the slide's lifecycle still runs.
  */
-export function setPreviewMode(on = true) {
+export function setPreviewMode(on = true, onAdvance = null) {
     _previewMode = !!on;
+    _onPreviewAdvance = typeof onAdvance === 'function' ? onAdvance : null;
 }
 
 /**
