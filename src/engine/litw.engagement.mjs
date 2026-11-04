@@ -15,6 +15,12 @@ let _recommendations = null;
  * @param {function} callback — receives array of {URL, LOGO_URL, SLOGAN, DESCRIPTION}
  */
 export function getStudiesRecommendation(study_id, callback) {
+    // An unlinked study has no recommendations to ask for, and a preview of one
+    // should stay quiet instead of requesting `/config/null/...`.
+    if (!study_id) {
+        callback([]);
+        return;
+    }
     if (_recommendations) {
         callback(_recommendations);
     } else {

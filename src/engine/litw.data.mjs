@@ -12,6 +12,7 @@ import { getStudyLang } from './litw.locale.mjs';
 
 let _studyId = null;
 let _isInitialized = false;
+let _warnedNoStudyId = false;
 let _participantId = null;
 let _ipCountry = "";
 let _ipRegion = "";
@@ -25,6 +26,11 @@ let _apiBase = "";
  */
 export function setStudyId(id) {
     _studyId = id;
+}
+
+/** The study this page submits to, or null when it is not linked. */
+export function getStudyId() {
+    return _studyId;
 }
 
 /**
@@ -111,7 +117,15 @@ export function initialize() {
 function _submit(data, dataType, slide) {
     // Never mutate the caller's object (e.g. LITW.slide.data).
     const payload = { ...data, data_type: dataType, uuid: _participantId };
+    // Listeners first, always: a preview reports rows it cannot post.
     _notify(payload, slide);
+    if (!_studyId) {
+        if (!_warnedNoStudyId) {
+            _warnedNoStudyId = true;
+            console.warn('[litw.data] no study_id: submissions are reported but not sent');
+        }
+        return;
+    }
     fetch(`${_apiBase}/service/${_studyId}/data/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

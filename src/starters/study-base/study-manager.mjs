@@ -15,8 +15,7 @@
 import { configureStudy, startStudy, DATA_TYPE, loadTemplate } from '/engine/litw.core.mjs';
 import { i18n } from '/engine/litw.locale.mjs';
 import {
-    addToLocal, loadFromLocal, getURLparams, getParticipantId,
-    setStudyId
+    addToLocal, loadFromLocal, getURLparams, getParticipantId, getStudyId
 } from '/engine/litw.data.mjs';
 import { getStudiesRecommendation } from '/engine/litw.engagement.mjs';
 
@@ -50,7 +49,6 @@ const Handlebars = window.Handlebars;
 			},
 			'pt': './i18n/pt-br.json?v=1.0',
 		},
-		study_id: "TO_BE_ADDED_IF_USING_LITW_INFRA",
 		study_recommendation: [],
 		preLoad: ["/img/btn-next.png","/img/btn-next-active.png","/img/ajax-loader.gif"],
 		slides: {
@@ -238,7 +236,7 @@ const Handlebars = window.Handlebars;
 	 * it ever does not, the footer's list is simply empty.
 	 */
 	function resultsInput() {
-		getStudiesRecommendation(config.study_id, (studies) => {
+		getStudiesRecommendation(getStudyId(), (studies) => {
 			recommendations = studies || [];
 		});
 
@@ -263,11 +261,10 @@ const Handlebars = window.Handlebars;
 	let recommendations = [];
 
 	async function bootstrap() {
-		setStudyId(config.study_id);
 		const timeline = await getTimeline();
+		// `study_id` is not here: the engine reads it from study.config.json.
 		const good = await configureStudy({
 			...config,
-			studyId: config.study_id,
 			preload: config.preLoad,
 			slides: timeline,
 		});

@@ -146,11 +146,9 @@ async function replayFinished(name) {
  */
 async function startEngine() {
     const { config, timeline } = await loadStudy();
-    await configureEngine({
-        studyId: config.study_id,
-        languages: config.languages,
-        preload: config.preLoad,
-    });
+    // The study's own config, whole: the engine reads the platform facts and
+    // resolves the aliases itself, so nothing is picked by hand here.
+    await configureEngine(config);
     // A preview cannot advance, but the study has every right to try: its own
     // next button and any nextSlide() call land here. Report, do not swallow.
     setPreviewMode(true, (name) => {

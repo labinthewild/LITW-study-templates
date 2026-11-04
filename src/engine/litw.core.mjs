@@ -24,6 +24,8 @@ import * as data from './litw.data.mjs';
 import * as tracking from './litw.tracking.mjs';
 import { configure as configureLocale, i18n, getResources } from './litw.locale.mjs';
 import { getStudiesRecommendation } from './litw.engagement.mjs';
+import { loadPlatformConfig } from './litw.config.mjs';
+import { stopStudy, STOP } from './litw.error.mjs';
 
 // Re-export the data-event API so consumers (the builder stage) can
 // subscribe through this module. Importing litw.data.mjs by any other
@@ -150,11 +152,28 @@ function preloadResources(preload, study_id = "") {
  * Configure the engine without a timeline: bind the next button, load
  * language, preload resources and initialize data. Previews use this
  * before showing a single slide with testSlide().
+ *
+ * Returns true when the study may run, false when it was stopped.
  */
 export async function configureEngine(config = {}) {
-    const languages = config.languages || { 'default': 'en', 'en': './i18n/en.json' };
-    const preload = config.preload || [];
-    const studyId = config.studyId || "";
+    // Platform facts first: they come from the deployment, not from the code,
+    // and nothing below can be checked without them.
+    const platform = await loadPlatformConfig(config.platformUrl);
+    const merged = { ...config, ...platform };
+
+    const languages = merged.languages || { 'default': 'en', 'en': './i18n/en.json' };
+    const preload = merged.preload || merged.preLoad || [];
+    // `data.getStudyId()` is the legacy path: older managers call setStudyId()
+    // themselves and never pass it in. If anything already said which study
+    // this is, the page is linked and there is nothing to stop.
+    const studyId = merged.study_id || merged.studyId || data.getStudyId() || null;
+
+    // A study with no id cannot submit, so a real run would collect data and
+    // drop it. Previews are exempt: they show one slide and report instead of
+    // posting, which is exactly what an unlinked study still needs.
+    if (!studyId && !window.LITW_PREVIEW) {
+        return stopStudy(STOP.UNLINKED, 'no study_id in study.config.json');
+    }
 
     const next = document.getElementById('btn-next-page');
     if (next) next.onclick = () => finishSlide();
@@ -162,15 +181,20 @@ export async function configureEngine(config = {}) {
     await configureLocale(languages);
 
     // The engine owns LITW.study; the study only reads it. `resources`
-    // holds the loaded reference lists, keyed exactly as declared.
+    // holds the loaded reference lists, keyed exactly as declared. `config`
+    // here is the merged one, so study code and templates see the same facts.
     window.LITW = window.LITW || {};
-    window.LITW.study = { config, resources: getResources() };
+    window.LITW.study = { config: merged, resources: getResources() };
 
     i18n(document.head);
     i18n(document.body);
 
-    preloadResources(preload, studyId);
+    // Before initialize(): its first submission already carries the study id.
+    if (studyId) data.setStudyId(studyId);
+    preloadResources(preload, studyId || "");
     data.initialize();
+
+    return true;
 }
 
 /**
@@ -178,10 +202,11 @@ export async function configureEngine(config = {}) {
  * slide timeline. Returns true on success.
  */
 export async function configureStudy(config = {}) {
-    await configureEngine(config);
+    if (!(await configureEngine(config))) return false;
     const slides = config.slides || [];
     await loadTemplates(slides);
-    return setSlides(slides);
+    if (setSlides(slides)) return true;
+    return stopStudy(STOP.RUNTIME, 'the slide timeline could not be built');
 }
 
 // ─── Slide lifecycle ──────────────────────────────────────────
@@ -344,6 +369,11 @@ function endStudy() {
  * Start the study: advance through the slides.
  */
 export function startStudy() {
+    // A manager may call this directly; the guard in configureStudy is not
+    // the only way in.
+    if (!data.getStudyId() && !window.LITW_PREVIEW) {
+        return stopStudy(STOP.UNLINKED, 'startStudy() called without a study_id');
+    }
     console.log("STUDY STARTED!", Date.now());
     runtime.timeline.started_at = Date.now();
     runtime.timeline.status = STUDY_STATUS.RUNNING;

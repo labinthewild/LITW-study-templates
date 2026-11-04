@@ -78,6 +78,7 @@ src/
   starters/study-base/
     index.html          # the study page: shell, stylesheets, script tags, boot
     study-manager.mjs   # the study: config + getTimeline() + study logic
+    study.config.json   # the platform binding: which LITW study this is
     i18n/{en.json,pt-br.json}
   library/              # slide templates (snippets) + i18n resource JSON
   engine/
@@ -86,6 +87,8 @@ src/
     litw.data.mjs       # submissions, local storage, participant id
     litw.tracking.mjs   # timing + events
     litw.engagement.mjs
+    litw.config.mjs     # reads study.config.json (the platform binding)
+    litw.error.mjs      # stopStudy(): why a study may not run
     litw.preview.mjs    # preview host (loaded only with ?preview)
   legacy/litw-v1/       # the old runtime, still fetched by published studies
   vendor/               # third-party JS, pinned by filename
@@ -120,6 +123,57 @@ src/
 
 ## The study contract
 
+### `study.config.json` — the platform binding
+
+Sits at the study root and holds **facts about this deployment of the code**,
+never behaviour: which LITW study the submissions belong to, and other
+platform-owned facts as the contract grows. Behaviour — languages, resources,
+slides, hooks — stays in `study-manager.mjs`, where it can be a function.
+
+```json
+{ "study_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479" }
+```
+
+- **The platform owns this file.** The Launcher writes it when the study is
+  linked. Humans may read it; they should not have to edit it.
+- **One owner per fact.** When a key moves in here, delete it from the study's
+  `config`. Both places spelling the same thing is the failure this file exists
+  to prevent.
+- **Optional, but not neutral.** No `study_id` means *unlinked*: the study still
+  renders in preview (that is how a researcher works before linking), and
+  outside preview it stops instead of collecting data it cannot send.
+- **Facts win, because they have no default.** The engine spreads them over the
+  study's config (`{ ...config, ...platform }`) and exposes the result as
+  `window.LITW.study.config`. `study_id` is snake_case here and in the API; the
+  `studyId` option on `configureEngine` is gone.
+- **Validated on read.** The value must be a UUID — the same rule the study
+  server applies before writing it. Anything else is reported and treated as
+  absent, rather than posted into the void.
+- **Read from the page, not the module.** The engine is shared at `/engine/`,
+  so the file is resolved against `document.baseURI`;
+  `config.platformUrl` is the escape hatch for an unusual base.
+
+### `stopStudy(reason, detail)` — when the study may not run
+
+A study is stopped only for deployment reasons, never for a slide bug. The page
+is replaced by one participant-safe line — *Something is wrong with this
+study! :(* — while the reason and detail go to the console and to listeners.
+
+| reason | means |
+| --- | --- |
+| `unlinked` | no usable `study_id`: submissions would have nowhere to go |
+| `runtime` | the engine could not build the timeline |
+
+- **Reasons are codes,** because notifications will be routed by them. The page
+  never shows the reason; `onStudyStop` listeners and the console do.
+- **Reporting belongs to the server.** A browser cannot send email. The listener
+  is the seam where the platform will later report `{reason, detail}` so an
+  admin or the study's managers hear about it.
+- **Previews never stop.** `window.LITW_PREVIEW` exempts them: an unlinked study
+  still renders one slide and still reports `data_submitted`.
+- **The guard runs before `data.initialize()`,** so a stopped study does not even
+  fire its `litw:initialize` row.
+
 ### `config.slides` — the catalogue
 
 The best place to declare **ready-made slide structures**: named, reorderable,
@@ -132,7 +186,7 @@ conditionally include slides, and may attach per-slide content before returning.
 Both the study's own `bootstrap()` and the preview host call it, so they run the
 same code path.
 
-    export const config = { languages, study_id, preLoad, slides: { … } };
+    export const config = { languages, preLoad, slides: { … } };
     export async function getTimeline() { return [ …config.slides values… ]; }
 
 It is **async** on purpose: whatever it prepares (here, registering the `prog`
