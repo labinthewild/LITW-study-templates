@@ -1,0 +1,5 @@
+# Studies created through the API are user content, never part of the runtime.
+/studies/
+
+# A study commits its identity; its job state is local.
+*/.litw/state.json

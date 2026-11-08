@@ -1,0 +1,150 @@
+<div class="row">
+    <div class="col-12">
+        <div id="title" class="h3 bolded-blue text-center">
+            <span data-i18n="litw-demographics-title"></span>
+            <a class="bi bi-question-circle" id="demographics-info-toggle" style="cursor: pointer"></a>
+        </div>
+        <div id="data_info_alert" class="alert alert-warning alert-dismissible" role="alert" hidden>
+            <span data-i18n="litw-demographics-title-tip"></span>
+            <button type="button" class="btn-close" id="demographics-info-close"></button>
+        </div>
+        <p class="text-center" id="requiredMessage" data-i18n="litw-demographics-required"></p>
+        <br>
+    </div>
+</div>
+
+<form id="demographics-form" class="text-start" novalidate>
+    <label class="form-label fw-bold" for="demographics-retake">
+        <span data-i18n="litw-demographics-retake"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-retake" name="demographics-retake" required>
+        <option value="">--</option>
+        <option value="no" data-i18n="litw-demographics-no"></option>
+        <option value="yes" data-i18n="litw-demographics-yes"></option>
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-country-grow">
+        <span data-i18n="litw-demographics-country-grow"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-country-grow" name="demographics-country-grow" required>
+        <option value="">--</option>
+        {{#each resources.countries}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-country-live">
+        <span data-i18n="litw-demographics-country-live"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-country-live" name="demographics-country-live" required>
+        <option value="">--</option>
+        {{#each resources.countries}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-age">
+        <span data-i18n="litw-demographics-age"></span> <span class="text-danger">*</span>
+    </label>
+    <input class="form-control mb-3" id="demographics-age" name="demographics-age"
+           type="number" min="0" style="width: 200px" required>
+
+    <label class="form-label fw-bold" for="demographics-language-native">
+        <span data-i18n="litw-demographics-language-native"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-language-native" name="demographics-language-native" required>
+        <option value="">--</option>
+        {{#each resources.languageNames}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-religion">
+        <span data-i18n="litw-demographics-religion"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-religion" name="demographics-religion" required>
+        <option value="">--</option>
+        {{#each resources.religions}}<option value="{{@key}}">{{this}}</option>{{/each}}
+    </select>
+
+    <label class="form-label fw-bold" for="demographics-gender">
+        <span data-i18n="litw-demographics-gender"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-gender" name="demographics-gender" required>
+        <option value="">--</option>
+        <option value="female" data-i18n="litw-demographics-female"></option>
+        <option value="male" data-i18n="litw-demographics-male"></option>
+        <option value="non-binary" data-i18n="litw-demographics-nonbinary"></option>
+        <option value="no-disclosure" data-i18n="litw-demographics-nodisclose"></option>
+        <option value="other" data-i18n="litw-demographics-other"></option>
+    </select>
+
+    <div id="demographics-gender-other-field" hidden>
+        <label class="form-label fw-bold" for="demographics-gender-other">
+            <span data-i18n="litw-demographics-gender-other"></span>
+        </label>
+        <input class="form-control mb-3" id="demographics-gender-other" name="demographics-gender-other"
+               type="text" style="width: 200px">
+    </div>
+
+    <label class="form-label fw-bold" for="demographics-education">
+        <span data-i18n="litw-demographics-education"></span> <span class="text-danger">*</span>
+    </label>
+    <select class="form-select mb-3" id="demographics-education" name="demographics-education" required>
+        <option value="">--</option>
+        <option value="no-formal-edu" data-i18n="litw-demographics-education1"></option>
+        <option value="incomplete-primary" data-i18n="litw-demographics-education2"></option>
+        <option value="complete-primary" data-i18n="litw-demographics-education3"></option>
+        <option value="incomplete-sec-high" data-i18n="litw-demographics-education4"></option>
+        <option value="complete-sec-high" data-i18n="litw-demographics-education5"></option>
+        <option value="university-no-degree" data-i18n="litw-demographics-education6"></option>
+        <option value="university-degree" data-i18n="litw-demographics-education7"></option>
+        <option value="incomplete-grad" data-i18n="litw-demographics-education8"></option>
+        <option value="complete-grad" data-i18n="litw-demographics-education9"></option>
+    </select>
+</form>
+
+<script type="text/javascript">
+    (function () {
+        const form = document.getElementById('demographics-form');
+        if (!form) return;
+
+        const { init, produced } = LITW.slide.data;
+        const next = document.getElementById('btn-next-page');
+
+        const read = el => el.type === 'checkbox' ? el.checked
+            : (el.type === 'number' ? (el.value === '' ? '' : Number(el.value)) : el.value);
+        const write = (el, v) => {
+            if (el.type === 'checkbox') el.checked = !!v;
+            else el.value = (v === undefined || v === null) ? '' : v;
+        };
+
+        const fields = [...form.querySelectorAll('[name]')];
+        const required = [...form.querySelectorAll('[required]')];
+
+        function apply() {
+            const ok = required.every(el => String(el.value).trim() !== '');
+            if (next) next.style.display = ok ? 'block' : 'none';
+            document.getElementById('demographics-gender-other-field').hidden =
+                form.elements['demographics-gender'].value !== 'other';
+            return ok;
+        }
+
+        // One list drives hydration AND collection: the form is the schema.
+        for (const el of fields) {
+            // Accept the seed: a declared field whose init has a value (here, a
+            // value recalled from browser memory) becomes part of what is
+            // submitted. Stale keys cannot leak, because `init` is only ever
+            // consulted per declared field name.
+            if (produced[el.name] === undefined && init[el.name] !== undefined) {
+                produced[el.name] = init[el.name];
+            }
+            write(el, produced[el.name]);
+            const sync = () => { produced[el.name] = read(el); apply(); };
+            el.addEventListener('input', sync);
+            el.addEventListener('change', sync);
+        }
+
+        form.addEventListener('submit', e => e.preventDefault());
+        document.getElementById('demographics-info-toggle')
+            .addEventListener('click', () => { document.getElementById('data_info_alert').hidden = false; });
+        document.getElementById('demographics-info-close')
+            .addEventListener('click', () => { document.getElementById('data_info_alert').hidden = true; });
+
+        apply();
+    })();
+</script>
