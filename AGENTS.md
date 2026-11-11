@@ -134,8 +134,16 @@ slides, hooks — stays in `study-manager.mjs`, where it can be a function.
 { "study_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479" }
 ```
 
-- **The platform owns this file.** The Launcher writes it when the study is
-  linked. Humans may read it; they should not have to edit it.
+- **The deployer generates it into the release.** It is not part of the
+  researcher's repository history and not part of any build-API write: the id
+  is a property of the *deployment*, so the act of deploying is what binds it.
+  A copy shipped in the repo, or left in a workspace, is overwritten there —
+  what the deployment knows beats what the checkout carries.
+- **Everything before a deploy runs unlinked.** That is normal: a workspace is
+  authored in preview, where an unlinked study renders and reports to the
+  builder. Only a release is expected to submit. The starter ships the file with
+  `"study_id": ""` for exactly this reason — a workspace is *quietly* unlinked
+  instead of logging a missing file on every preview load.
 - **One owner per fact.** When a key moves in here, delete it from the study's
   `config`. Both places spelling the same thing is the failure this file exists
   to prevent.

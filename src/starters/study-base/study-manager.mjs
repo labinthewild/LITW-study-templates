@@ -63,6 +63,7 @@ const Handlebars = window.Handlebars;
 					next_button: false,
 					input: { time: study_times.MEDIUM },
 				},
+				data: { type: DATA_TYPE.INFORMED_CONSENT },
 			},
 			DEMOGRAPHICS: {
 				name: "demographics",

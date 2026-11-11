@@ -1,0 +1,9 @@
+{
+  "name": "litw-study-templates",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/studies.test.mjs",
+    "validate": "node bin/validate-study.mjs"
+  }
+}
