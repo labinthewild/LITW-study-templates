@@ -52,7 +52,11 @@ export async function getTimeline() {
 			template: { url: '/library/comments.html' },
 			data: { type: DATA_TYPE.COMMENTS },
 		},
-		{ name: 'results', template: { url: './templates/results.html', next_button: false } },
+		{
+			name: 'results',
+			template: { url: './templates/results.html', next_button: false },
+			data: { type: DATA_TYPE.RESULTS },
+		},
 	];
 }
 

@@ -46,7 +46,8 @@ export const DATA_TYPE = {
     DEMOGRAPHICS: 'demographics',
     COMMENTS: 'comments',
     CONFIGURATION: 'configuration',
-    INFORMED_CONSENT: 'informed_consent'
+    INFORMED_CONSENT: 'informed_consent',
+    RESULTS: 'results'
 };
 
 // ─── Internal state ───────────────────────────────────────────
@@ -126,8 +127,6 @@ async function loadTemplates(slides_config) {
     await Promise.all(fetches);
 }
 
-// ─── Configuration ────────────────────────────────────────────
-
 function setSlides(slides_config = []) {
     if (runtime.timeline.status === STUDY_STATUS.NEW && slides_config.length > 0) {
         runtime.timeline.slides = slides_config;
@@ -192,7 +191,11 @@ export async function configureEngine(config = {}) {
     // Before initialize(): its first submission already carries the study id.
     if (studyId) data.setStudyId(studyId);
     preloadResources(preload, studyId || "");
+    getStudiesRecommendation(studyId || "", (studies) => { recommendations = studies || []; });
     data.initialize();
+
+    const footer = await loadTemplate('/library/results-footer.html').catch(() => null);
+    if (footer) window.Handlebars.registerPartial('results-footer', footer);
 
     return true;
 }
@@ -238,10 +241,34 @@ function slideInput(slide) {
     return input || {};
 }
 
+let recommendations = [];
+
+/** The study's title as a participant reads it — the key the library renders. */
+function studyTitle() {
+    const title = i18n('litw-study-title');
+    return title === 'litw-study-title' ? document.title : title;
+}
+
+/**
+ * The footer belongs to the platform, not to the study: a template asks for it
+ * with `{{>results-footer}}`, and the values it renders come from here.
+ */
+function footerValues() {
+    return {
+        share_url: window.location.href,
+        share_text: studyTitle(),
+        more_litw_studies: recommendations
+    };
+}
+
 function showSlide(slide) {
     const el = ensureElement(slide.name);
     // `resources` is reserved: the engine's loaded lists are always in scope.
-    el.innerHTML = slide.template.compiled({ ...slideInput(slide), resources: getResources() });
+    el.innerHTML = slide.template.compiled({
+        ...slideInput(slide),
+        resources: getResources(),
+        footer: footerValues()
+    });
     // Re-execute inline scripts (innerHTML doesn't run them). The `type` comes
     // along too: a template may ship a `<script type="module">` — results-footer
     // does, for shareon — and re-created as a classic script it would throw on

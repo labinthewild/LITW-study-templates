@@ -15,9 +15,8 @@
 import { configureStudy, startStudy, DATA_TYPE, loadTemplate } from '/engine/litw.core.mjs';
 import { i18n } from '/engine/litw.locale.mjs';
 import {
-    addToLocal, loadFromLocal, getURLparams, getParticipantId, getStudyId
+    addToLocal, loadFromLocal, getURLparams, getParticipantId
 } from '/engine/litw.data.mjs';
-import { getStudiesRecommendation } from '/engine/litw.engagement.mjs';
 
 // Handlebars is the one third-party global the manager still needs.
 const Handlebars = window.Handlebars;
@@ -128,6 +127,7 @@ const Handlebars = window.Handlebars;
 					// A function, so these values are computed when the slide renders.
 					input: () => resultsInput(),
 				},
+				data: { type: DATA_TYPE.RESULTS },
 			}
 		}
 	};
@@ -231,23 +231,10 @@ const Handlebars = window.Handlebars;
 	/**
 	 * What the results slide renders with. `template.input` is a FUNCTION, so
 	 * this runs at render time and may read whatever is only true then.
-	 *
-	 * The recommendations are already cached by the engine (preloadResources
-	 * warms them during configuration), so this callback fires synchronously; if
-	 * it ever does not, the footer's list is simply empty.
 	 */
 	function resultsInput() {
-		getStudiesRecommendation(getStudyId(), (studies) => {
-			recommendations = studies || [];
-		});
-
 		return {
 			data: calculateResults(),
-			footer: {
-				share_url: window.location.href,
-				share_text: i18n('litw-template-title'),
-				more_litw_studies: recommendations,
-			},
 			// A demo of what `input` can do — these change on every render. Delete
 			// this block, here and in results.html, when you write your own page.
 			input_demo: {
@@ -257,9 +244,6 @@ const Handlebars = window.Handlebars;
 			},
 		};
 	}
-
-	// Filled by resultsInput() from the engine's (already warmed) cache.
-	let recommendations = [];
 
 	async function bootstrap() {
 		const timeline = await getTimeline();

@@ -17,6 +17,24 @@ const SLIDE_KEYS = new Set(['name', 'template', 'hooks', 'data', 'runtime'])
 /** A slide of a given submission kind, by declaration alone. */
 const findSlide = (slides, kind) => slides.findIndex((slide) => slide?.data?.type === kind)
 
+/**
+ * The values a template asks for, with the ones it guards as optional.
+ * Handlebars blocks (`#if`, `#each`, `with`) name a value that may be absent.
+ */
+function placeholders(html) {
+  const guarded = new Set()
+  for (const [, name] of html.matchAll(/{{\s*#(?:if|unless|each|with)\s+([\w$]+)/g)) {
+    guarded.add(name)
+  }
+
+  const found = new Map()
+  for (const [, name] of html.matchAll(/{{\s*\{?\s*([\w$]+)/g)) {
+    if (name === 'else' || name.startsWith('@')) continue
+    found.set(name.split('.')[0], guarded.has(name.split('.')[0]))
+  }
+  return found
+}
+
 /** The study-local templates the timeline actually renders. */
 function referencedTemplates(slides) {
   const used = new Set()
@@ -289,6 +307,7 @@ export const RULES = [
         DATA_TYPE.COMMENTS,
         DATA_TYPE.CONFIGURATION,
         DATA_TYPE.INFORMED_CONSENT,
+        DATA_TYPE.RESULTS,
       ])
       const COLLECTS = {
         '/library/demographics.html': DATA_TYPE.DEMOGRAPHICS,
@@ -446,6 +465,46 @@ export const RULES = [
       './img/cat1.jpg — because the study directory is served as it is copied.',
   },
   {
+    id: 'engine.template-input',
+    severity: 'warning',
+    title: 'a template gets the values its slide declares, and nothing else',
+    async check(ctx) {
+      if (!ctx.has(MANAGER)) return []
+      const { slides, config, error } = await investigate(ctx)
+      if (error) return []
+
+      const findings = []
+      for (const slide of slides) {
+        if (typeof slide?.template?.input === 'function') continue
+
+        const file = slide?.template?.url
+        if (typeof file !== 'string' || PLATFORM_ASSET.test(file)) continue
+        const path = localPath(file)
+        const html = (await ctx.read(path)) ?? ''
+
+        const provided = new Set(['resources', ...Object.keys(slide?.template?.input ?? {})])
+        for (const language of Object.values(config?.languages ?? {})) {
+          for (const name of Object.keys(language?.resources ?? {})) provided.add(name)
+        }
+
+        for (const [name, optional] of placeholders(html)) {
+          if (provided.has(name) || optional) continue
+          findings.push(
+            `${path} on slide "${slide.name}" renders {{ ${name} }}, but the slide declares no ` +
+              'input for it: the participant sees an empty space where that value should be.',
+          )
+        }
+      }
+      return findings
+    },
+    fix:
+      'Give the slide its input: `template: { url: "…", input: { time: 10 } }`, or a function when ' +
+      'the value is computed at render time — `input: () => ({ share_url: window.location.href })`. ' +
+      'A placeholder a study deliberately may not have (an error code, a returning participant\'s ' +
+      'name) is guarded instead of passed: `{{#if data.code}}…{{ data.code }}…{{/if}}` renders ' +
+      'nothing when the value is absent, and the validator then asks for nothing.',
+  },
+  {
     id: 'templates.injected-scripts',
     severity: 'error',
     title: 'a template script runs when the template is injected, not when the page loads',
@@ -529,6 +588,43 @@ export const RULES = [
       'cover most slides, and the engine already provides the locale, data and tracking layers. ' +
       'Reach for a library when it earns its download, and vendor it inside the study (or use what ' +
       '/vendor serves) so it is versioned with the code that depends on it.',
+  },
+  {
+    id: 'engine.results',
+    severity: 'warning',
+    title: 'a study ends on a results slide, and shows the platform footer there',
+    async check(ctx) {
+      if (!ctx.has(MANAGER)) return []
+      const { slides, error } = await investigate(ctx)
+      if (error) return []
+
+      const DATA_TYPE = await loadDataTypes()
+      const index = findSlide(slides, DATA_TYPE.RESULTS)
+      if (index === -1) {
+        return [
+          'No slide declares `data: { type: DATA_TYPE.RESULTS }`. The results slide is where a ' +
+            'participant sees what they contributed, and where the platform puts its own footer: ' +
+            'share links and other LabintheWild studies.',
+        ]
+      }
+
+      const file = slides[index]?.template?.url
+      if (typeof file !== 'string' || PLATFORM_ASSET.test(file)) return []
+
+      const path = localPath(file)
+      const html = (await ctx.read(path)) ?? ''
+      if (/{{\s*>\s*results-footer\s*}}/.test(html)) return []
+
+      return [
+        `${path} is the results slide, but renders no {{>results-footer}}: the participant ends ` +
+          'the study with nothing to share and no other LabintheWild study to visit.',
+      ]
+    },
+    fix:
+      'Declare the last slide as the results slide — `data: { type: DATA_TYPE.RESULTS }` — and put ' +
+      '`{{>results-footer}}` where you want the LabintheWild results page footer to be added to ' +
+      'the slide. This is a required feature to launch a study in the LabintheWild platform, and ' +
+      'it is generally added at the bottom of the page.',
   },
   {
     id: 'engine.languages',

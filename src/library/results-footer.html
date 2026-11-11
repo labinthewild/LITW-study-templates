@@ -8,7 +8,7 @@
         </a>
 
         <h5 class="card-title pt-4" data-i18n="litw-more-step2"></h5>
-        <div class="shareon" data-title="{{ share_text }}" data-url="{{ share_url }}">
+        <div class="shareon" data-title="{{ footer.share_text }}" data-url="{{ footer.share_url }}">
             <a class="facebook" onclick="LITW.tracking.recordSharing('facebook')"></a>
             <a class="linkedin" onclick="LITW.tracking.recordSharing('linkedin')"></a>
             <a class="mastodon" onclick="LITW.tracking.recordSharing('mastodon')"></a>
@@ -17,9 +17,9 @@
             <a class="copy-url" onclick="LITW.tracking.recordSharing('copyURL')"></a>
         </div>
 
-        {{#if more_litw_studies}}
+        {{#if footer.more_litw_studies}}
         <h5 class="card-title pt-4" data-i18n="litw-more-step3"></h5>
-        {{#each more_litw_studies}}
+        {{#each footer.more_litw_studies}}
         <div class="card border-light text-bg-light mb-3">
             <div class="row g-0">
                 <div class="col-md-3" style="max-width: 50%">
