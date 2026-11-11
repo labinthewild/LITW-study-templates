@@ -10,17 +10,24 @@
 
 import { submitData } from './litw.data.mjs';
 
-function _track(type, info = {}) {
-    let data = { tracking_type: type, ...info };
-    submitData(data, "litw:tracking", info.slide);
+/**
+ * The slide in view, when the caller did not name one: a template's onclick
+ * knows what was clicked, not where it is, and the engine is already showing it.
+ */
+function currentSlide() {
+    return (window.LITW && window.LITW.slide && window.LITW.slide.name) || undefined;
+}
+
+function _track(type, info = {}, slide = currentSlide()) {
+    submitData({ tracking_type: type, ...info }, "litw:tracking", slide);
 }
 
 export function recordSlideVisit(slide_name) {
-    _track("checkpoint", { slide: slide_name });
+    _track("checkpoint", {}, slide_name);
 }
 
 export function recordSlideTime(slide_name, elapsed_time_msecs) {
-    _track("elapsed_time", { slide: slide_name, total_time: elapsed_time_msecs });
+    _track("elapsed_time", { total_time: elapsed_time_msecs }, slide_name);
 }
 
 export function recordClick(where, context = {}) {

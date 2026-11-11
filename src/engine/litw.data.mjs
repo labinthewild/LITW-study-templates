@@ -57,13 +57,12 @@ export function onData(callback) {
 /**
  * Tell listeners a row was submitted.
  *
- * `payload` is what goes on the wire, and it already carries `data_type` and
- * `uuid` — so the event does not repeat them. `slide` is passed by whoever
- * submits, because only that caller knows it: for a study row it is the key
- * the payload is wrapped in, for a tracking row it is a field inside it.
+ * `payload` is what goes on the wire and it carries everything a reader needs —
+ * `data_type`, `uuid`, and `slide` when the row belongs to one — so the event
+ * adds only when it happened.
  */
-function _notify(payload, slide) {
-    const event = { slide, data: payload, at: Date.now() };
+function _notify(payload) {
+    const event = { slide: payload.slide, data: payload, at: Date.now() };
     for (let cb of _listeners) {
         try { cb(event); } catch (e) { /* keep going */ }
     }
@@ -117,12 +116,15 @@ export function initialize() {
 function _submit(data, dataType, slide) {
     // Never mutate the caller's object (e.g. LITW.slide.data).
     const payload = { ...data, data_type: dataType, uuid: _participantId };
+    // `slide` is the caller's and it is the row's: one field, written once.
+    if (slide) payload.slide = slide;
     // Listeners first, always: a preview reports rows it cannot post.
-    _notify(payload, slide);
-    if (!_studyId) {
+    _notify(payload);
+    // A preview reports; it never posts. So does a study with no id.
+    if (!_studyId || window.LITW_PREVIEW) {
         if (!_warnedNoStudyId) {
             _warnedNoStudyId = true;
-            console.warn('[litw.data] no study_id: submissions are reported but not sent');
+            console.warn('[litw.data] submissions are reported but not sent');
         }
         return;
     }

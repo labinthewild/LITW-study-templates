@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node bin/dev-server.mjs",
     "test": "node --test test/studies.test.mjs",
     "validate": "node bin/validate-study.mjs"
   }

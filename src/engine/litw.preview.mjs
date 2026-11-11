@@ -91,7 +91,7 @@ let currentSlide = null;
  */
 function describeSlides(config, timeline) {
     const keyByName = Object.fromEntries(
-        Object.entries(config.slides).map(([key, slide]) => [slide.name, key]));
+        Object.entries(config.slides || {}).map(([key, slide]) => [slide.name, key]));
     return timeline.map(slide => ({
         key: keyByName[slide.name] || slide.name,
         name: slide.name,
@@ -250,7 +250,7 @@ async function startStandaloneMode() {
     // ?slide accepts the slide's own name (demographics) or its catalogue key
     // (DEMOGRAPHICS); anything else falls back to the study's first slide.
     const keyByName = Object.fromEntries(
-        Object.entries(config.slides).map(([key, slide]) => [slide.name, key]));
+        Object.entries(config.slides || {}).map(([key, slide]) => [slide.name, key]));
     const alias = {};
     for (const slide of timeline) {
         alias[slide.name] = slide.name;

@@ -505,6 +505,26 @@ export const RULES = [
       'nothing when the value is absent, and the validator then asks for nothing.',
   },
   {
+    id: 'index.engine-assets',
+    severity: 'error',
+    title: 'the page loads what the engine compiles templates with',
+    async check(ctx) {
+      const page = await ctx.read('index.html')
+      if (page == null) return []
+      if (/<script[^>]+src=["']\/vendor\/handlebars\.js["']/i.test(page)) return []
+
+      return [
+        'index.html does not load /vendor/handlebars.js. Every template — the study\'s own and the ' +
+          'platform\'s, the results footer included — is compiled with Handlebars, so without it no ' +
+          'slide can render.',
+      ]
+    },
+    fix:
+      'Add `<script src="/vendor/handlebars.js"></script>` to index.html, before the module entry. ' +
+      'A v1 study often got Handlebars from a bundler; a v2 study loads the platform copy, which is ' +
+      'also what lets the engine compile the results footer the study asks for.',
+  },
+  {
     id: 'templates.injected-scripts',
     severity: 'error',
     title: 'a template script runs when the template is injected, not when the page loads',

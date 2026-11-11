@@ -191,7 +191,10 @@ export async function configureEngine(config = {}) {
     // Before initialize(): its first submission already carries the study id.
     if (studyId) data.setStudyId(studyId);
     preloadResources(preload, studyId || "");
-    getStudiesRecommendation(studyId || "", (studies) => { recommendations = studies || []; });
+    // A preview asks anyway, so a designer sees the footer a participant will.
+    // An unlinked study outside preview has nothing to ask for.
+    const recommendFor = studyId || (window.LITW_PREVIEW ? 'preview' : '');
+    getStudiesRecommendation(recommendFor, (studies) => { recommendations = studies || []; });
     data.initialize();
 
     const footer = await loadTemplate('/library/results-footer.html').catch(() => null);
@@ -423,7 +426,7 @@ function setupSlideData(slide) {
         init = JSON.parse(JSON.stringify(seed));
     }
     window.LITW = window.LITW || {};
-    window.LITW.slide = { data: { init, produced: {} } };
+    window.LITW.slide = { name: slide.name, data: { init, produced: {} } };
 }
 
 /**
@@ -489,4 +492,4 @@ window.LITW = window.LITW || {};
 window.LITW.data = { ...data };
 window.LITW.tracking = { ...tracking };
 window.LITW.study = window.LITW.study || { config: {} };
-window.LITW.slide = window.LITW.slide || { data: { init: {}, produced: {} } };
+window.LITW.slide = window.LITW.slide || { name: null, data: { init: {}, produced: {} } };
